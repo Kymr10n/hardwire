@@ -9,6 +9,7 @@ All notable changes to Hardwire are documented here. The format follows [Keep a 
 - CPU minigame judged as you play: the first beat out of tolerance ends the attempt at once with a red marker and the reason ("Beat 3 too late"); success shows at the last release; tolerance widened to 40% at tier 1 (25% floor, 100 ms minimum).
 - Swiping over the slot cards scrolls the overview; a wobbly tap is still a tap.
 - Per-frame UI code replaced by Godot built-ins: tweened reward count-up and pad flash, the overview scrolls to the newest tier on layout, the timer is a `ProgressBar`, and pads, grid, stat bar and the first-run hint take pointer input through `_gui_input`.
+- Desktop saves move to a `Hardwire` folder (`~/.local/share/Hardwire`, `%APPDATA%\Hardwire`); the Windows exe carries the game icon and version info. Saves from 0.1.0 are not moved: copy `save.json` from `godot/app_userdata/Hardwire` by hand.
 - Audio mixes at 22.05 kHz (every tone stays well below half of it).
 - The quality gate runs Godot with a throwaway data directory, so it never touches the developer's save; CI exports all platforms in one job.
 
@@ -16,6 +17,7 @@ All notable changes to Hardwire are documented here. The format follows [Keep a 
 
 - `SECURITY.md`.
 - A quiet procedural ambient score with a soft half-time beat on the overview and puzzle screens.
+- `tools/steam_upload.sh`: exports Linux and Windows and uploads them to Steam with SteamPipe.
 
 ## [0.1.0] - 2026-10-19
 

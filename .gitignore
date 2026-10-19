@@ -19,6 +19,9 @@ __pycache__/
 # Personal Steam Deck address for tools/deck.sh
 tools/deck.local.env
 
+# Personal Steamworks IDs and builder account for tools/steam_upload.sh
+tools/steam.local.env
+
 # Keep signing secrets out of git
 export_credentials.cfg
 *.keystore

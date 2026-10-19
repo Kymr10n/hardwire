@@ -338,7 +338,7 @@ The look is a dark, flat circuit board drawn entirely with Godot shapes and one 
 
 ## Save system
 
-The game saves one JSON file to `user://save.json` after every solve, purchase, prestige and settings change, and on window close or app pause (so `last_seen` is current). Godot maps `user://` to the right per-user folder on every target platform (browser storage on the web), so the same code works everywhere.
+The game saves one JSON file to `user://save.json` after every solve, purchase, prestige and settings change, and on window close or app pause (so `last_seen` is current). Godot maps `user://` to the right per-user folder on every target platform (a `Hardwire` folder on desktop, browser storage on the web), so the same code works everywhere.
 
 ```json
 {
@@ -432,11 +432,22 @@ Build one milestone per session, in order. Each milestone ends with a playable b
 | M7 | Prestige and idle income | Rebuild becomes available after a tier 10 solve; Cores and multiplier are correct; the right fields reset; idle Cycles are offered after closing the app for over 5 minutes and respect the 8 h cap |
 | M8 | Polish and export | Synth sounds, haptics, screen transitions, first-run hints; Android APK and web build run on a real phone |
 | M9 | Steam Deck and desktop: landscape layouts, gamepad and keyboard controls, Linux build | The Linux build runs fullscreen in Steam Deck game mode; every screen and minigame is playable with the controller alone and with touch alone; landscape layouts work at 16:10 and 16:9; prompts show glyphs of the last-used device; export presets exist for Windows and macOS; CI builds Linux and Windows |
+| M10 | Steam release preparation (see After the prototype: Steam release) | Saves live in a `Hardwire` folder on desktop; the Windows exe carries the Hardwire icon, name, version and company; `tools/steam_upload.sh` exports Linux and Windows and uploads both depots with SteamPipe; the first Steam build installs and plays from the Steam client on PC and Steam Deck (needs the App ID) |
 
 ## After the prototype: Steam release
 
 Hardwire is meant to go on Steam eventually as a paid game; the price is set in Steamworks at
-launch (D-031). That needs a Steamworks app (one-time app fee), builds uploaded with SteamPipe, a default Steam Input configuration matching the Controls table, and a Steam Deck Verified review (full controller support, 1280 × 800 layout, readable text, no launcher). M9 prepares everything except the Steamworks account.
+launch (D-031). That needs a Steamworks app (one-time app fee), builds uploaded with SteamPipe, a default Steam Input configuration matching the Controls table, and a Steam Deck Verified review (full controller support, 1280 × 800 layout, readable text, no launcher). M9 prepares everything except the Steamworks account; M10 prepares the builds and the upload.
+
+| Steamworks setting | Value |
+| --- | --- |
+| Depots | Linux x86_64 (also the Steam Deck) and Windows x86_64; macOS waits for D-008 |
+| Launch options | Linux `hardwire.x86_64`, Windows `hardwire.exe`; Linux runs in the Steam Linux Runtime |
+| Steam Input | Full controller support; default layout: the gamepad (Xbox) template |
+| Steam Cloud | Auto-Cloud syncs only `save.json` (not recursive), one file for both platforms: root `LinuxXdgDataHome` and `WinAppDataRoaming`, subdirectory `Hardwire` (`~/.local/share/Hardwire`, `%APPDATA%\Hardwire`) |
+| Builds | `tools/steam_upload.sh`; App ID, depot IDs and the builder account come from the git-ignored `tools/steam.local.env`. Builds go live by hand in Steamworks |
+
+The game does not use the Steamworks SDK: no achievements, overlay hooks or DRM (D-006).
 
 ## After the prototype: Benchmark slot
 

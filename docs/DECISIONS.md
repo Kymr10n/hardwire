@@ -203,3 +203,16 @@ purchases or tracking SDKs. Other storefronts are decided when they come up.
 **Why:** Steam charges the app fee for free games too; the owner wants it to pay for itself. Buyers
 pay for the convenience of the Steam build, updates and Steam features; open source stays.
 **Affects:** After the prototype: Steam release; Not in scope (Monetization); README.
+
+## D-032 — 2026-10-19 — M10: Steam release preparation
+
+**Decision:** A new milestone M10 prepares the Steam release: desktop saves move to a `Hardwire`
+folder (custom user directory) so Steam Auto-Cloud can sync `save.json` there, the Windows exe gets the game's
+icon and version info, and `tools/steam_upload.sh` uploads the Linux and Windows builds with
+SteamPipe. No Steamworks SDK; builds are set live by hand. The Steamworks settings are listed in
+the spec. Saves from 0.1.0 are not moved automatically (only play-testers have them); copy
+`save.json` across by hand.
+**Why:** The owner is setting up the Steamworks account; the save path must be final before
+anyone buys the game, because moving it later loses saves.
+**Affects:** Milestones; After the prototype: Steam release; Save system; `project.godot`; `export_presets.cfg`;
+`tools/`.

@@ -14,6 +14,7 @@ Status values: `todo`, `in progress`, `done`. Milestone scope and "Done when" cr
 | M7 | done | Rebuild (prestige) and idle income |
 | M8 | done | Polish, web and Linux builds; the Android APK and phone test are tracked in [issue #5](https://github.com/Kymr10n/hardwire/issues/5) (D-026) |
 | M9 | done | Steam Deck and desktop: landscape, controller, glyphs, Linux/Windows/macOS presets, `tools/deck.sh`, rumble; Deck play-test passed 2026-10-19 (issue #6) |
+| M10 | in progress | Steam release preparation (D-032): save folder, Windows exe metadata and `tools/steam_upload.sh` done; the first Steam install waits for the App ID |
 
 **Prototype v0.1.0 released 2026-10-19 (D-026).** Next scope: the "After the prototype" sections of the spec (Steam release, Benchmark slot).
 
@@ -32,6 +33,7 @@ Deferred work, each with what it needs:
 - **Bundle ID:** `org.hardwire.prototype` (Android and macOS presets) must become the final ID before any store release; it cannot change afterwards. Owner decision (D-021 kept the placeholder).
 - **iOS preset:** none yet; waits for a Mac with current Xcode (D-008).
 - **Private vulnerability reporting:** `SECURITY.md` points at GitHub's private report form; the owner enables it under Settings → Code security (`gh api -X PUT repos/Kymr10n/hardwire/private-vulnerability-reporting`).
+- **Steam (M10):** create the Steamworks app; set depots, launch options, Steam Input, Linux Runtime and Auto-Cloud from the spec table; fill `tools/steam.local.env`; run `tools/steam_upload.sh --preview`, then a real upload; install from the Steam client on PC and Steam Deck. Copy the Deck's 0.1.0 save to `~/.local/share/Hardwire` if wanted. Needs the owner and the App ID.
 - **Ambient score on devices:** listen and profile on the web export, Steam Deck and Android. The score keeps 3–4 GDScript voices mixing on the main thread (single-threaded on web); if it is too heavy, drop the bass harmonic voice first.
 - **Ambient score code (review, should-fix):** schedule each bar's notes with per-voice `delay_ms` instead of per-frame dispatch (removes frame jitter on the hi-hat and the event index); resolve attack/release defaults once in `Synth._add_voice` and store the kick glide as a per-sample step; one `_pick_positions` helper for pads and leads; seed bars with `hash([seed, bar])` and drop `music_seed_stride`; `music_bass_min_midi`/`max_midi` are test-only (move into the test or enforce); `music_kick_beats` repeats the bass beats; the debug time scale also speeds up the score.
 - **Play-test the balance:** time to tiers 5, 10 and 20 on a fresh save (targets: 10 min, 1 h, several sessions); fail rate per minigame; rhythm tolerance on a real phone.

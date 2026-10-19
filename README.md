@@ -61,7 +61,7 @@ godot -e --path .    # open the editor
 | `scenes/` | Main scene, screens, the three puzzles, UI components (built in code with `Ui` helpers) |
 | `theme/` | Colors, sizes and durations |
 | `tests/` | GUT tests; `tests/logic/` mirrors `logic/` |
-| `tools/` | Setup, quality gate, drift checks, exports, Steam Deck deploy, pinned versions |
+| `tools/` | Setup, quality gate, drift checks, exports, Steam Deck deploy, Steam upload, pinned versions |
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
 
@@ -102,6 +102,12 @@ The game is a single file, `hardwire.x86_64`, that Steam runs like any non-Steam
 3. Switch to Game Mode and press Play. If the controls don't respond, pick the "Gamepad" layout in the game's Steam controller settings.
 
 **Deploying over SSH.** On the Deck in Desktop Mode, open Konsole: `passwd` (set a password), then `sudo systemctl enable --now sshd`. On the dev PC: `ssh-copy-id deck@steamdeck` and, if the Deck has another address, `echo 'DECK=deck@<host-or-ip>' > tools/deck.local.env` (git-ignored). Then every `tools/deck.sh` (or the VS Code task "Deploy: Steam Deck") exports the Linux build and copies it into place; `--run` also starts it in Desktop Mode, `--no-export` copies the existing build. For log output, run the binary over `ssh` while the Deck is in Desktop Mode.
+
+### Steam
+
+`tools/steam_upload.sh` exports Linux and Windows and uploads them with SteamPipe; `--preview` builds the manifests without uploading. It needs `steamcmd` on PATH and a git-ignored `tools/steam.local.env` with `STEAM_APP_ID`, `STEAM_DEPOT_LINUX`, `STEAM_DEPOT_WINDOWS` and `STEAM_USER`, and it only uploads a committed tree. Set the uploaded build live by hand in Steamworks → Builds. The Steamworks settings (launch options, Steam Input, Auto-Cloud) are in the spec under "After the prototype: Steam release".
+
+Desktop saves live in `~/.local/share/Hardwire` (Linux, Steam Deck) and `%APPDATA%\Hardwire` (Windows).
 
 ## License
 
