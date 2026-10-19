@@ -16,7 +16,7 @@ Status values: `todo`, `in progress`, `done`. Milestone scope and "Done when" cr
 | M9 | done | Steam Deck and desktop: landscape, controller, glyphs, Linux/Windows/macOS presets, `tools/deck.sh`, rumble; Deck play-test passed 2026-10-19 (issue #6) |
 | M10 | in progress | Steam release preparation (D-032): save folder, Windows exe metadata and `tools/steam_upload.sh` done; the first Steam install waits for the App ID |
 
-**Prototype v0.1.0 released 2026-10-19 (D-026).** Next scope: the "After the prototype" sections of the spec (Steam release, Benchmark slot).
+**Prototype v0.1.0 released 2026-10-19 (D-026); v0.2.0 released 2026-10-19 (name, ambient score, Storage hold feedback, Steam preparation).** Next scope: the "After the prototype" sections of the spec (Steam release, Benchmark slot).
 
 ## Reviews
 

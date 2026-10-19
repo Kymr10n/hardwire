@@ -4,6 +4,10 @@ All notable changes to Hardwire are documented here. The format follows [Keep a 
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-19
+
+Renamed to *Hardwire: Boot Sequence*, with an ambient score, hold feedback on the Storage pads and the groundwork for a Steam release.
+
 ### Changed
 
 - Storage: a pressed pad stays lit, sounds its note and rumbles for as long as it is held.
@@ -22,6 +26,10 @@ All notable changes to Hardwire are documented here. The format follows [Keep a 
 - `SECURITY.md`.
 - A quiet procedural ambient score on the overview and puzzle screens: sine bass, soft upper and high notes, and a half-time beat that builds over the first phrases (kick and hats, then a soft noise snare, then ghost hats).
 - `tools/steam_upload.sh`: exports Linux and Windows and uploads them to Steam with SteamPipe.
+
+### Fixed
+
+- A puzzle screen rebuilt mid-attempt (rotation, window resize) no longer leaves a held tone or rumble running.
 
 ## [0.1.0] - 2026-10-19
 
