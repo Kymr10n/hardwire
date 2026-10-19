@@ -45,34 +45,6 @@ func get_int(section_name: String, key: String) -> int:
 	return int(get_num(section_name, key))
 
 
-func economy() -> Dictionary:
-	return section("economy")
-
-
-func flow() -> Dictionary:
-	return section("flow")
-
-
-func idle() -> Dictionary:
-	return section("idle")
-
-
-func storage() -> Dictionary:
-	return section("storage")
-
-
-func ram() -> Dictionary:
-	return section("ram")
-
-
-func cpu() -> Dictionary:
-	return section("cpu")
-
-
-func modifiers() -> Dictionary:
-	return section("modifiers")
-
-
 func upgrade(id: String) -> Dictionary:
 	var value: Variant = section("upgrades").get(id)
 	if value is Dictionary:
@@ -89,7 +61,8 @@ func upgrade_ids() -> Array[String]:
 	return ids
 
 
-## Looks up a [[from_tier, value], ...] table in a section: the value of the last row with from_tier <= tier.
+## Looks up a [[from_tier, value], ...] table in a section: the value of the last row with from_tier
+## <= tier.
 func tier_table(section_name: String, key: String, tier: int) -> int:
 	var table: Variant = section(section_name).get(key)
 	if not (table is Array) or table.is_empty():

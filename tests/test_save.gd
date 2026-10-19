@@ -1,3 +1,4 @@
+# gdlint: disable=max-public-methods
 extends GutTest
 ## GameState serialization and SaveManager atomic save/load, backup on broken files.
 ## Uses its own save file and restores GameState, so the real save is never touched.
@@ -10,7 +11,7 @@ var _orig_state: Dictionary
 
 func before_each() -> void:
 	_orig_path = SaveManager.save_path
-	_orig_state = GameState.to_dict()
+	_orig_state = SaveManager.to_dict()
 	SaveManager.save_path = TEST_PATH
 	_remove_test_files()
 	GameState.reset_all()
@@ -19,7 +20,7 @@ func before_each() -> void:
 func after_each() -> void:
 	_remove_test_files()
 	SaveManager.save_path = _orig_path
-	GameState.from_dict(_orig_state)
+	SaveManager.from_dict(_orig_state)
 
 
 func _remove_test_files() -> void:
@@ -53,7 +54,7 @@ func test_fresh_state_has_all_upgrades_at_zero() -> void:
 
 
 func test_to_dict_matches_save_schema() -> void:
-	var keys: Array = GameState.to_dict().keys()
+	var keys: Array = SaveManager.to_dict().keys()
 	keys.sort()
 	var expected: Array = [
 		"best_tier_ever",
@@ -72,17 +73,17 @@ func test_to_dict_matches_save_schema() -> void:
 
 func test_dict_roundtrip() -> void:
 	_fill_state()
-	var d: Dictionary = GameState.to_dict()
+	var d: Dictionary = SaveManager.to_dict()
 	GameState.reset_all()
-	GameState.from_dict(d)
-	assert_eq(GameState.to_dict(), d)
+	SaveManager.from_dict(d)
+	assert_eq(SaveManager.to_dict(), d)
 
 
 func test_from_dict_survives_json_floats() -> void:
 	_fill_state()
-	var d: Variant = JSON.parse_string(JSON.stringify(GameState.to_dict()))
+	var d: Variant = JSON.parse_string(JSON.stringify(SaveManager.to_dict()))
 	GameState.reset_all()
-	GameState.from_dict(d)
+	SaveManager.from_dict(d)
 	assert_eq(GameState.ram, 3)
 	assert_eq(GameState.cpu, 5)
 	assert_eq(GameState.sto, 7)
@@ -91,7 +92,7 @@ func test_from_dict_survives_json_floats() -> void:
 
 
 func test_from_dict_fills_missing_fields() -> void:
-	GameState.from_dict(
+	SaveManager.from_dict(
 		{"stats": {"ram": 4}, "upgrades": {"bogus": 9}, "settings": {"sound": "no"}}
 	)
 	assert_eq(GameState.ram, 4)
@@ -105,10 +106,10 @@ func test_from_dict_fills_missing_fields() -> void:
 func test_save_then_load_restores_state() -> void:
 	_fill_state()
 	assert_true(SaveManager.save_game())
-	var saved: Dictionary = GameState.to_dict()
+	var saved: Dictionary = SaveManager.to_dict()
 	GameState.reset_all()
 	assert_true(SaveManager.load_game())
-	assert_eq(GameState.to_dict(), saved)
+	assert_eq(SaveManager.to_dict(), saved)
 
 
 func test_save_is_atomic_and_versioned() -> void:

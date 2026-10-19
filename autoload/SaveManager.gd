@@ -30,7 +30,7 @@ func backup_path() -> String:
 ## Writes GameState atomically. Returns false if the file could not be written.
 func save_game() -> bool:
 	GameState.last_seen = int(Time.get_unix_time_from_system())
-	var d: Dictionary = GameState.to_dict()
+	var d: Dictionary = to_dict()
 	d["version"] = SAVE_VERSION
 	var file := FileAccess.open(tmp_path(), FileAccess.WRITE)
 	if file == null:
@@ -75,7 +75,7 @@ func load_game() -> bool:
 		_backup()
 		GameState.reset_all()
 		return false
-	GameState.from_dict(parsed)
+	from_dict(parsed)
 	return true
 
 
@@ -89,3 +89,68 @@ func _backup() -> void:
 	var err := DirAccess.rename_absolute(save_path, backup_path())
 	if err != OK:
 		push_error("SaveManager: cannot back up %s (%s)" % [save_path, error_string(err)])
+
+
+## GameState as the save schema in SPEC: Save system (without "version", added on save).
+func to_dict() -> Dictionary:
+	var gs := GameState
+	return {
+		"stats": gs.stats(),
+		"cycles": gs.cycles,
+		"cores": gs.cores,
+		"last_seen": gs.last_seen,
+		"upgrades": gs.upgrades.duplicate(),
+		"solved_slots": gs.solved_slots.duplicate(),
+		"best_tier_ever": gs.best_tier_ever,
+		"seen_tutorials": gs.seen_tutorials.duplicate(),
+		"settings": gs.settings.duplicate(),
+		"lifetime": gs.lifetime.duplicate(),
+	}
+
+
+## Loads a save Dictionary into GameState. Missing or mistyped fields keep their fresh defaults;
+## unknown upgrade ids are dropped.
+func from_dict(d: Dictionary) -> void:
+	var gs := GameState
+	gs.reset_all()
+	var stats: Dictionary = _dict(d.get("stats"))
+	gs.ram = _int(stats.get("ram"))
+	gs.cpu = _int(stats.get("cpu"))
+	gs.sto = _int(stats.get("sto"))
+	gs.cycles = _int(d.get("cycles"))
+	gs.cores = _int(d.get("cores"))
+	gs.last_seen = _int(d.get("last_seen"))
+	var saved_upgrades: Dictionary = _dict(d.get("upgrades"))
+	for id: String in gs.upgrades.keys():
+		gs.upgrades[id] = _int(saved_upgrades.get(id))
+	gs.solved_slots = _strings(d.get("solved_slots"))
+	gs.best_tier_ever = _int(d.get("best_tier_ever"))
+	gs.seen_tutorials = _strings(d.get("seen_tutorials"))
+	var saved_settings: Dictionary = _dict(d.get("settings"))
+	for key: String in gs.settings.keys():
+		if saved_settings.get(key) is bool:
+			gs.settings[key] = saved_settings[key]
+	var saved_lifetime: Dictionary = _dict(d.get("lifetime"))
+	for key: String in gs.lifetime.keys():
+		gs.lifetime[key] = _int(saved_lifetime.get(key))
+	gs.emit_all()
+
+
+static func _dict(value: Variant) -> Dictionary:
+	return value if value is Dictionary else {}
+
+
+## JSON numbers arrive as float; negative or non-numeric values count as 0.
+static func _int(value: Variant) -> int:
+	if (value is float or value is int) and value >= 0:
+		return int(value)
+	return 0
+
+
+static func _strings(value: Variant) -> Array[String]:
+	var out: Array[String] = []
+	if value is Array:
+		for item: Variant in value:
+			if item is String:
+				out.append(item)
+	return out

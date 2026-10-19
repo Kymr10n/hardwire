@@ -1,6 +1,6 @@
 extends Node
-## Runtime-synthesized audio via AudioStreamGenerator, no audio files (SPEC: Visual and audio style).
-## Pentatonic pad notes, RAM click, CPU sine tone, success arpeggio, fail noise burst.
+## Runtime-synthesized audio via AudioStreamGenerator, no audio files (SPEC: Visual and audio
+## style). Pentatonic pad notes, RAM click, CPU sine tone, success arpeggio, fail noise burst.
 ## Respects GameState.settings.sound. All frequencies and durations come from balance.json "audio".
 
 enum Wave { SINE, NOISE }
@@ -32,7 +32,8 @@ func _process(_delta: float) -> void:
 	_fill_buffer()
 
 
-## Pad tone for Storage pad `index` (pentatonic, wraps around). `volume` scales the note (decoy plays quieter).
+## Pad tone for Storage pad `index` (pentatonic, wraps around). `volume` scales the note (decoy
+## plays quieter).
 func play_note(index: int, duration_ms: float, volume: float = 1.0) -> void:
 	var notes: Array = Balance.section("audio").get("pad_notes_hz", [])
 	if notes.is_empty():

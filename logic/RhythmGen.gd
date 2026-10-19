@@ -9,7 +9,7 @@ const MOD_SYNCOPATED := "syncopated"
 
 ## Tier difficulty from the spec formulas, before upgrades.
 static func params(tier: int) -> Dictionary:
-	var c: Dictionary = Balance.cpu()
+	var c: Dictionary = Balance.section("cpu")
 	var t: int = maxi(1, tier)
 	return {
 		"beats":
@@ -27,7 +27,7 @@ static func params(tier: int) -> Dictionary:
 ## first_press_timeout_s. Assists from slot.assist apply after the tier formulas.
 static func make(slot: SlotDef, seed: int) -> Dictionary:
 	var p: Dictionary = params(slot.tier)
-	var c: Dictionary = Balance.cpu()
+	var c: Dictionary = Balance.section("cpu")
 	var rng := RandomNumberGenerator.new()
 	rng.seed = seed
 	var on_choices: Array[float] = _range_steps(int(c.on_steps_min), int(c.on_steps_max))

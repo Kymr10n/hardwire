@@ -7,6 +7,7 @@ signal play_requested(slot: SlotDef)
 signal exit_requested
 
 const QUICK_TIERS: Array[int] = [1, 5, 10, 20]
+const BUTTON_TAPS := 1.5
 const TYPES: Array[String] = [SlotDef.TYPE_STO, SlotDef.TYPE_RAM, SlotDef.TYPE_CPU]
 
 ## Kept across screen changes so returning from a puzzle keeps the picks.
@@ -23,52 +24,42 @@ var _scale_button: Button
 
 
 func _ready() -> void:
-	var margin: int = get_theme_constant("margin", "Hardwire")
 	var column: VBoxContainer = Ui.screen_root(self, get_theme_constant("max_column", "Hardwire"))
 	var title: Label = Ui.header(column, "DEBUG", exit_requested.emit)
 	title.add_theme_color_override("font_color", get_theme_color("fail", "Hardwire"))
-	var scroll := ScrollContainer.new()
-	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	scroll.follow_focus = true
+	var scroll: ScrollContainer = Ui.scroll()
 	column.add_child(scroll)
-	var box := VBoxContainer.new()
+	var box: BoxContainer = Ui.box(true)
 	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	box.add_theme_constant_override("separation", margin / 2)
 	scroll.add_child(box)
-
-	_stats_label = _label("", 0)
+	_stats_label = Ui.label("")
 	box.add_child(_stats_label)
-
-	var stat_row := _row(box)
+	var stat_row: BoxContainer = _row(box)
 	for step: Variant in Balance.section("debug").get("stat_steps", []):
 		stat_row.add_child(_button("+%d stats" % int(step), _add_stats.bind(int(step))))
 	stat_row.add_child(_button("+%d Cyc" % Balance.get_int("debug", "cycles_step"), _add_cycles))
-
-	box.add_child(_label("Tier", 0))
-	var tier_row := _row(box)
-	tier_row.add_child(_button("-", _change_tier.bind(-1)))
-	_tier_label = _label("", get_theme_font_size("header", "Hardwire"))
-	_tier_label.custom_minimum_size.x = get_theme_constant("tap_min", "Hardwire") * 2
-	tier_row.add_child(_tier_label)
-	tier_row.add_child(_button("+", _change_tier.bind(1)))
-	var quick_row := _row(box)
-	for t: int in QUICK_TIERS:
-		quick_row.add_child(_button("T%d" % t, _set_tier.bind(t)))
-	box.add_child(_button("Set stats to tier requirement", _set_stats_for_tier))
-
-	_type_button = _button("", _cycle_type)
-	box.add_child(_type_button)
-	_modifier_button = _button("", _cycle_modifier)
-	box.add_child(_modifier_button)
-	_play_button = _button("Play", _on_play)
-	box.add_child(_play_button)
-	_scale_button = _button("", _cycle_time_scale)
-	box.add_child(_scale_button)
-
+	_build_tier_picker(box)
+	_type_button = _add(box, _cycle_type)
+	_modifier_button = _add(box, _cycle_modifier)
+	_play_button = _add(box, _on_play)
+	_scale_button = _add(box, _cycle_time_scale)
 	GameState.stats_changed.connect(_refresh)
 	GameState.cycles_changed.connect(_refresh)
 	_refresh()
+
+
+func _build_tier_picker(box: Control) -> void:
+	box.add_child(Ui.label("Tier"))
+	var tier_row: BoxContainer = _row(box)
+	tier_row.add_child(_button("-", _change_tier.bind(-1)))
+	_tier_label = Ui.label("", get_theme_font_size("header", "Hardwire"))
+	_tier_label.custom_minimum_size.x = get_theme_constant("tap_min", "Hardwire") * 2
+	tier_row.add_child(_tier_label)
+	tier_row.add_child(_button("+", _change_tier.bind(1)))
+	var quick_row: BoxContainer = _row(box)
+	for t: int in QUICK_TIERS:
+		quick_row.add_child(_button("T%d" % t, _set_tier.bind(t)))
+	box.add_child(_button("Set stats to tier requirement", _set_stats_for_tier))
 
 
 func _refresh() -> void:
@@ -89,7 +80,7 @@ func _refresh() -> void:
 ## "" plus the selected minigame's modifier pool from balance.json.
 func _modifiers() -> Array[String]:
 	var mods: Array[String] = [""]
-	for m: Variant in Balance.modifiers().get("pools", {}).get(TYPES[type_index], []):
+	for m: Variant in Balance.section("modifiers").get("pools", {}).get(TYPES[type_index], []):
 		mods.append(str(m))
 	return mods
 
@@ -145,28 +136,21 @@ func _on_play() -> void:
 	play_requested.emit(slot)
 
 
-func _label(text: String, font_size: int) -> Label:
-	var label := Label.new()
-	label.text = text
-	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	if font_size > 0:
-		label.add_theme_font_size_override("font_size", font_size)
-	return label
-
-
-func _row(parent: Control) -> HBoxContainer:
-	var row := HBoxContainer.new()
+func _row(parent: Control) -> BoxContainer:
+	var row: BoxContainer = Ui.box(false)
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
-	row.add_theme_constant_override("separation", get_theme_constant("margin", "Hardwire") / 2)
 	parent.add_child(row)
 	return row
 
 
 func _button(text: String, on_pressed: Callable) -> Button:
-	var button := Button.new()
-	button.text = text
-	var tap: float = get_theme_constant("tap_min", "Hardwire")
-	button.custom_minimum_size = Vector2(tap * 1.5, tap)
+	var button: Button = Ui.button(text, on_pressed, BUTTON_TAPS)
 	button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	button.pressed.connect(on_pressed)
+	return button
+
+
+## A centered button whose text _refresh sets.
+func _add(box: Control, on_pressed: Callable) -> Button:
+	var button: Button = _button("", on_pressed)
+	box.add_child(button)
 	return button

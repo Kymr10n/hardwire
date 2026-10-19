@@ -83,12 +83,12 @@ func test_required_numbers_exist() -> void:
 
 
 func test_tier_tables_exist() -> void:
-	assert_eq(Balance.storage().get("pads_by_tier", []).size(), 4)
-	assert_eq(Balance.ram().get("grid_by_tier", []).size(), 4)
+	assert_eq(Balance.section("storage").get("pads_by_tier", []).size(), 4)
+	assert_eq(Balance.section("ram").get("grid_by_tier", []).size(), 4)
 
 
 func test_modifier_pools() -> void:
-	var pools: Dictionary = Balance.modifiers().get("pools", {})
+	var pools: Dictionary = Balance.section("modifiers").get("pools", {})
 	for type: String in ["sto", "ram", "cpu"]:
 		assert_eq(pools.get(type, []).size(), 2, "%s should have two modifiers" % type)
 

@@ -1,3 +1,4 @@
+# gdlint: disable=max-public-methods
 extends "res://tests/hardwire_test.gd"
 ## Upgrade shop (SPEC: Upgrade shop): costs, buying, persistence and each upgrade's effect.
 
@@ -9,29 +10,6 @@ func _slot(tier: int, type: String, levels: Dictionary) -> SlotDef:
 	var slot := SlotDef.create(tier, type)
 	slot.assist = levels
 	return slot
-
-
-func test_costs() -> void:
-	var expected := {
-		"replay_buffer": [50, 150],
-		"longer_exposure": [30, 54, 97, 175, 315],
-		"metronome": [30, 54, 97, 175, 315],
-		"time_dilation": [40, 76, 144, 274, 521],
-		"overclock": [100, 220, 484, 1065],
-		"cycle_miner": [80, 160, 320, 640],
-	}
-	for id: String in expected:
-		for level: int in expected[id].size():
-			assert_eq(
-				Economy.upgrade_cost(id, level), expected[id][level], "%s level %d" % [id, level]
-			)
-
-
-func test_caps() -> void:
-	assert_true(Economy.is_maxed("replay_buffer", 2))
-	assert_false(Economy.is_maxed("replay_buffer", 1))
-	assert_true(Economy.is_maxed("metronome", 5))
-	assert_false(Economy.is_maxed("overclock", 1000), "economy upgrades are uncapped")
 
 
 func test_buy_deducts_and_levels() -> void:

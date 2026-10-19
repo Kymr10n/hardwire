@@ -1,5 +1,6 @@
 extends "res://tests/hardwire_test.gd"
-## Overview screen: visible tiers, card states, gating in the UI, reward flow from the puzzle screen.
+## Overview screen: visible tiers, card states, gating in the UI, reward flow from the puzzle
+## screen.
 
 const OverviewScreen := preload("res://scenes/screens/OverviewScreen.gd")
 const PuzzleScreen := preload("res://scenes/screens/PuzzleScreen.gd")
@@ -24,7 +25,7 @@ func test_card_states() -> void:
 	var t2: SlotCard = overview.rows()[1].cards[0]
 	assert_false(t1.disabled, "tier 1 is open")
 	assert_true(t2.disabled, "tier 2 is locked")
-	assert_eq(GameState.missing(t2.slot), {"ram": 2, "cpu": 2, "sto": 2})
+	assert_eq(Progress.missing(t2.slot.req, GameState.stats()), {"ram": 2, "cpu": 2, "sto": 2})
 	GameState.apply_solve(t1.slot)
 	overview._refresh_rows()
 	assert_true(GameState.is_solved(t1.slot))

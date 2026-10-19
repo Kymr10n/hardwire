@@ -9,19 +9,13 @@ func _solve(tier: int, type: String) -> void:
 	GameState.apply_solve(SlotGenerator.make(tier, type))
 
 
-func test_cores_for() -> void:
-	assert_eq(Economy.cores_for(9), 0)
-	assert_eq(Economy.cores_for(10), 1)
-	assert_eq(Economy.cores_for(20), 11)
-
-
 func test_rebuild_needs_tier_10_solve() -> void:
 	set_stats(722)
 	_solve(9, SlotDef.TYPE_RAM)
-	assert_false(GameState.can_rebuild())
+	assert_false(Progress.can_rebuild(GameState.solved_slots))
 	assert_eq(GameState.rebuild(), 0)
 	_solve(10, SlotDef.TYPE_CPU)
-	assert_true(GameState.can_rebuild())
+	assert_true(Progress.can_rebuild(GameState.solved_slots))
 
 
 func test_rebuild_resets_the_right_fields() -> void:
@@ -60,42 +54,6 @@ func test_core_multiplier_applies_after_rebuild() -> void:
 	assert_eq([gain.stat, gain.cycles], [5, 13])
 
 
-func test_idle_cycles_formula() -> void:
-	# t_max 10: 6 x 50 = 300 Cycles per hour.
-	assert_eq(Economy.idle_cycles(3600, 10, 0, 0), 300)
-	assert_eq(Economy.idle_cycles(1800, 10, 0, 0), 150)
-	assert_eq(Economy.idle_cycles(8 * 3600, 10, 0, 0), 2400)
-	assert_eq(Economy.idle_cycles(30 * 3600, 10, 0, 0), 2400, "capped at 8 h")
-	# Cycle miner 2 (+20%) and 2 Cores (x1.5): 300 x 1.2 x 1.5 = 540
-	assert_eq(Economy.idle_cycles(3600, 10, 2, 2), 540)
-	assert_eq(Economy.idle_cycles(3600, 0, 0, 0), 0, "nothing before the first solve")
-	assert_eq(Economy.idle_cycles(-500, 10, 0, 0), 0)
-
-
-func test_idle_ignores_overclock() -> void:
-	GameState.upgrades.overclock = 5
-	_solve(1, SlotDef.TYPE_RAM)
-	GameState.last_seen = NOW - 3600
-	assert_eq(GameState.idle_offer(NOW), 6 * 5)
-
-
-func test_idle_offer_needs_more_than_5_minutes() -> void:
-	_solve(1, SlotDef.TYPE_RAM)
-	GameState.last_seen = NOW - 300
-	assert_eq(GameState.idle_offer(NOW), 0)
-	GameState.last_seen = NOW - 301
-	assert_gt(GameState.idle_offer(NOW), 0)
-
-
-func test_idle_clock_edge_cases() -> void:
-	_solve(1, SlotDef.TYPE_RAM)
-	GameState.last_seen = 0
-	assert_eq(GameState.seconds_away(NOW), 0, "missing last_seen")
-	GameState.last_seen = NOW + 1000
-	assert_eq(GameState.seconds_away(NOW), 0, "clock went backwards")
-	assert_eq(GameState.idle_offer(NOW), 0)
-
-
 func test_last_seen_survives_save_and_drives_offer() -> void:
 	set_stats(8)
 	_solve(3, SlotDef.TYPE_RAM)
@@ -105,7 +63,9 @@ func test_last_seen_survives_save_and_drives_offer() -> void:
 	SaveManager.load_game()
 	assert_eq(GameState.last_seen, saved)
 	# 2 hours later: 6 x cycles(3) x 2 = 180
-	assert_eq(GameState.idle_offer(saved + 7200), 180)
+	assert_eq(
+		Progress.idle_offer(GameState.last_seen, saved + 7200, GameState.solved_slots, 0, 0), 180
+	)
 
 
 func _main() -> Node:

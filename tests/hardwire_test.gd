@@ -13,7 +13,7 @@ var _orig_time_scale: float
 
 func before_each() -> void:
 	_orig_path = SaveManager.save_path
-	_orig_state = GameState.to_dict()
+	_orig_state = SaveManager.to_dict()
 	_orig_time_scale = Engine.time_scale
 	SaveManager.save_path = TEST_SAVE
 	_remove_test_files()
@@ -29,7 +29,7 @@ func before_each() -> void:
 func after_each() -> void:
 	_remove_test_files()
 	SaveManager.save_path = _orig_path
-	GameState.from_dict(_orig_state)
+	SaveManager.from_dict(_orig_state)
 	Engine.time_scale = _orig_time_scale
 
 

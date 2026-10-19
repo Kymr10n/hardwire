@@ -3,6 +3,18 @@ extends PuzzleBase
 ## The pattern shows for show_ms, then the player toggles cells and presses Commit once the
 ## set count equals the cells needed. A wrong Commit or the timeout fails the attempt.
 
+## Layout, in units of tap_min and margin.
+const COMMIT_WIDTH := 2.5
+const WIDE_MARGINS := 3.0
+## Rotation arrow, as fractions of tap_min and of its radius.
+const ICON_RADIUS := 0.3
+const ARROW_START := -PI * 0.75
+const ARROW_SWEEP := PI * 1.5
+const ARROW_WIDTH := 0.28
+const ARROW_HEAD_HALF := 0.6
+const ARROW_HEAD_LENGTH := 0.8
+const ARC_SEGMENTS := 32
+
 var _attempt: Dictionary = {}
 var _grid: RamGrid
 var _hint: Label
@@ -145,16 +157,16 @@ func _layout() -> void:
 		return
 	var margin: float = get_theme_constant("margin", "Hardwire")
 	var row_h: float = get_theme_constant("tap_min", "Hardwire")
-	var commit_w: float = row_h * 2.5
-	var wide: bool = size.x - 3.0 * margin - commit_w > size.y - 2.0 * row_h - 2.0 * margin
+	var commit_w: float = row_h * COMMIT_WIDTH
+	var wide: bool = size.x - WIDE_MARGINS * margin - commit_w > size.y - 2.0 * row_h - 2.0 * margin
 	var side: float
 	if wide:
-		side = maxf(0.0, minf(size.y - 2.0 * margin, size.x - 3.0 * margin - commit_w))
+		side = maxf(0.0, minf(size.y - 2.0 * margin, size.x - WIDE_MARGINS * margin - commit_w))
 		var left: float = (size.x - side - margin - commit_w) / 2.0
 		var top: float = (size.y - side) / 2.0
 		var column_x: float = left + side + margin
 		_grid.position = Vector2(left, top)
-		_icon_center = Vector2(column_x + row_h * 0.3, top + row_h / 2.0)
+		_icon_center = Vector2(column_x + row_h * ICON_RADIUS, top + row_h / 2.0)
 		_hint.position = Vector2(column_x, top + row_h)
 		_hint.size = Vector2(commit_w, row_h * 2.0)
 		_commit.position = Vector2(column_x, top + side - row_h)
@@ -166,7 +178,9 @@ func _layout() -> void:
 		_grid.position = Vector2((size.x - side) / 2.0, top)
 		_hint.position = Vector2(_grid.position.x, top - row_h - margin / 2.0)
 		_hint.size = Vector2(side, row_h)
-		_icon_center = Vector2(_grid.position.x + row_h * 0.3, _hint.position.y + row_h / 2.0)
+		_icon_center = Vector2(
+			_grid.position.x + row_h * ICON_RADIUS, _hint.position.y + row_h / 2.0
+		)
 		var bottom: float = top + side + margin / 2.0
 		_counter.position = Vector2(_grid.position.x, bottom)
 		_counter.size = Vector2(side / 2.0, row_h)
@@ -180,13 +194,13 @@ func _layout() -> void:
 func _draw() -> void:
 	if slot == null or slot.modifier != GridGen.MOD_ROTATED or _grid == null:
 		return
-	var r: float = get_theme_constant("tap_min", "Hardwire") * 0.3
+	var r: float = get_theme_constant("tap_min", "Hardwire") * ICON_RADIUS
 	var c: Vector2 = _icon_center
 	var color: Color = get_theme_color("ram", "Hardwire")
-	var start: float = -PI * 0.75
-	var end: float = start + PI * 1.5
-	draw_arc(c, r, start, end, 32, color, r * 0.28, true)
+	var end: float = ARROW_START + ARROW_SWEEP
+	draw_arc(c, r, ARROW_START, end, ARC_SEGMENTS, color, r * ARROW_WIDTH, true)
 	var tip: Vector2 = c + Vector2.from_angle(end) * r
 	var dir: Vector2 = Vector2.from_angle(end + PI / 2.0)
-	var side: Vector2 = Vector2.from_angle(end) * r * 0.6
-	draw_colored_polygon(PackedVector2Array([tip + dir * r * 0.8, tip + side, tip - side]), color)
+	var side: Vector2 = Vector2.from_angle(end) * r * ARROW_HEAD_HALF
+	var head := PackedVector2Array([tip + dir * r * ARROW_HEAD_LENGTH, tip + side, tip - side])
+	draw_colored_polygon(head, color)

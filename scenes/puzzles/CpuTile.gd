@@ -3,6 +3,8 @@ extends Control
 ## The central CPU tile: a large rounded square that lights in the CPU accent color.
 ## Lit state brightens and scales to glow_scale_pct over glow_ms. Input is handled by CpuPuzzle.
 
+const CORNER := 0.12
+
 var lit: bool = false:
 	set(value):
 		if value == lit:
@@ -16,10 +18,7 @@ var _style := StyleBoxFlat.new()
 
 
 func _init() -> void:
-	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	focus_mode = Control.FOCUS_ALL
-	focus_entered.connect(queue_redraw)
-	focus_exited.connect(queue_redraw)
+	Ui.make_focusable(self)
 
 
 func _ready() -> void:
@@ -31,7 +30,7 @@ func _animate() -> void:
 		return
 	if _tween:
 		_tween.kill()
-	var target: float = get_theme_constant("glow_scale_pct", "Hardwire") / 100.0 if lit else 1.0
+	var target: float = Ui.pct(self, "glow_scale_pct") if lit else 1.0
 	_tween = create_tween()
 	_tween.tween_property(
 		self, "scale", Vector2.ONE * target, get_theme_constant("glow_ms", "Hardwire") / 1000.0
@@ -40,11 +39,7 @@ func _animate() -> void:
 
 func _draw() -> void:
 	var accent: Color = get_theme_color("cpu", "Hardwire")
-	_style.bg_color = (
-		accent
-		if lit
-		else accent.darkened(1.0 - get_theme_constant("pad_idle_pct", "Hardwire") / 100.0)
-	)
-	_style.set_corner_radius_all(int(size.x * 0.12))
+	_style.bg_color = (accent if lit else accent.darkened(1.0 - Ui.pct(self, "pad_idle_pct")))
+	_style.set_corner_radius_all(int(size.x * CORNER))
 	draw_style_box(_style, Rect2(Vector2.ZERO, size))
 	Ui.draw_focus(self, Rect2(Vector2.ZERO, size))

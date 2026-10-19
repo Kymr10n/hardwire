@@ -19,9 +19,7 @@ func _ready() -> void:
 	var column: VBoxContainer = Ui.screen_root(self, get_theme_constant("max_column", "Hardwire"))
 	Ui.header(column, "Licenses", exit_requested.emit)
 
-	var scroll := ScrollContainer.new()
-	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	var scroll: ScrollContainer = Ui.scroll()
 	column.add_child(scroll)
 	_scroll = scroll
 	text_label = RichTextLabel.new()

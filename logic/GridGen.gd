@@ -10,7 +10,7 @@ const MOD_ROTATED := "rotated"
 
 ## Tier difficulty from the spec formulas, before upgrades.
 static func params(tier: int) -> Dictionary:
-	var r: Dictionary = Balance.ram()
+	var r: Dictionary = Balance.section("ram")
 	var t: int = maxi(1, tier)
 	var n: int = Balance.tier_table("ram", "grid_by_tier", t)
 	var filled: int = mini(
@@ -44,7 +44,7 @@ static func make(slot: SlotDef, seed: int) -> Dictionary:
 	var pattern: Array[int] = cells.slice(0, p.filled)
 	pattern.sort()
 	var expected: Array[int] = expected_input(pattern, n, slot.modifier)
-	var r: Dictionary = Balance.ram()
+	var r: Dictionary = Balance.section("ram")
 	return {
 		"n": n,
 		"pattern": pattern,

@@ -14,6 +14,12 @@ const DIRECTIONS := {
 	"ui_down": Vector2i(0, 1)
 }
 
+## Cell look, as fractions of the grid / cell size.
+const GAP := 0.03
+const CORNER := 0.14
+const IDLE_DARKEN := 0.4
+const MIN_GLOW_S := 0.001
+
 var n: int = 0
 var cursor: int = 0
 
@@ -23,10 +29,7 @@ var _style := StyleBoxFlat.new()
 
 
 func _init() -> void:
-	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	focus_mode = Control.FOCUS_ALL
-	focus_entered.connect(queue_redraw)
-	focus_exited.connect(queue_redraw)
+	Ui.make_focusable(self)
 
 
 func setup(p_n: int) -> void:
@@ -101,8 +104,8 @@ func _show_focus() -> void:
 
 
 func _process(delta: float) -> void:
-	var glow_s: float = maxf(0.001, get_theme_constant("glow_ms", "Hardwire") / 1000.0)
-	var big: float = get_theme_constant("glow_scale_pct", "Hardwire") / 100.0
+	var glow_s: float = maxf(MIN_GLOW_S, get_theme_constant("glow_ms", "Hardwire") / 1000.0)
+	var big: float = Ui.pct(self, "glow_scale_pct")
 	var step: float = (big - 1.0) * delta / glow_s
 	var changed: bool = false
 	for i: int in _scale.size():
@@ -115,7 +118,7 @@ func _process(delta: float) -> void:
 
 
 func _cell_rect(i: int) -> Rect2:
-	var gap: float = size.x * 0.03
+	var gap: float = size.x * GAP
 	var cell: float = (size.x - gap * (n - 1)) / n
 	var row: int = floori(float(i) / n)
 	var col: int = i % n
@@ -124,12 +127,12 @@ func _cell_rect(i: int) -> Rect2:
 
 func _draw() -> void:
 	var lit: Color = get_theme_color("ram", "Hardwire")
-	var idle: Color = get_theme_color("trace", "Hardwire").darkened(0.4)
+	var idle: Color = get_theme_color("trace", "Hardwire").darkened(IDLE_DARKEN)
 	for i: int in n * n:
 		var rect: Rect2 = _cell_rect(i)
 		rect = rect.grow((rect.size.x * _scale[i] - rect.size.x) / 2.0)
 		_style.bg_color = lit if _on[i] else idle
-		_style.set_corner_radius_all(int(rect.size.x * 0.14))
+		_style.set_corner_radius_all(int(rect.size.x * CORNER))
 		draw_style_box(_style, rect)
 	if n > 0:
 		Ui.draw_focus(self, _cell_rect(cursor))

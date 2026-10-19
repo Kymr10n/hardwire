@@ -1,8 +1,8 @@
 class_name RhythmJudge
 extends RefCounted
-## Pure function: player press/release timestamps (usec) + target segments (ms) -> pass/fail per segment.
-## A segment passes if abs(actual - target) <= max(abs_ms, tolerance * target).
-## Only relative intervals count: the clock starts at the first press. SPEC: Minigame: CPU > Judging.
+## Pure function: player press/release timestamps (usec) + target segments (ms) -> pass/fail per
+## segment. A segment passes if abs(actual - target) <= max(abs_ms, tolerance * target). Only
+## relative intervals count: the clock starts at the first press. SPEC: Minigame: CPU > Judging.
 
 
 ## Allowed deviation for one segment.

@@ -1,8 +1,8 @@
 extends Control
-## Root scene. Holds the current screen and handles transitions (SPEC: Screens and UX flow):
-## Boot -> Overview hub -> Puzzle / Shop / Settings / debug panel, plus the Rebuild dialog and
-## the "While you were away" idle income dialog (on start and after a resume, shown on the overview).
-## Picks portrait or landscape from the window aspect and rebuilds the screen when it flips.
+## Root scene. Holds the current screen and handles transitions (SPEC: Screens and UX flow): Boot ->
+## Overview hub -> Puzzle / Shop / Settings / debug panel, plus the Rebuild dialog and the "While
+## you were away" idle income dialog (on start and after a resume, shown on the overview). Picks
+## portrait or landscape from the window aspect and rebuilds the screen when it flips.
 
 const BootScreen := preload("res://scenes/screens/BootScreen.gd")
 const OverviewScreen := preload("res://scenes/screens/OverviewScreen.gd")
@@ -96,7 +96,13 @@ func show_overview() -> void:
 ## Offers idle Cycles if enough time passed since the last save (SPEC: Idle income).
 func check_idle() -> void:
 	_idle_check_pending = false
-	var amount: int = GameState.idle_offer(int(Time.get_unix_time_from_system()))
+	var amount: int = Progress.idle_offer(
+		GameState.last_seen,
+		int(Time.get_unix_time_from_system()),
+		GameState.solved_slots,
+		GameState.upgrade_level("cycle_miner"),
+		GameState.cores
+	)
 	if amount <= 0:
 		return
 	var dialog := ConfirmDialog.open(
@@ -111,9 +117,9 @@ func check_idle() -> void:
 
 ## Confirm dialog with Cores to gain and the new multiplier (SPEC: Prestige).
 func show_rebuild_dialog() -> void:
-	if not GameState.can_rebuild():
+	if not Progress.can_rebuild(GameState.solved_slots):
 		return
-	var gained: int = GameState.rebuild_cores()
+	var gained: int = Progress.rebuild_cores(GameState.solved_slots)
 	var message: String = (
 		"Gain %d %s: rewards x%s -> x%s.\nStats, Cycles, upgrades and first solves reset."
 		% [

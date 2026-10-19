@@ -37,35 +37,12 @@ func setup(p_slot: SlotDef) -> void:
 
 func _ready() -> void:
 	_rng.randomize()
-	var accent: Color = get_theme_color(slot.type, "Hardwire")
 	var landscape: bool = Ui.is_landscape(self)
-	var root: VBoxContainer = Ui.screen_root(self, 0.0, 1.0)
-
 	# Portrait: panel above the puzzle. Landscape: panel beside it.
-	var body := BoxContainer.new()
-	body.vertical = not landscape
+	var body: BoxContainer = Ui.box(not landscape)
 	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	body.add_theme_constant_override("separation", get_theme_constant("margin", "Hardwire") / 2)
-	root.add_child(body)
-	var panel := VBoxContainer.new()
-	panel.add_theme_constant_override("separation", get_theme_constant("margin", "Hardwire") / 2)
-	if landscape:
-		panel.custom_minimum_size.x = get_theme_constant("side_panel", "Hardwire")
-	body.add_child(panel)
-
-	var title: Label = Ui.header(panel, _title_text(), go_back, landscape)
-	title.add_theme_color_override("font_color", accent)
-
-	_phase_label = Label.new()
-	_phase_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_phase_label.add_theme_font_size_override("font_size", get_theme_font_size("phase", "Hardwire"))
-	panel.add_child(_phase_label)
-
-	_timer_bar = TimerBar.new()
-	_timer_bar.color = accent
-	_timer_bar.custom_minimum_size.y = get_theme_constant("timer_bar_height", "Hardwire")
-	panel.add_child(_timer_bar)
-
+	Ui.screen_root(self, 0.0, 1.0).add_child(body)
+	body.add_child(_build_panel(landscape))
 	var area := Control.new()
 	area.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	area.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -76,12 +53,10 @@ func _ready() -> void:
 	puzzle.phase_changed.connect(_on_phase_changed)
 	puzzle.solved.connect(_on_solved)
 	puzzle.failed.connect(_on_failed)
-
 	_overlay = ResultOverlay.new()
 	add_child(_overlay)
 	_overlay.again_pressed.connect(start_attempt)
 	_overlay.overview_pressed.connect(go_back)
-
 	if GameState.seen_tutorials.has(slot.type):
 		start_attempt()
 	else:
@@ -89,6 +64,23 @@ func _ready() -> void:
 		hint.text = HINTS.get(slot.type, "")
 		hint.dismissed.connect(_on_hint_dismissed)
 		add_child(hint)
+
+
+## Header (back + title), phase label and timer bar.
+func _build_panel(landscape: bool) -> BoxContainer:
+	var accent: Color = get_theme_color(slot.type, "Hardwire")
+	var panel: BoxContainer = Ui.box(true)
+	if landscape:
+		panel.custom_minimum_size.x = get_theme_constant("side_panel", "Hardwire")
+	var title: Label = Ui.header(panel, _title_text(), go_back, landscape)
+	title.add_theme_color_override("font_color", accent)
+	_phase_label = Ui.label("", get_theme_font_size("phase", "Hardwire"))
+	panel.add_child(_phase_label)
+	_timer_bar = TimerBar.new()
+	_timer_bar.color = accent
+	_timer_bar.custom_minimum_size.y = get_theme_constant("timer_bar_height", "Hardwire")
+	panel.add_child(_timer_bar)
+	return panel
 
 
 func _on_hint_dismissed() -> void:

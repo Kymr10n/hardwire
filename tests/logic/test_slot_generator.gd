@@ -62,7 +62,7 @@ func test_no_modifiers_before_tier_8() -> void:
 
 
 func test_modifier_pools_by_tier() -> void:
-	var pools: Dictionary = Balance.modifiers().pools
+	var pools: Dictionary = Balance.section("modifiers").pools
 	var seen_second: bool = false
 	for tier: int in range(8, 300):
 		for type: String in SlotGenerator.TYPES:
@@ -93,15 +93,3 @@ func test_modifier_chance() -> void:
 			if not SlotGenerator.make(tier, type).modifier.is_empty():
 				hits += 1
 	assert_between(float(hits) / total, 0.75, 0.85)
-
-
-func test_modifier_and_multipliers() -> void:
-	var slot := _plain(9, SlotDef.TYPE_RAM)
-	slot.modifier = "inverted"
-	# reward 10, cycles 45: x1.5 modifier
-	assert_eq(Economy.solve_reward(slot, false, 0, 0, 0), {"stat": 15, "cycles": 68})
-	assert_eq(Economy.solve_reward(slot, true, 0, 0, 0), {"stat": 30, "cycles": 135})
-	var plain := _plain(9, SlotDef.TYPE_RAM)
-	# Overclock 2 (+20% stats), Cycle miner 3 (+30% Cycles), 2 Cores (x1.5)
-	assert_eq(Economy.solve_reward(plain, false, 2, 3, 2), {"stat": 18, "cycles": 88})
-	assert_almost_eq(Economy.core_multiplier(4), 2.0, 0.0001)

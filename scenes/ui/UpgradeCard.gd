@@ -63,7 +63,7 @@ func refresh() -> void:
 	else:
 		_effect.text = "%s  ->  %s" % [effect_text(id, level), effect_text(id, level + 1)]
 		_buy.text = "%d Cyc" % Economy.upgrade_cost(id, level)
-	_buy.disabled = not GameState.can_buy(id)
+	_buy.disabled = not Economy.can_buy(id, GameState.upgrade_level(id), GameState.cycles)
 
 
 ## Human-readable total effect at a level.

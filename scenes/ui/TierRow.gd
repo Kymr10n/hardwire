@@ -53,7 +53,7 @@ func _ready() -> void:
 func refresh() -> void:
 	for chip: Label in _chips:
 		var type: String = chip.get_meta("type")
-		var met: bool = GameState.stat(type) >= Balance.req(tier)
+		var met: bool = GameState.stats()[type] >= Balance.req(tier)
 		chip.add_theme_color_override(
 			"font_color",
 			get_theme_color("text_dim", "Hardwire") if met else get_theme_color(type, "Hardwire")

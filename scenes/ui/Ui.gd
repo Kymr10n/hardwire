@@ -11,7 +11,8 @@ static func is_landscape(node: Node) -> bool:
 
 
 ## Fills `screen` with margins and returns the content column. With `max_width` > 0, landscape
-## widens the side margins so the column is at most that wide. `margin_scale` scales the theme margin.
+## widens the side margins so the column is at most that wide. `margin_scale` scales the theme
+## margin.
 static func screen_root(
 	screen: Control, max_width: float = 0.0, margin_scale: float = 0.5
 ) -> VBoxContainer:
@@ -100,3 +101,77 @@ static func focus_first(screen: Control) -> void:
 static func draw_focus(control: Control, rect: Rect2) -> void:
 	if control.has_focus(true):
 		control.draw_style_box(control.get_theme_stylebox("focus", "Button"), rect)
+
+
+## A `*_pct` theme constant as a ratio (glow_scale_pct 105 -> 1.05).
+static func pct(control: Control, name: String) -> float:
+	return control.get_theme_constant(name, "Hardwire") / 100.0
+
+
+## A button at least tap_min tall and `width_taps` x tap_min wide (0 = as wide as its text).
+static func button(text: String, on_pressed: Callable, width_taps: float = 0.0) -> Button:
+	var b := Button.new()
+	b.text = text
+	b.pressed.connect(on_pressed)
+	var tap: float = ThemeDB.get_project_theme().get_constant("tap_min", "Hardwire")
+	b.custom_minimum_size = Vector2(tap * width_taps, tap)
+	return b
+
+
+## Lets a custom-drawn control take gamepad/keyboard focus (pointer input is handled by its
+## puzzle) and redraw its focus outline when focus changes.
+static func make_focusable(control: Control) -> void:
+	control.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	control.focus_mode = Control.FOCUS_ALL
+	control.focus_entered.connect(control.queue_redraw)
+	control.focus_exited.connect(control.queue_redraw)
+
+
+## Fills `overlay` with a dimmed backdrop and a centered panel; returns the panel's column.
+static func modal(overlay: Control, dim_alpha: float, min_width: float = 0.0) -> VBoxContainer:
+	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var dim := ColorRect.new()
+	dim.color = Color(overlay.get_theme_color("bg", "Hardwire"), dim_alpha)
+	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	overlay.add_child(dim)
+	var center := CenterContainer.new()
+	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	overlay.add_child(center)
+	var panel := PanelContainer.new()
+	panel.custom_minimum_size.x = min_width
+	center.add_child(panel)
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override(
+		"separation", overlay.get_theme_constant("margin", "Hardwire")
+	)
+	panel.add_child(column)
+	return column
+
+
+## A centered label; font_size 0 keeps the theme default.
+static func label(text: String, font_size: int = 0) -> Label:
+	var l := Label.new()
+	l.text = text
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	if font_size > 0:
+		l.add_theme_font_size_override("font_size", font_size)
+	return l
+
+
+## A row (or column, when `vertical`) with the standard half-margin spacing.
+static func box(vertical: bool) -> BoxContainer:
+	var b := BoxContainer.new()
+	b.vertical = vertical
+	var margin: int = ThemeDB.get_project_theme().get_constant("margin", "Hardwire")
+	b.add_theme_constant_override("separation", margin / 2)
+	return b
+
+
+## A vertical scroll area that fills the space left and follows gamepad/keyboard focus.
+static func scroll() -> ScrollContainer:
+	var s := ScrollContainer.new()
+	s.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	s.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	s.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	s.follow_focus = true
+	return s

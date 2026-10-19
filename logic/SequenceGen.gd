@@ -9,7 +9,7 @@ const MOD_DECOY := "decoy"
 
 ## Tier difficulty from the spec formulas, before upgrades.
 static func params(tier: int) -> Dictionary:
-	var s: Dictionary = Balance.storage()
+	var s: Dictionary = Balance.section("storage")
 	var t: int = maxi(1, tier)
 	var length: int = mini(
 		int(s.length_base) + floori(t / float(s.length_tier_divisor)), int(s.length_max)

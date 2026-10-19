@@ -5,6 +5,10 @@ extends RefCounted
 
 ## Overview order of the three slots in a tier row.
 const TYPES: Array[String] = [SlotDef.TYPE_RAM, SlotDef.TYPE_CPU, SlotDef.TYPE_STO]
+## The 32-bit slot hash is split in halves: low bits roll the chance, high bits pick the modifier.
+const HALF_BITS := 16
+const HALF_MASK := 0xFFFF
+const HALF_RANGE := 65536.0
 
 
 static func make(tier: int, type: String) -> SlotDef:
@@ -25,7 +29,7 @@ static func tier_slots(tier: int) -> Array[SlotDef]:
 
 ## Modifier chance for a tier (0 below modifiers.from_tier).
 static func modifier_chance(tier: int) -> float:
-	var m: Dictionary = Balance.modifiers()
+	var m: Dictionary = Balance.section("modifiers")
 	if tier < int(m.from_tier):
 		return 0.0
 	return minf(
@@ -33,20 +37,21 @@ static func modifier_chance(tier: int) -> float:
 	)
 
 
-## Deterministic modifier for a slot: low 16 hash bits roll the chance, high 16 bits pick from the pool.
+## Deterministic modifier for a slot: low 16 hash bits roll the chance, high 16 bits pick from the
+## pool.
 static func modifier_for(tier: int, type: String) -> String:
 	var chance: float = modifier_chance(tier)
 	if chance <= 0.0:
 		return ""
 	var h: int = fnv1a32("%d:%s" % [tier, type])
-	if (h & 0xFFFF) / 65536.0 >= chance:
+	if (h & HALF_MASK) / HALF_RANGE >= chance:
 		return ""
-	var m: Dictionary = Balance.modifiers()
+	var m: Dictionary = Balance.section("modifiers")
 	var pool: Array = m.get("pools", {}).get(type, [])
 	if pool.is_empty():
 		return ""
 	var size: int = 1 if tier < int(m.second_pool_from_tier) else pool.size()
-	return str(pool[(h >> 16) % size])
+	return str(pool[(h >> HALF_BITS) % size])
 
 
 ## 32-bit FNV-1a over the UTF-8 bytes of `text` (stable across runs and platforms).

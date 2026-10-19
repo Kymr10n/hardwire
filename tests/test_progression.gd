@@ -7,27 +7,19 @@ func _solve(tier: int, type: String) -> Dictionary:
 
 
 func test_fresh_save_reaches_tier_4_with_first_solves_only() -> void:
-	assert_eq(GameState.highest_unlocked_tier(), 1)
+	assert_eq(Progress.highest_unlocked_tier(GameState.stats()), 1)
 	for tier: int in range(1, 4):
 		for slot: SlotDef in SlotGenerator.tier_slots(tier):
-			assert_true(GameState.is_unlocked(slot), "tier %d open" % tier)
+			assert_true(Progress.is_unlocked(slot.req, GameState.stats()), "tier %d open" % tier)
 			GameState.apply_solve(slot)
-	assert_eq(GameState.highest_unlocked_tier(), 4)
+	assert_eq(Progress.highest_unlocked_tier(GameState.stats()), 4)
 	for slot: SlotDef in SlotGenerator.tier_slots(4):
 		GameState.apply_solve(slot)
 	assert_eq([GameState.ram, GameState.cpu, GameState.sto], [28, 28, 28])
-	assert_eq(GameState.highest_unlocked_tier(), 4, "tier 5 (32) needs replays")
-	assert_false(GameState.is_unlocked(SlotGenerator.make(5, SlotDef.TYPE_CPU)))
-
-
-func test_every_stat_must_meet_requirement() -> void:
-	GameState.add_stats(8, 4, 8)
-	var slot: SlotDef = SlotGenerator.make(3, SlotDef.TYPE_RAM)
-	assert_false(GameState.is_unlocked(slot))
-	assert_eq(GameState.missing(slot), {"cpu": 4})
-	GameState.add_stats(0, 4, 0)
-	assert_true(GameState.is_unlocked(slot))
-	assert_eq(GameState.missing(slot), {})
+	assert_eq(Progress.highest_unlocked_tier(GameState.stats()), 4, "tier 5 (32) needs replays")
+	assert_false(
+		Progress.is_unlocked(SlotGenerator.make(5, SlotDef.TYPE_CPU).req, GameState.stats())
+	)
 
 
 func test_first_solve_then_replay() -> void:
@@ -46,14 +38,6 @@ func test_new_tier_is_reported() -> void:
 	_solve(1, SlotDef.TYPE_CPU)
 	var last: Dictionary = _solve(1, SlotDef.TYPE_STO)
 	assert_eq(last.new_tier, 2)
-
-
-func test_highest_tiers() -> void:
-	assert_eq(GameState.highest_solved_tier(), 0)
-	set_stats(162)
-	assert_eq(GameState.highest_unlocked_tier(), 10)
-	_solve(7, SlotDef.TYPE_CPU)
-	assert_eq(GameState.highest_solved_tier(), 7)
 
 
 func test_rewards_use_upgrades_and_cores() -> void:

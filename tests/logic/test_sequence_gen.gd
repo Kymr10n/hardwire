@@ -1,5 +1,6 @@
 extends GutTest
-## SequenceGen against SPEC: Sample tiers table (Storage length · pads · show ms) and modifier rules.
+## SequenceGen against SPEC: Sample tiers table (Storage length · pads · show ms) and modifier
+## rules.
 
 # tier: [length, pads, show_ms]
 const SAMPLE_TIERS := {

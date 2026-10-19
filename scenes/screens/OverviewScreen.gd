@@ -8,33 +8,27 @@ signal rebuild_requested
 signal settings_requested
 signal debug_requested
 
+var rebuild_button: Button
+var shop_button: Button
+
 var _scroll: ScrollContainer
 var _list: VBoxContainer
 var _rows: Array[TierRow] = []
 var _scroll_frames: int = 2
-var rebuild_button: Button
-var shop_button: Button
 
 
 func _ready() -> void:
-	var margin: int = get_theme_constant("margin", "Hardwire")
 	var landscape: bool = Ui.is_landscape(self)
-	var root: VBoxContainer = Ui.screen_root(self)
-
 	# Portrait: stats on top, list, buttons at the bottom.
 	# Landscape: a sidebar with stats and buttons beside the list.
-	var body := BoxContainer.new()
-	body.vertical = not landscape
+	var body: BoxContainer = Ui.box(not landscape)
 	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	body.add_theme_constant_override("separation", margin / 2)
-	root.add_child(body)
+	Ui.screen_root(self).add_child(body)
 	var side: BoxContainer = body
 	if landscape:
-		side = VBoxContainer.new()
+		side = Ui.box(true)
 		side.custom_minimum_size.x = get_theme_constant("side_panel", "Hardwire")
-		side.add_theme_constant_override("separation", margin / 2)
 		body.add_child(side)
-
 	var stat_bar := StatBar.new()
 	stat_bar.vertical = landscape
 	stat_bar.debug_requested.connect(debug_requested.emit)
@@ -43,37 +37,38 @@ func _ready() -> void:
 		var spacer := Control.new()
 		spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
 		side.add_child(spacer)
-
-	_scroll = ScrollContainer.new()
-	_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	_scroll.follow_focus = true
-	body.add_child(_scroll)
-	_list = VBoxContainer.new()
-	_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_list.add_theme_constant_override("separation", margin)
-	_scroll.add_child(_list)
-
-	var bottom := BoxContainer.new()
-	bottom.vertical = landscape
-	bottom.add_theme_constant_override("separation", margin / 2)
-	side.add_child(bottom)
-	shop_button = _bottom_button("Shop", shop_requested.emit)
-	bottom.add_child(shop_button)
-	rebuild_button = _bottom_button("Rebuild", rebuild_requested.emit)
-	bottom.add_child(rebuild_button)
-	bottom.add_child(_bottom_button("Settings", settings_requested.emit))
-
+	body.add_child(_build_list())
+	side.add_child(_build_buttons(landscape))
 	GameState.stats_changed.connect(_rebuild_rows)
 	GameState.upgrades_changed.connect(_refresh_rows)
 	GameState.cores_changed.connect(_refresh_rows)
 	_rebuild_rows()
 
 
+func _build_list() -> ScrollContainer:
+	_scroll = Ui.scroll()
+	_list = VBoxContainer.new()
+	_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_list.add_theme_constant_override("separation", get_theme_constant("margin", "Hardwire"))
+	_scroll.add_child(_list)
+	return _scroll
+
+
+func _build_buttons(vertical: bool) -> BoxContainer:
+	var bar: BoxContainer = Ui.box(vertical)
+	shop_button = Ui.button("Shop", shop_requested.emit)
+	rebuild_button = Ui.button("Rebuild", rebuild_requested.emit)
+	for button: Button in [
+		shop_button, rebuild_button, Ui.button("Settings", settings_requested.emit)
+	]:
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		bar.add_child(button)
+	return bar
+
+
 ## Gamepad focus on open: the first unsolved slot of the newest unlocked tier, else its first slot.
 func default_focus() -> Control:
-	var newest: int = GameState.highest_unlocked_tier()
+	var newest: int = Progress.highest_unlocked_tier(GameState.stats())
 	if newest > _rows.size():
 		return null
 	var cards: Array[SlotCard] = _rows[newest - 1].cards
@@ -89,7 +84,10 @@ func rows() -> Array[TierRow]:
 
 ## Number of tier rows to show: every unlocked tier plus the next locked ones.
 static func visible_tiers() -> int:
-	return GameState.highest_unlocked_tier() + Balance.get_int("flow", "locked_tiers_visible")
+	return (
+		Progress.highest_unlocked_tier(GameState.stats())
+		+ Balance.get_int("flow", "locked_tiers_visible")
+	)
 
 
 func _rebuild_rows() -> void:
@@ -106,12 +104,7 @@ func _rebuild_rows() -> void:
 func _refresh_rows() -> void:
 	for row: TierRow in _rows:
 		row.refresh()
-	rebuild_button.disabled = not _rebuild_available()
-
-
-## Rebuild needs a solved slot at economy.prestige_min_tier or above (SPEC: Prestige).
-func _rebuild_available() -> bool:
-	return GameState.highest_solved_tier() >= Balance.get_int("economy", "prestige_min_tier")
+	rebuild_button.disabled = not Progress.can_rebuild(GameState.solved_slots)
 
 
 ## Brings the newest unlocked tier into view once the layout has settled.
@@ -120,15 +113,6 @@ func _process(_delta: float) -> void:
 		return
 	_scroll_frames -= 1
 	if _scroll_frames == 0:
-		var newest: int = GameState.highest_unlocked_tier()
+		var newest: int = Progress.highest_unlocked_tier(GameState.stats())
 		if newest - 1 < _rows.size():
 			_scroll.ensure_control_visible(_rows[newest - 1])
-
-
-func _bottom_button(text: String, on_pressed: Callable) -> Button:
-	var button := Button.new()
-	button.text = text
-	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	button.custom_minimum_size.y = get_theme_constant("tap_min", "Hardwire")
-	button.pressed.connect(on_pressed)
-	return button

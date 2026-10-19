@@ -1,5 +1,6 @@
 extends GutTest
-## RhythmGen against SPEC: Sample tiers table (CPU beats · step ms · tolerance) and the rhythm model.
+## RhythmGen against SPEC: Sample tiers table (CPU beats · step ms · tolerance) and the rhythm
+## model.
 
 # tier: [beats, step_ms, tolerance]
 const SAMPLE_TIERS := {

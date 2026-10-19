@@ -1,5 +1,6 @@
 extends Control
-## Upgrade shop (SPEC: Upgrade shop): Cycles balance on top, one card per upgrade. Saves after a purchase.
+## Upgrade shop (SPEC: Upgrade shop): Cycles balance on top, one card per upgrade. Saves after a
+## purchase.
 
 signal exit_requested
 
@@ -13,10 +14,7 @@ func _ready() -> void:
 	var column: VBoxContainer = Ui.screen_root(self)
 	_balance = Ui.header(column, "", exit_requested.emit)
 
-	var scroll := ScrollContainer.new()
-	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	scroll.follow_focus = true
+	var scroll: ScrollContainer = Ui.scroll()
 	column.add_child(scroll)
 	# One column in portrait, two in landscape.
 	var list := GridContainer.new()

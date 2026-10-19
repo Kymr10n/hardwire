@@ -1,9 +1,32 @@
 class_name StoragePad
 extends Control
 ## One colored pad of the Storage ring: distinct color and symbol (colorblind-safe), lit level 0..1.
-## Lit pads brighten and scale up (theme: glow_ms, glow_scale_pct). Input is handled by StoragePuzzle.
+## Lit pads brighten and scale up (theme: glow_ms, glow_scale_pct). Input is handled by
+## StoragePuzzle.
 
 enum Symbol { CIRCLE, TRIANGLE, SQUARE, DIAMOND, STAR, PLUS, HEXAGON, RING }
+
+## Pad look, as fractions of the pad size.
+const CORNER := 0.18
+const SYMBOL_RADIUS := 0.2
+const LIT_LIGHTEN := 0.15
+const IDLE_MARK_DARKEN := 0.2
+## Regular polygons: [sides, radius scale, start angle].
+const UP := -PI / 2.0
+const POLYGONS := {
+	Symbol.TRIANGLE: [3, 1.15, UP],
+	Symbol.DIAMOND: [4, 1.1, UP],
+	Symbol.HEXAGON: [6, 1.0, 0.0],
+}
+## Other symbols, as fractions of the symbol radius.
+const SQUARE_HALF := 0.85
+const STAR_POINTS := 5
+const STAR_OUTER := 1.15
+const STAR_INNER := 0.5
+const PLUS_HALF_WIDTH := 0.3
+const RING_RADIUS := 0.8
+const RING_WIDTH := 0.4
+const ARC_SEGMENTS := 32
 
 var index: int = 0
 
@@ -15,10 +38,7 @@ var _style := StyleBoxFlat.new()
 
 func _init(p_index: int = 0) -> void:
 	index = p_index
-	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	focus_mode = Control.FOCUS_ALL
-	focus_entered.connect(queue_redraw)
-	focus_exited.connect(queue_redraw)
+	Ui.make_focusable(self)
 
 
 func _ready() -> void:
@@ -58,7 +78,7 @@ func _apply_level(p_level: float) -> void:
 		_tween.kill()
 	var target: float = 1.0
 	if p_level > 0.0:
-		target = get_theme_constant("glow_scale_pct", "Hardwire") / 100.0
+		target = Ui.pct(self, "glow_scale_pct")
 	_tween = create_tween()
 	_tween.tween_property(
 		self, "scale", Vector2.ONE * target, get_theme_constant("glow_ms", "Hardwire") / 1000.0
@@ -67,40 +87,41 @@ func _apply_level(p_level: float) -> void:
 
 func _draw() -> void:
 	var base: Color = get_theme_color("pad_%d" % index, "Hardwire")
-	var idle: Color = base.darkened(1.0 - get_theme_constant("pad_idle_pct", "Hardwire") / 100.0)
-	_style.bg_color = idle.lerp(base.lightened(0.15), _level)
-	_style.set_corner_radius_all(int(size.x * 0.18))
+	var idle: Color = base.darkened(1.0 - Ui.pct(self, "pad_idle_pct"))
+	_style.bg_color = idle.lerp(base.lightened(LIT_LIGHTEN), _level)
+	_style.set_corner_radius_all(int(size.x * CORNER))
 	draw_style_box(_style, Rect2(Vector2.ZERO, size))
 	var mark: Color = get_theme_color("bg", "Hardwire")
 	if _level <= 0.0:
-		mark = base.darkened(0.2)
-	_draw_symbol(index % Symbol.size(), size / 2.0, size.x * 0.2, mark)
+		mark = base.darkened(IDLE_MARK_DARKEN)
+	_draw_symbol(index % Symbol.size(), size / 2.0, size.x * SYMBOL_RADIUS, mark)
 	Ui.draw_focus(self, Rect2(Vector2.ZERO, size))
 
 
 func _draw_symbol(symbol: int, c: Vector2, r: float, color: Color) -> void:
+	if POLYGONS.has(symbol):
+		var p: Array = POLYGONS[symbol]
+		draw_colored_polygon(_regular(c, r * p[1], p[0], p[2]), color)
+		return
 	match symbol:
 		Symbol.CIRCLE:
 			draw_circle(c, r, color)
-		Symbol.TRIANGLE:
-			draw_colored_polygon(_regular(c, r * 1.15, 3, -PI / 2.0), color)
 		Symbol.SQUARE:
-			draw_rect(Rect2(c - Vector2(r, r) * 0.85, Vector2(r, r) * 1.7), color)
-		Symbol.DIAMOND:
-			draw_colored_polygon(_regular(c, r * 1.1, 4, -PI / 2.0), color)
+			draw_rect(
+				Rect2(c - Vector2.ONE * r * SQUARE_HALF, Vector2.ONE * r * SQUARE_HALF * 2), color
+			)
 		Symbol.STAR:
 			var points := PackedVector2Array()
-			for i: int in 10:
-				var radius: float = r * 1.15 if i % 2 == 0 else r * 0.5
-				points.append(c + Vector2.from_angle(-PI / 2.0 + i * PI / 5.0) * radius)
+			for i: int in STAR_POINTS * 2:
+				var radius: float = r * (STAR_OUTER if i % 2 == 0 else STAR_INNER)
+				points.append(c + Vector2.from_angle(UP + i * PI / STAR_POINTS) * radius)
 			draw_colored_polygon(points, color)
 		Symbol.PLUS:
-			draw_rect(Rect2(c - Vector2(r, r * 0.3), Vector2(r * 2.0, r * 0.6)), color)
-			draw_rect(Rect2(c - Vector2(r * 0.3, r), Vector2(r * 0.6, r * 2.0)), color)
-		Symbol.HEXAGON:
-			draw_colored_polygon(_regular(c, r, 6, 0.0), color)
+			var half: float = r * PLUS_HALF_WIDTH
+			draw_rect(Rect2(c - Vector2(r, half), Vector2(r, half) * 2), color)
+			draw_rect(Rect2(c - Vector2(half, r), Vector2(half, r) * 2), color)
 		Symbol.RING:
-			draw_arc(c, r * 0.8, 0.0, TAU, 32, color, r * 0.4, true)
+			draw_arc(c, r * RING_RADIUS, 0.0, TAU, ARC_SEGMENTS, color, r * RING_WIDTH, true)
 
 
 static func _regular(c: Vector2, r: float, sides: int, start: float) -> PackedVector2Array:

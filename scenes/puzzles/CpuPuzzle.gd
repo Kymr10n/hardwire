@@ -4,6 +4,14 @@ extends PuzzleBase
 ## RhythmJudge compares relative intervals. Input ends 600 ms after the last beat is released,
 ## or once no input could pass any more; no first press within the timeout fails.
 
+## Layout, as fractions of the available square and of tap_min.
+const TILE_FILL := 0.75
+const RESERVED_ROWS := 3.0
+const DOT_RADIUS := 0.12
+const DOT_SPACING := 3.0
+const DOT_RING := 0.3
+const ARC_SEGMENTS := 24
+
 var _attempt: Dictionary = {}
 var _tile: CpuTile
 var _hint: Label
@@ -220,7 +228,9 @@ func _layout() -> void:
 		return
 	var margin: float = get_theme_constant("margin", "Hardwire")
 	var row_h: float = get_theme_constant("tap_min", "Hardwire")
-	var side: float = maxf(0.0, minf(size.x - 2.0 * margin, size.y - 3.0 * row_h) * 0.75)
+	var side: float = maxf(
+		0.0, minf(size.x - 2.0 * margin, size.y - RESERVED_ROWS * row_h) * TILE_FILL
+	)
 	_tile.size = Vector2(side, side)
 	_tile.position = (size - _tile.size) / 2.0
 	_tile.pivot_offset = _tile.size / 2.0
@@ -234,8 +244,8 @@ func _draw() -> void:
 	if _attempt.is_empty() or _tile == null:
 		return
 	var beats: int = _attempt.beats
-	var r: float = get_theme_constant("tap_min", "Hardwire") * 0.12
-	var gap: float = r * 3.0
+	var r: float = get_theme_constant("tap_min", "Hardwire") * DOT_RADIUS
+	var gap: float = r * DOT_SPACING
 	var y: float = _tile.position.y + _tile.size.y + get_theme_constant("margin", "Hardwire") + r
 	var x0: float = size.x / 2.0 - gap * (beats - 1) / 2.0
 	var filled: int = _presses.size()
@@ -247,4 +257,5 @@ func _draw() -> void:
 		if i < filled:
 			draw_circle(c, r, accent)
 		else:
-			draw_arc(c, r, 0.0, TAU, 24, get_theme_color("text_dim", "Hardwire"), r * 0.3, true)
+			var dim: Color = get_theme_color("text_dim", "Hardwire")
+			draw_arc(c, r, 0.0, TAU, ARC_SEGMENTS, dim, r * DOT_RING, true)

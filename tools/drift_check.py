@@ -12,6 +12,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 CODE_DIRS = ["autoload", "logic", "scenes"]
 ALLOWED_NUMBERS = {"0", "1", "2", "-1", "0.0", "1.0", "0.5", "1000", "1000.0", "1000000"}
+ALLOWED_VALUES = {float(n) for n in ALLOWED_NUMBERS}
 DUP_WINDOW = 6  # identical significant lines in a row that count as duplicated code
 MAX_FUNC_LINES = 40
 RAW_INPUT = re.compile(r"\b(InputEventKey|InputEventJoypad\w*|KEY_[A-Z0-9_]+|JOY_[A-Z_]+|is_key_pressed)\b")
@@ -80,11 +81,13 @@ def check_spec_has_decision():
 def check_magic_numbers():
     problems = []
     for path in gd_files(["logic", "scenes/puzzles"]):
+        depth = 0  # open brackets of a multi-line const/enum, whose lines are all exempt
         for no, code in code_lines(path):
-            if code.lstrip().startswith(("const ", "enum ")):
+            if depth > 0 or code.lstrip().startswith(("const ", "enum ")):
+                depth = max(0, depth + sum(code.count(c) for c in "([{") - sum(code.count(c) for c in ")]}"))
                 continue
             for num in re.findall(r"(?<![\w.])-?\d+(?:\.\d+)?(?![\w.])", code):
-                if num not in ALLOWED_NUMBERS:
+                if float(num) not in ALLOWED_VALUES:  # 2.0 counts as 2
                     problems.append(f"{rel(path)}:{no} magic number {num} — read it from Balance")
     return problems
 
