@@ -248,3 +248,18 @@ ghost hats on the sixteenth before each beat. The last bar of every phrase adds 
 Still 72 BPM half-time, no new instruments beyond noise and the sine kick.
 **Why:** The owner wanted the bassline a bit louder and the beat more progressive but still chill.
 **Affects:** Visual and audio style (Audio); `MusicGen`; `Synth`; `balance.json` → `audio`.
+
+## D-037 — 2026-10-19 — Storage pads light, sound and rumble while held
+
+**Decision:** During Storage input a pressed pad stays lit, sounds its tone and rumbles for as long
+as it is held, with at least 180 ms of light (`tap_flash_ms`) and the minimum note length
+(`pad_note_min_ms`) so a quick tap still shows. The press still counts as the tap: a wrong press
+fails at once without lighting or sounding the pad (the correct pad is revealed), and the last
+correct press solves and still shows its minimum light. A release ends the hold even if focus moved
+while holding; a second press moves the hold to the new pad. A puzzle freed mid-attempt (screen
+rebuilt on rotation or resize) aborts, so no tone or rumble outlives it.
+**Why:** Play-test: the owner wants intuitive feedback while repeating the pattern; it matches
+the CPU tile (tone and rumble while held) and Watch playback (rumble while a pad is lit).
+**Affects:** Minigame: Storage (Input phase); Platforms and input (Haptics); `StoragePad`,
+`StoragePuzzle`, `PuzzleBase` (abort on exit), `Synth.start_note`; tests `test_storage_puzzle`,
+`test_polish`.

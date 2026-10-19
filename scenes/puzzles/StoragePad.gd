@@ -2,9 +2,12 @@ class_name StoragePad
 extends Control
 ## One colored pad of the Storage ring: distinct color and symbol (colorblind-safe), lit level 0..1.
 ## Lit pads brighten and scale up (theme: glow_ms, glow_scale_pct). A touch on the pad or the
-## accept action while it has focus emits `tapped`; StoragePuzzle decides what it means.
+## accept action while it has focus emits `tapped`; letting go emits `released` (with the pad's
+## index for a touch, -1 for accept, whose release may come after focus moved). StoragePuzzle
+## decides what they mean.
 
 signal tapped(index: int)
+signal released(index: int)
 
 enum Symbol { CIRCLE, TRIANGLE, SQUARE, DIAMOND, STAR, PLUS, HEXAGON, RING }
 
@@ -33,7 +36,8 @@ const ARC_SEGMENTS := 32
 var index: int = 0
 
 var _level: float = 0.0
-var _flash: Tween
+var _held: bool = false
+var _min_light: Tween
 var _tween: Tween
 var _style := StyleBoxFlat.new()
 
@@ -51,32 +55,52 @@ func level() -> float:
 	return _level
 
 
-## Sets the lit level (0 = idle, 1 = fully lit). Cancels a running tap flash.
+## Sets the lit level (0 = idle, 1 = fully lit). Cancels a hold and its minimum flash.
 func set_level(p_level: float) -> void:
-	_cancel_flash()
+	_held = false
+	_cancel_min_light()
 	_apply_level(p_level)
 
 
-## Short full-brightness flash for a tap.
-func flash() -> void:
-	_cancel_flash()
-	_apply_level(1.0)
-	_flash = create_tween()
-	_flash.tween_interval(get_theme_constant("tap_flash_ms", "Hardwire") / 1000.0)
-	_flash.tween_callback(_apply_level.bind(0.0))
+## Fully lit until let_go(), and at least tap_flash_ms so a quick tap still shows.
+func hold() -> void:
+	set_level(1.0)
+	_held = true
+	_min_light = create_tween()
+	_min_light.tween_interval(get_theme_constant("tap_flash_ms", "Hardwire") / 1000.0)
+	_min_light.tween_callback(_end_min_light)
 
 
-func _cancel_flash() -> void:
-	if _flash:
-		_flash.kill()
-		_flash = null
+func let_go() -> void:
+	_held = false
+	if _min_light == null:
+		_apply_level(0.0)
+
+
+func _end_min_light() -> void:
+	_min_light = null
+	if not _held:
+		_apply_level(0.0)
+
+
+func _cancel_min_light() -> void:
+	if _min_light:
+		_min_light.kill()
+		_min_light = null
 
 
 func _gui_input(event: InputEvent) -> void:
 	var touch := event as InputEventScreenTouch
-	if (touch != null and touch.pressed) or Ui.accept_event(event) == 1:
+	var accept: int = Ui.accept_event(event)
+	if (touch != null and touch.pressed) or accept == 1:
 		accept_event()
 		tapped.emit(index)
+	elif touch != null:
+		accept_event()
+		released.emit(index)
+	elif accept == -1:
+		accept_event()
+		released.emit(-1)
 
 
 func _apply_level(p_level: float) -> void:

@@ -213,6 +213,15 @@ func test_synth_tone_handle_is_zero_when_sound_is_off() -> void:
 	Synth.stop_tone(id)
 
 
+func test_synth_held_pad_note_is_zero_when_sound_is_off() -> void:
+	GameState.settings.sound = false
+	assert_eq(Synth.start_note(0), 0)
+	GameState.settings.sound = true
+	var id: int = Synth.start_note(0)
+	assert_gt(id, 0)
+	Synth.stop_tone(id)
+
+
 func test_pausing_the_score_keeps_sound_effects_playing() -> void:
 	GameState.settings.sound = true
 	Synth.set_music_enabled(true)

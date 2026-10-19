@@ -11,6 +11,9 @@ var _pads: Array[StoragePad] = []
 var _pos: int = 0
 var _lit_item: int = -1
 var _replays_left: int = 0
+## The pad held during input (-1 for none) and its sustained note.
+var _held: int = -1
+var _note_id: int = 0
 
 
 func _ready() -> void:
@@ -55,16 +58,29 @@ func pads() -> Array[StoragePad]:
 func tap_pad(index: int) -> void:
 	if phase != Phase.INPUT or index < 0 or index >= _pads.size():
 		return
-	_pads[index].flash()
-	Synth.play_note(index, get_theme_constant("tap_flash_ms", "Hardwire"))
-	Haptics.pulse()
 	var target: Array[int] = expected()
 	if index != target[_pos]:
+		# A wrong press fails at once: no light or note, only the press pulse and the reveal.
+		Haptics.pulse()
 		_fail()
 		return
+	release_pad()
+	_held = index
+	_pads[index].hold()
+	_note_id = Synth.start_note(index)
+	Haptics.start_hold()
 	_pos += 1
 	if _pos == target.size():
 		_succeed({"slot_id": slot.id()})
+
+
+## Ends the hold (from a pad's `released`). A touch release names its pad and ends only that
+## pad's hold; an accept release (-1) ends any, since focus may have moved. Public for tests.
+func release_pad(index: int = -1) -> void:
+	if _held < 0 or (index >= 0 and index != _held):
+		return
+	_pads[_held].let_go()
+	_end_hold()
 
 
 func default_focus() -> Control:
@@ -115,6 +131,7 @@ func _light_item(item: int) -> void:
 
 
 func _on_phase_entered(p_phase: Phase) -> void:
+	release_pad()
 	replay_button.visible = p_phase == Phase.INPUT and _replays_left > 0
 	replay_button.text = "Replay (%d)" % _replays_left
 
@@ -128,6 +145,17 @@ func _on_fail_reveal() -> void:
 func _on_abort() -> void:
 	for pad: StoragePad in _pads:
 		pad.set_level(0.0)
+	_end_hold()
+	Haptics.stop_hold()
+
+
+## Stops the held note and rumble; the pad's light is the caller's choice.
+func _end_hold() -> void:
+	if _held < 0:
+		return
+	_held = -1
+	Synth.stop_tone(_note_id)
+	_note_id = 0
 	Haptics.stop_hold()
 
 
@@ -140,6 +168,7 @@ func _ensure_pads(count: int) -> void:
 	for i: int in count:
 		var pad := StoragePad.new(i)
 		pad.tapped.connect(tap_pad)
+		pad.released.connect(release_pad)
 		add_child(pad)
 		_pads.append(pad)
 	_layout()

@@ -45,6 +45,12 @@ func abort() -> void:
 	_on_abort()
 
 
+## A screen rebuilt mid-attempt (rotation, resize) frees the puzzle without abort(); held tones
+## and rumble must not outlive it.
+func _exit_tree() -> void:
+	abort()
+
+
 ## Remaining input time as 0..1 (1 outside the input phase until it starts).
 func time_fraction() -> float:
 	if phase == Phase.INPUT and time_limit_s > 0.0:

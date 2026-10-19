@@ -67,7 +67,7 @@ The focus outline shows only for keyboard and gamepad input; when the overview o
 - No text entry, so no on-screen keyboard is needed.
 - At least 30 fps at 800p; the game caps at 60 fps (`application/run/max_fps`).
 
-**Haptics.** Phones use `Input.vibrate_handheld`; gamepads use `Input.start_joy_vibration`. Both go through the Haptics autoload and respect the setting. Every press of a button or pad gives a light pulse (also the boot and hint taps; the Haptics autoload hooks every button, so screens never ask for it). During a Watch phase the controller rumbles for as long as playback lights something: each Storage pad while it is lit (decoys weaker), the RAM pattern while it shows, the CPU tile for each on-segment (see Minigame: CPU > Haptics). During CPU input it rumbles while the tile is held. Results give a pulse pattern (see Result overlay). Phones get one vibration per lit thing or press. Lengths and strengths live in `balance.json` → `haptics`.
+**Haptics.** Phones use `Input.vibrate_handheld`; gamepads use `Input.start_joy_vibration`. Both go through the Haptics autoload and respect the setting. Every press of a button or pad gives a light pulse (also the boot and hint taps; the Haptics autoload hooks every button, so screens never ask for it). During a Watch phase the controller rumbles for as long as playback lights something: each Storage pad while it is lit (decoys weaker), the RAM pattern while it shows, the CPU tile for each on-segment (see Minigame: CPU > Haptics). During input it rumbles while the CPU tile or a Storage pad is held. Results give a pulse pattern (see Result overlay). Phones get one vibration per lit thing or press. Lengths and strengths live in `balance.json` → `haptics`.
 
 ## Core loop
 
@@ -115,7 +115,7 @@ The game lights a sequence of colored pads, and the player taps them back in the
 
 **Input phase.**
 
-- The player taps pads; each tap lights the pad and plays its tone.
+- The player taps pads. The press counts as the tap; a correct pad stays lit, sounds its tone and rumbles for as long as it is held (at least 180 ms of light and the minimum note length, so a quick tap still shows). A wrong press fails at once without lighting or sounding the pad.
 - A wrong pad fails the attempt immediately.
 - The attempt also fails if the timer runs out. Time limit = `length × input_s_per_item`.
 - The attempt succeeds as soon as the last correct pad is tapped.

@@ -51,11 +51,20 @@ func _process(delta: float) -> void:
 ## Pad tone for Storage pad `index` (pentatonic, wraps around). `volume` scales the note (decoy
 ## plays quieter).
 func play_note(index: int, duration_ms: float, volume: float = 1.0) -> void:
-	var notes: Array = Balance.section("audio").get("pad_notes_hz", [])
-	if notes.is_empty():
-		return
 	var length_ms: float = maxf(duration_ms, Balance.get_num("audio", "pad_note_min_ms"))
-	_add_voice(Wave.SINE, float(notes[index % notes.size()]), length_ms, volume)
+	_add_voice(Wave.SINE, _pad_hz(index), length_ms, volume)
+
+
+## Sustained pad tone while a Storage pad is held, at least pad_note_min_ms. Returns an id for
+## stop_tone, or 0 if sound is off.
+func start_note(index: int) -> int:
+	var min_ms: float = Balance.get_num("audio", "pad_note_min_ms")
+	return _add_voice(Wave.SINE, _pad_hz(index), -1.0, 1.0, {"min_ms": min_ms})
+
+
+static func _pad_hz(index: int) -> float:
+	var notes: Array = Balance.section("audio").pad_notes_hz
+	return float(notes[index % notes.size()])
 
 
 func play_click() -> void:
@@ -72,7 +81,8 @@ func start_tone() -> int:
 func stop_tone(id: int) -> void:
 	for voice: Dictionary in _voices:
 		if voice.id == id and voice.length < 0:
-			voice.length = voice.t + _ms_to_samples(Balance.get_num("audio", "release_ms"))
+			var release: int = _ms_to_samples(Balance.get_num("audio", "release_ms"))
+			voice.length = maxi(voice.t + release, voice.min_length)
 
 
 func is_playing(id: int) -> bool:
@@ -140,6 +150,7 @@ func _add_voice(
 				"attack": _ms_to_samples(attack_ms) if attack_ms >= 0.0 else 0,
 				"release": _ms_to_samples(release_ms) if release_ms >= 0.0 else 0,
 				"music": options.get("music", false),
+				"min_length": _ms_to_samples(float(options.get("min_ms", 0.0))),
 			}
 		)
 	)

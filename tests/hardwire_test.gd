@@ -72,8 +72,9 @@ func tap_action(viewport: Viewport, action: String) -> void:
 
 
 ## Sends a touch press and release at `position` (viewport coordinates) through `viewport`.
-func tap_at(viewport: Viewport, position: Vector2) -> void:
-	for pressed: bool in [true, false]:
+## `steps` [true] only presses (a finger held down), [false] only releases.
+func tap_at(viewport: Viewport, position: Vector2, steps: Array[bool] = [true, false]) -> void:
+	for pressed: bool in steps:
 		var touch := InputEventScreenTouch.new()
 		touch.position = position
 		touch.pressed = pressed

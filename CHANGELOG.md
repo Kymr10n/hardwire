@@ -6,6 +6,7 @@ All notable changes to Hardwire are documented here. The format follows [Keep a 
 
 ### Changed
 
+- Storage: a pressed pad stays lit, sounds its note and rumbles for as long as it is held.
 - Renamed to "Hardwire: Boot Sequence" (Boot screen subtitle, window title, Windows exe); the save folder stays `Hardwire`.
 - CPU minigame judged as you play: the first beat out of tolerance ends the attempt at once with a red marker and the reason ("Beat 3 too late"); success shows at the last release; tolerance widened to 40% at tier 1 (25% floor, 100 ms minimum).
 - Swiping over the slot cards scrolls the overview; a wobbly tap is still a tap.

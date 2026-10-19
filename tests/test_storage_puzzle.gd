@@ -1,5 +1,10 @@
+# gdlint: disable=max-public-methods
 extends "res://tests/hardwire_test.gd"
-## StoragePuzzle and PuzzleScreen behaviour, driven by simulated frames (no real time passes).
+## StoragePuzzle and PuzzleScreen behaviour, driven by simulated frames (no real time passes,
+## except in the hold tests: a pad's minimum light is a real-time tween).
+
+## Longer than the theme's tap_flash_ms (180 ms), the shortest a pressed pad stays lit.
+const PAST_MIN_FLASH_S := 0.3
 
 
 func test_watch_then_input() -> void:
@@ -138,3 +143,117 @@ func test_screen_restarts_with_new_sequence_after_failure() -> void:
 	assert_eq(puzzle.phase, PuzzleBase.Phase.COUNTDOWN, "next attempt starts automatically")
 	assert_ne(puzzle.attempt_seed, first_seed, "with a fresh seed")
 	assert_eq(puzzle.slot.tier, 5, "at the same difficulty")
+
+
+func test_pad_stays_lit_while_accept_is_held() -> void:
+	var puzzle := await _input_ready()
+	var pad: StoragePad = puzzle.pads()[puzzle.expected()[0]]
+	pad.grab_focus()
+	press_action(puzzle.get_viewport(), "ui_accept", true)
+	await wait_seconds(PAST_MIN_FLASH_S)
+	assert_eq(pad.level(), 1.0, "lit while held")
+	press_action(puzzle.get_viewport(), "ui_accept", false)
+	assert_eq(pad.level(), 0.0, "dark on release")
+	assert_eq(puzzle.progress(), 1, "the press counted")
+
+
+func test_pad_stays_lit_while_touched() -> void:
+	var puzzle := await _input_ready()
+	var pad: StoragePad = puzzle.pads()[puzzle.expected()[0]]
+	var center: Vector2 = pad.get_global_rect().get_center()
+	tap_at(puzzle.get_viewport(), center, [true])
+	await wait_seconds(PAST_MIN_FLASH_S)
+	assert_eq(pad.level(), 1.0, "lit while touched")
+	tap_at(puzzle.get_viewport(), center, [false])
+	assert_eq(pad.level(), 0.0, "dark on release")
+
+
+func test_quick_tap_still_flashes_for_the_minimum() -> void:
+	var puzzle := await _input_ready()
+	var pad: StoragePad = puzzle.pads()[puzzle.expected()[0]]
+	tap_at(puzzle.get_viewport(), pad.get_global_rect().get_center())
+	assert_eq(pad.level(), 1.0, "lit right after a quick tap")
+	await wait_seconds(PAST_MIN_FLASH_S)
+	assert_eq(pad.level(), 0.0, "dark after the minimum")
+
+
+func test_release_ends_the_hold_even_after_focus_moved() -> void:
+	var puzzle := await _input_ready()
+	var first: int = puzzle.expected()[0]
+	var pad: StoragePad = puzzle.pads()[first]
+	pad.grab_focus()
+	press_action(puzzle.get_viewport(), "ui_accept", true)
+	await wait_seconds(PAST_MIN_FLASH_S)
+	puzzle.pads()[(first + 1) % puzzle.pads().size()].grab_focus()
+	press_action(puzzle.get_viewport(), "ui_accept", false)
+	assert_eq(pad.level(), 0.0, "the held pad goes dark")
+
+
+func test_wrong_press_fails_without_lighting_or_holding() -> void:
+	GameState.settings.haptics = true
+	var puzzle := await _input_ready()
+	var first: int = puzzle.expected()[0]
+	var wrong: StoragePad = puzzle.pads()[(first + 1) % puzzle.pads().size()]
+	wrong.grab_focus()
+	press_action(puzzle.get_viewport(), "ui_accept", true)
+	assert_eq(puzzle.phase, PuzzleBase.Phase.RESULT)
+	assert_eq(wrong.level(), 0.0, "the wrong pad does not light")
+	assert_false(Haptics.active, "no hold rumble")
+	assert_eq(puzzle.pads()[first].level(), 1.0, "the correct pad is revealed")
+	press_action(puzzle.get_viewport(), "ui_accept", false)
+
+
+func test_winning_press_still_flashes() -> void:
+	var puzzle := await _input_ready()
+	var seq: Array[int] = puzzle.expected()
+	for i: int in seq.size() - 1:
+		puzzle.tap_pad(seq[i])
+		puzzle.release_pad()
+	var last: StoragePad = puzzle.pads()[seq[-1]]
+	tap_at(puzzle.get_viewport(), last.get_global_rect().get_center())
+	assert_eq(puzzle.phase, PuzzleBase.Phase.RESULT)
+	assert_eq(last.level(), 1.0, "the solving press shows")
+
+
+func test_hold_rumbles_until_release() -> void:
+	GameState.settings.haptics = true
+	var puzzle := await _input_ready()
+	puzzle.pads()[puzzle.expected()[0]].grab_focus()
+	press_action(puzzle.get_viewport(), "ui_accept", true)
+	assert_true(Haptics.active, "rumbles while held")
+	press_action(puzzle.get_viewport(), "ui_accept", false)
+	assert_false(Haptics.active, "stops on release")
+
+
+func test_a_second_press_moves_the_hold() -> void:
+	var puzzle := await _input_ready()
+	var seq: Array[int] = puzzle.expected()
+	var first: StoragePad = puzzle.pads()[seq[0]]
+	var second: StoragePad = puzzle.pads()[seq[1]]
+	first.grab_focus()
+	press_action(puzzle.get_viewport(), "ui_accept", true)
+	tap_at(puzzle.get_viewport(), second.get_global_rect().get_center(), [true])
+	await wait_seconds(PAST_MIN_FLASH_S)
+	assert_eq(first.level(), 0.0, "the first pad lets go")
+	assert_eq(second.level(), 1.0, "the second pad holds")
+	tap_at(puzzle.get_viewport(), second.get_global_rect().get_center(), [false])
+	assert_eq(second.level(), 0.0)
+	press_action(puzzle.get_viewport(), "ui_accept", false)
+
+
+func test_freeing_the_puzzle_mid_hold_stops_the_rumble() -> void:
+	GameState.settings.haptics = true
+	var puzzle := await _input_ready()
+	puzzle.pads()[puzzle.expected()[0]].grab_focus()
+	press_action(puzzle.get_viewport(), "ui_accept", true)
+	assert_true(Haptics.active)
+	puzzle.free()
+	assert_false(Haptics.active, "a screen rebuilt mid-hold leaves nothing running")
+
+
+## A touchable tier 1 puzzle in its input phase, ready for pushed input.
+func _input_ready() -> StoragePuzzle:
+	var puzzle := make_puzzle(StoragePuzzle, 1, "", 7, true) as StoragePuzzle
+	run_until(puzzle, PuzzleBase.Phase.INPUT)
+	await wait_process_frames(2)
+	return puzzle
