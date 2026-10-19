@@ -4,6 +4,8 @@ extends Control
 
 signal start_requested
 
+var prompt: Label
+
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -18,15 +20,19 @@ func _ready() -> void:
 	title.add_theme_font_size_override("font_size", get_theme_font_size("title", "Hardwire") * 2)
 	title.add_theme_color_override("font_color", get_theme_color("ram", "Hardwire"))
 	box.add_child(title)
-	var hint := Label.new()
-	hint.text = "Tap or press A to start"
-	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	hint.add_theme_color_override("font_color", get_theme_color("text_dim", "Hardwire"))
-	box.add_child(hint)
+	prompt = Ui.dim_label("")
+	box.add_child(prompt)
+	InputMode.device_changed.connect(_update_prompt)
+	_update_prompt()
+
+
+## "Tap to start" on touch, "Press any button" otherwise (SPEC: Boot).
+func _update_prompt(_device: int = 0) -> void:
+	var touch: bool = InputMode.device == InputMode.Device.TOUCH
+	prompt.text = "Tap to start" if touch else "Press any button"
 
 
 func _input(event: InputEvent) -> void:
-	var touch := event as InputEventScreenTouch
-	if (touch != null and not touch.pressed) or Ui.accept_event(event) == 1:
+	if InputMode.is_any_press(event):
 		get_viewport().set_input_as_handled()
 		start_requested.emit()

@@ -61,17 +61,19 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request. The projec
 
 ## Export
 
-Presets for Web, Linux and Android are in `export_presets.cfg`. Install the Godot 4.7.2 export templates first (Editor → Manage Export Templates).
+Presets for Linux (Steam Deck), Windows, macOS, Android and Web are in `export_presets.cfg`. Install the Godot 4.7.2 export templates first (Editor → Manage Export Templates).
 
 ```bash
 tools/export.sh Linux build/linux/hardwire.x86_64   # Linux / Steam Deck (single file, PCK embedded)
+tools/export.sh Windows build/windows/hardwire.exe  # Windows (single file)
+tools/export.sh macOS build/macos/hardwire.zip      # macOS (unsigned; signing needs a Mac)
 tools/export.sh Web build/web/index.html            # Web (single-threaded; serve over HTTPS or localhost)
 
 # Android (needs the Android SDK and JDK 17 in Editor Settings → Export → Android)
 godot --headless --path . --export-debug "Android" build/android/hardwire.apk
 ```
 
-CI builds the web and Linux exports on every push to `main` and attaches them as artifacts.
+CI builds the Linux, Windows and web exports on every push to `main` and attaches them as artifacts.
 
 ### Steam Deck
 

@@ -59,11 +59,15 @@ func _on_window_resized() -> void:
 		_rebuild.call()
 
 
-## B / Esc goes back, unless something on the screen handled it first.
+## B / Esc / Backspace goes back, unless something on the screen handled it first;
+## F1 / gamepad View opens the debug panel in debug builds.
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
 		get_viewport().set_input_as_handled()
 		go_back()
+	elif event.is_action_pressed("debug_panel") and OS.is_debug_build():
+		get_viewport().set_input_as_handled()
+		show_debug()
 
 
 func _notification(what: int) -> void:

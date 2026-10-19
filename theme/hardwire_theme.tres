@@ -133,5 +133,5 @@ Hardwire/font_sizes/header = 44
 Hardwire/font_sizes/phase = 64
 Hardwire/font_sizes/body = 34
 Hardwire/font_sizes/card_title = 36
-Hardwire/font_sizes/card_body = 30
-Hardwire/font_sizes/small = 26
+Hardwire/font_sizes/card_body = 32
+Hardwire/font_sizes/small = 32

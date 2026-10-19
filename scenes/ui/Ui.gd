@@ -148,6 +148,15 @@ static func modal(overlay: Control, dim_alpha: float, min_width: float = 0.0) ->
 	return column
 
 
+## A centered label in the dim text color (prompts and notes).
+static func dim_label(text: String) -> Label:
+	var l: Label = label(text)
+	l.add_theme_color_override(
+		"font_color", ThemeDB.get_project_theme().get_color("text_dim", "Hardwire")
+	)
+	return l
+
+
 ## A centered label; font_size 0 keeps the theme default.
 static func label(text: String, font_size: int = 0) -> Label:
 	var l := Label.new()

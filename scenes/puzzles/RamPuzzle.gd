@@ -38,9 +38,10 @@ func _ready() -> void:
 	_counter.add_theme_font_size_override("font_size", get_theme_font_size("header", "Hardwire"))
 	add_child(_counter)
 	_commit = Button.new()
-	_commit.text = "Commit"
 	_commit.pressed.connect(commit)
 	add_child(_commit)
+	InputMode.device_changed.connect(_update_commit_text)
+	_update_commit_text()
 	resized.connect(_layout)
 	_layout()
 
@@ -55,6 +56,12 @@ func pattern() -> Array[int]:
 
 func grid() -> RamGrid:
 	return _grid
+
+
+## "Commit", plus the key or button for it when not on touch ("Commit (Y)").
+func _update_commit_text(_device: int = 0) -> void:
+	var glyph: String = InputMode.glyph("commit")
+	_commit.text = "Commit" if glyph.is_empty() else "Commit (%s)" % glyph
 
 
 func can_commit() -> bool:

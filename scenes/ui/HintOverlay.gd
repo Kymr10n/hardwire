@@ -5,6 +5,7 @@ extends Control
 signal dismissed
 
 var text: String = ""
+var prompt: Label
 
 
 func _ready() -> void:
@@ -24,11 +25,14 @@ func _ready() -> void:
 	line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	line.add_theme_font_size_override("font_size", get_theme_font_size("header", "Hardwire"))
 	box.add_child(line)
-	var tap := Label.new()
-	tap.text = "Tap or press A to begin"
-	tap.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	tap.add_theme_color_override("font_color", get_theme_color("text_dim", "Hardwire"))
-	box.add_child(tap)
+	prompt = Ui.dim_label("")
+	box.add_child(prompt)
+	InputMode.device_changed.connect(_update_prompt)
+	_update_prompt()
+
+
+func _update_prompt(_device: int = 0) -> void:
+	prompt.text = InputMode.prompt("ui_accept", "begin")
 
 
 func _input(event: InputEvent) -> void:

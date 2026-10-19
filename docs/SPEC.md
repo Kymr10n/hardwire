@@ -1,17 +1,17 @@
 # Hardwire — Game Design Spec
 
-As of 2026-10-19. Source of truth for implementation; build it milestone by milestone (see "Milestones and acceptance criteria").
+As of 2026-10-19. **Source of truth for implementation.** Build it milestone by milestone (see "Milestones and acceptance criteria"); progress is tracked in `docs/PROGRESS.md`. Change it only through `/spec-change`, which also records the change in `docs/DECISIONS.md`.
 
 ## Overview
 
-Hardwire is an endless incremental puzzle game for phones, built in Godot 4. The player upgrades a computer by solving three short memory and timing minigames. Each minigame raises one stat (RAM, CPU or Storage), and higher stats unlock harder puzzle slots that pay out more.
+Hardwire is an endless incremental puzzle game for phones, PC and Steam Deck, built in Godot 4. The player upgrades a computer by solving three short memory and timing minigames. Each minigame raises one stat (RAM, CPU or Storage), and higher stats unlock harder puzzle slots that pay out more.
 
 | Decision | Choice |
 | --- | --- |
-| Engine | Godot 4.x (latest stable), GDScript, Compatibility renderer |
-| Platforms | Android, web, and Linux desktop / Steam Deck; Steam release and iOS later |
-| Orientation | Portrait on phones (reference 1080 × 1920); landscape on Steam Deck and desktop (reference 1920 × 1080), chosen by window aspect |
-| Input | Touch (mouse via Godot's touch emulation), plus gamepad and keyboard through Godot's UI actions |
+| Engine | Godot 4.7.2 (pinned in `tools/versions.env`), GDScript, Compatibility renderer |
+| Platforms | Android, iOS, Windows, Linux, macOS, Steam Deck (native Linux build), plus Web — see Platforms and input |
+| Orientation | Phones portrait; PC and Steam Deck landscape. One layout code path per screen adapts to both |
+| Input | Touch, mouse, keyboard and gamepad, all through InputMap actions |
 | Art | Minimal flat circuit-board look, no drawn assets |
 | Audio | Synthesized tones generated in code, no audio files needed |
 | Save | Local JSON in `user://` |
@@ -23,6 +23,51 @@ Design pillars:
 - **Always fair.** A failure costs nothing; the player gets a fresh sequence at the same difficulty right away.
 - **Endless through breadth, not only length.** Difficulty grows by sequence length and speed until human limits, then by new puzzle dimensions and modifiers.
 - **Data-driven balance.** Every number in this spec lives in one config file (`data/balance.json`), so balancing never needs code changes.
+
+## Platforms and input
+
+Every screen and minigame must be fully playable with touch, mouse, keyboard and gamepad, and must lay out correctly in portrait (phones) and landscape (PC, Steam Deck). Gameplay code reads InputMap actions only, never raw keys or buttons.
+
+| Target | Export | Screen | Primary input | Notes |
+| --- | --- | --- | --- | --- |
+| Android | APK / AAB | Portrait, locked | Touch | Built from Linux |
+| iOS | Xcode project | Portrait, locked | Touch | Needs macOS with Xcode 26 (D-008) |
+| Windows | x86_64 | Landscape window, resizable, default 1280 × 800 | Mouse, keyboard, gamepad | |
+| Linux | x86_64 | Same as Windows | Mouse, keyboard, gamepad | Same build runs natively on Steam Deck |
+| macOS | Universal | Same as Windows | Mouse, keyboard, gamepad | Signing and notarization need a Mac (D-008) |
+| Steam Deck | Linux x86_64 build | 1280 × 800 landscape, fullscreen | Gamepad, touch | Must meet the Deck Verified checklist below |
+| Web | HTML5, single-threaded | Follows the browser window | Touch, mouse, keyboard | Extra target (D-021) |
+
+**Layout.** The viewport reference is 1080 × 1920 (portrait) or 1920 × 1080 (landscape), picked from the window aspect, with stretch mode `canvas_items` and aspect `expand`. Each screen has one code path that arranges its parts by orientation (see Screens and UX flow > Landscape). The switch lives in one place (`Main` and `Ui.is_landscape()`).
+
+**Legibility.** Minimum font size is 32 px at the reference size (about 21 px on a 1280 × 800 Steam Deck screen). Tap and click targets are at least 120 px at the reference size.
+
+**Input actions.** Godot's UI actions plus one game action, defined in `project.godot`:
+
+| Action | Touch / mouse | Keyboard | Gamepad |
+| --- | --- | --- | --- |
+| Navigate menus and puzzles (`ui_up` / `ui_down` / `ui_left` / `ui_right`) | Tap / click | Arrow keys, Tab | D-pad, left stick |
+| Confirm (`ui_accept`) | Tap / click | Enter, Space | A (south button) |
+| Back (`ui_cancel`) | Back button on screen | Esc, Backspace | B (east button) |
+| Storage pad | Tap pad | Move focus to the pad, Enter / Space | Move focus to the pad, A |
+| RAM cursor and toggle | Tap cell | Arrow keys move, Enter / Space toggles | D-pad moves, A toggles |
+| RAM commit (`commit`) | Commit button | C | Y (north button) |
+| CPU tile | Hold tile | Hold Space or Enter | Hold A |
+| Debug panel (`debug_panel`, debug builds) | Tap the stat bar 5 times | F1 | View (Select) |
+
+The focus outline shows only for keyboard and gamepad input. Storage pads keep their ring on every input method (D-021).
+
+**Glyphs.** On-screen prompts show the glyphs of the last-used input device: none for touch ("Tap to …"), keys for keyboard and mouse ("Click or press Enter to …"), A/B/X/Y for gamepad (Xbox layout, which matches Steam Deck). Keyboard prompts never appear while a gamepad is in use.
+
+**Steam Deck Verified checklist** ([Valve](https://partner.steamgames.com/doc/steamhardware/compat)):
+
+- Full controller support in the default configuration, with matching glyphs.
+- Runs at 1280 × 800, smallest text at least 9 px (target 12 px or more).
+- No launcher, no unsupported-platform warnings.
+- No text entry, so no on-screen keyboard is needed.
+- At least 30 fps at 800p; the game targets a 60 fps cap.
+
+**Haptics.** Phones use `Input.vibrate_handheld`; gamepads use `Input.start_joy_vibration`. Both go through the Haptics autoload and respect the setting.
 
 ## Core loop
 
@@ -64,7 +109,7 @@ A solve credits stat points to the slot's own stat and Cycles to the wallet. The
 
 The game lights a sequence of colored pads, and the player taps them back in the same order. It raises STO.
 
-**Layout.** Pads sit in a ring around the screen center, each at least 160 px across. Every pad has a distinct color, a distinct tone and a small symbol (circle, triangle, square, and so on) so the game stays playable for colorblind players.
+**Layout.** Pads sit in a ring around the screen center, each at least 160 px across; on keyboard and gamepad the focus moves between them (see Platforms and input). Every pad has a distinct color, a distinct tone and a small symbol (circle, triangle, square, and so on) so the game stays playable for colorblind players.
 
 **Watch phase.** Each pad lights for `show_ms` with its tone, followed by a 150 ms gap. The same pad may appear twice in a row; the gap makes the repeat visible.
 
@@ -224,11 +269,11 @@ While the app is closed, the player earns Cycles (never stats), capped at 8 hour
 
 ## Screens and UX flow
 
-The prototype has five screens around one hub, the overview. All layouts are portrait, with tap targets of at least 120 px at the 1080 × 1920 reference size.
+The prototype has five screens around one hub, the overview. Every screen works in portrait and landscape and with every input method (see Platforms and input).
 
 | Screen | Contents | Leads to |
 | --- | --- | --- | --- |
-| Boot | Title, "Tap to start", loads the save | Overview |
+| Boot | Title, "Press any button" ("Tap to start" on touch), loads the save | Overview |
 | Overview | Top bar with RAM, CPU, STO, Cycles and Cores; vertical scroll list of tier rows (tier 1 at the top), newest unlocked tier in view on open; each row = tier number, requirement chips and 3 slot cards (RAM, CPU, STO); bottom bar with Shop, Rebuild and Settings | Puzzle, Shop, Rebuild dialog, Settings |
 | Puzzle | Header with minigame name, tier, modifier and a back button; phase label ("Watch" / "Your turn"); timer bar; the minigame area; result overlay | Overview |
 | Shop | List of upgrade cards, Cycles balance on top | Overview |
@@ -241,18 +286,9 @@ The prototype has five screens around one hub, the overview. All layouts are por
 - Success: "Write complete", the stat and Cycles gained (counting up over 0.6 s), a note if a new tier unlocked, then buttons "Again" (same slot, new sequence) and "Overview".
 - Failure: "Corrupted", the correct answer shown for 1 s, then the next attempt starts automatically. The back button is always available.
 
-**Feedback on every tap:** pad or cell flash, its tone, and a light haptic pulse on mobile (gamepad rumble on controllers).
+**Feedback on every input:** pad or cell flash, its tone, and a light haptic pulse (phone vibration or gamepad rumble).
 
 **Landscape:** the same screens with one code path each. The puzzle screen puts header, phase label and timer in a side panel next to the puzzle; the overview puts the stats and the Shop / Rebuild / Settings buttons in a sidebar next to the tier list; the shop shows two columns; other screens use a centered column.
-
-**Controls** (gamepad; keyboard equivalents in brackets). The focus outline shows only for gamepad and keyboard input.
-
-| Where | Control |
-| --- | --- |
-| Menus | D-pad or stick moves focus (arrows), A selects (Enter / Space), B goes back (Esc) |
-| Storage | Move focus to a pad, A taps it |
-| RAM | Move the cell cursor, A toggles the cell, Y commits (C) |
-| CPU | Hold A for each beat (Space) |
 
 On PC, Settings adds "Fullscreen" and "Quit"; B on the overview never quits. With the `SteamDeck=1` environment variable (set by Steam on the Deck) the game starts fullscreen.
 
@@ -284,7 +320,7 @@ The look is a dark, flat circuit board drawn entirely with Godot shapes and one 
 
 ## Save system
 
-The game saves one JSON file to `user://save.json` after every solve, purchase, prestige and settings change. Godot maps `user://` to app storage on phones and to browser storage in web exports, so the same code works everywhere.
+The game saves one JSON file to `user://save.json` after every solve, purchase, prestige and settings change. Godot maps `user://` to the right per-user folder on every target platform (browser storage on the web), so the same code works everywhere.
 
 ```json
 {
@@ -312,8 +348,8 @@ The code splits pure logic (generators, judges, economy) from presentation (scen
 **Project settings:**
 
 - Renderer: Compatibility (`gl_compatibility`).
-- Window: 1080 × 1920 viewport, stretch mode `canvas_items`, aspect `expand`, portrait orientation; desktop test window 540 × 960.
-- `input_devices/pointing/emulate_touch_from_mouse = true`, so all input code handles touch events only.
+- Window: 1080 × 1920 reference viewport (1920 × 1080 in landscape), stretch mode `canvas_items`, aspect `expand`; phones locked to portrait; desktop window 1280 × 800 by default. Test phone layout with `--resolution 540x960`.
+- Input: pointer input is touch, with the mouse emulated (`emulate_touch_from_mouse`); keyboard and gamepad use InputMap actions (see Platforms and input). Only the InputMode autoload looks at raw device events, for glyphs.
 
 **Folder structure:**
 
@@ -327,7 +363,8 @@ res://
     SaveManager.gd        # load/save user://save.json, atomic write, migrations
     Balance.gd            # loads balance.json, exposes formula functions
     Synth.gd              # AudioStreamGenerator tones, success/fail sounds
-    Haptics.gd            # Input.vibrate_handheld wrapper, respects settings
+    Haptics.gd            # phone vibration + gamepad rumble, respects settings
+    InputMode.gd          # last-used device and its glyphs for prompts
   logic/                  # pure GDScript, no nodes, fully unit-tested
     SlotDef.gd            # data class: tier, type, modifier, requirements, rewards
     SlotGenerator.gd      # (tier, type) -> SlotDef incl. modifier, requirements, rewards
@@ -336,6 +373,7 @@ res://
     RhythmGen.gd          # CPU attempt content
     RhythmJudge.gd        # timestamps + target -> pass/fail per segment
     Economy.gd            # rewards, costs, multipliers, prestige cores, idle income
+    Progress.gd           # gating, tiers, rebuild eligibility, idle offer over the player state
   scenes/
     Main.tscn             # holds the current screen, handles transitions
     screens/              # Boot, Overview, Shop, Settings
@@ -346,33 +384,34 @@ res://
   theme/
     hardwire_theme.tres   # colors, font sizes, durations
   fonts/
-  tests/                  # GUT unit tests for everything in logic/
+  tests/                  # GUT tests: tests/logic/ mirrors logic/ one-to-one
+  tools/                  # versions.env, setup.sh, check.sh, drift_check.py (the quality gate)
 ```
 
-**Conventions:**
+**Conventions** (enforced by `CLAUDE.md` and `tools/check.sh`):
 
 - Static typing everywhere in GDScript (`var x: int`, typed function signatures).
 - Every balance number comes from `Balance`, never a literal in game code.
 - Puzzles receive a `SlotDef` and an attempt seed, and emit `solved(result)` or `failed()`; they never touch `GameState` directly.
 - Rhythm timing uses `Time.get_ticks_usec()` inside `_input`.
-- Tests run headless with the GUT addon: `godot --headless -s addons/gut/gut_cmdln.gd`.
-- A debug panel (only in debug builds, opened by tapping the stat bar 5 times within 3 s) can set stats, Cycles and tier, force a minigame and change the time scale. Balancing relies on it. The time scale speeds up playback and timers only; rhythm judging always uses real time.
+- `tools/check.sh` is the single quality gate (format, lint, drift checks, script errors, tests).
+- A debug panel (only in debug builds, opened by tapping the stat bar 5 times within 3 s, or with F1 / gamepad View) can set stats, Cycles and tier, force a minigame and change the time scale. Balancing relies on it. The time scale speeds up playback and timers only; rhythm judging always uses real time.
 
 ## Milestones and acceptance criteria
 
-Build one milestone per session, in order. Each milestone ends with a playable build and passing tests, so the game can be play-tested at any point. Update the Status column when a milestone starts and when it meets its "Done when" criteria.
+Build one milestone per session, in order. Each milestone ends with a playable build and passing tests, so the game can be play-tested at any point. Status lives in `docs/PROGRESS.md`.
 
-| # | Milestone | Done when | Status |
-| --- | --- | --- | --- |
-| M1 | Skeleton: project settings, autoloads, `balance.json`, save/load, GUT set up | App opens in a portrait window; a debug button adds stats and they survive a restart; tests run headless | Done (2026-10-19) |
-| M2 | Storage minigame, launched from a debug menu with a tier picker | Tiers 1, 5 and 20 play as specified; wrong tap and timeout both start a new sequence; Reverse and Decoy work when forced; generator tests pass | Done (2026-10-19), awaiting play-test |
-| M3 | RAM minigame | Toggle, Commit and timeout work; failed attempts flash the answer; Inverted and Rotated work when forced | Done (2026-10-19), awaiting play-test |
-| M4 | CPU minigame and `RhythmJudge` | Judge tests cover exact input, input within tolerance, too many presses, and one segment out of tolerance; playing a tier 1 rhythm by ear passes | Done (2026-10-19), awaiting play-test on a phone |
-| M5 | Overview, slot generation, gating, rewards, Boot and Settings screens, debug panel | Fresh save reaches tier 4 through first solves alone; locked slots show missing stats; numbers match the Sample tiers table | Done (2026-10-19), awaiting play-test |
-| M6 | Shop and upgrades | All six upgrades buy, persist and change their puzzle as specified | Done (2026-10-19), awaiting play-test |
-| M7 | Prestige and idle income | Rebuild becomes available after a tier 10 solve; Cores and multiplier are correct; the right fields reset; idle Cycles are offered after closing the app for over 5 minutes and respect the 8 h cap | Done (2026-10-19), awaiting play-test |
-| M8 | Polish and export | Synth sounds, haptics, screen transitions, first-run hints; Android APK and web build run on a real phone | Polish and web build done (2026-10-19); Android export and real-phone test pending (needs Android SDK) |
-| M9 | Steam Deck and desktop: landscape layouts, gamepad and keyboard controls, Linux build | The Linux build runs fullscreen in Steam Deck game mode; every screen and minigame is playable with the controller alone and with touch alone; landscape layouts work at 16:10 and 16:9; CI builds Linux | Done (2026-10-19) except the check on a real Steam Deck |
+| # | Milestone | Done when |
+| --- | --- | --- |
+| M1 | Skeleton: project settings, autoloads, `balance.json`, save/load, GUT set up | App opens in a portrait window; a debug button adds stats and they survive a restart; tests run headless |
+| M2 | Storage minigame, launched from a debug menu with a tier picker | Tiers 1, 5 and 20 play as specified; wrong tap and timeout both start a new sequence; Reverse and Decoy work when forced; generator tests pass |
+| M3 | RAM minigame | Toggle, Commit and timeout work; failed attempts flash the answer; Inverted and Rotated work when forced |
+| M4 | CPU minigame and `RhythmJudge` | Judge tests cover exact input, input within tolerance, too many presses, and one segment out of tolerance; playing a tier 1 rhythm by ear passes |
+| M5 | Overview, slot generation, gating, rewards, Boot and Settings screens, debug panel | Fresh save reaches tier 4 through first solves alone; locked slots show missing stats; numbers match the Sample tiers table |
+| M6 | Shop and upgrades | All six upgrades buy, persist and change their puzzle as specified |
+| M7 | Prestige and idle income | Rebuild becomes available after a tier 10 solve; Cores and multiplier are correct; the right fields reset; idle Cycles are offered after closing the app for over 5 minutes and respect the 8 h cap |
+| M8 | Polish and export | Synth sounds, haptics, screen transitions, first-run hints; Android APK and web build run on a real phone |
+| M9 | Steam Deck and desktop: landscape layouts, gamepad and keyboard controls, Linux build | The Linux build runs fullscreen in Steam Deck game mode; every screen and minigame is playable with the controller alone and with touch alone; landscape layouts work at 16:10 and 16:9; prompts show glyphs of the last-used device; export presets exist for Windows and macOS; CI builds Linux and Windows |
 
 ## After the prototype: Steam release
 

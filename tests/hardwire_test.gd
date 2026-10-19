@@ -9,12 +9,14 @@ const FRAME := 1.0 / 60.0
 var _orig_path: String
 var _orig_state: Dictionary
 var _orig_time_scale: float
+var _orig_device: int
 
 
 func before_each() -> void:
 	_orig_path = SaveManager.save_path
 	_orig_state = SaveManager.to_dict()
 	_orig_time_scale = Engine.time_scale
+	_orig_device = InputMode.device
 	SaveManager.save_path = TEST_SAVE
 	_remove_test_files()
 	GameState.reset_all()
@@ -31,6 +33,7 @@ func after_each() -> void:
 	SaveManager.save_path = _orig_path
 	SaveManager.from_dict(_orig_state)
 	Engine.time_scale = _orig_time_scale
+	InputMode.device = _orig_device as InputMode.Device
 
 
 func _remove_test_files() -> void:

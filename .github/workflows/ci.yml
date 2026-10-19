@@ -13,15 +13,17 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  GODOT_VERSION: 4.7.2
-
 jobs:
-  test:
-    name: Unit tests
+  check:
+    name: Quality gate
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Read pinned versions
+        run: cat tools/versions.env >> "$GITHUB_ENV"
 
       - name: Cache Godot
         uses: actions/cache@v4
@@ -32,24 +34,45 @@ jobs:
       - name: Install Godot
         run: tools/install_godot.sh "$GODOT_VERSION" "$HOME/godot"
 
-      - name: Run tests
-        run: GODOT="$HOME/godot/godot" tools/run_tests.sh
+      - name: Setup (gdtoolkit)
+        run: GODOT="$HOME/godot/godot" tools/setup.sh
+
+      - name: Quality gate (format, lint, drift, script errors, tests)
+        run: GODOT="$HOME/godot/godot" tools/check.sh
+
+      - name: Spec changes carry a decision
+        if: github.event_name == 'push' && github.event.before != '0000000000000000000000000000000000000000'
+        run: |
+          changed="$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} 2>/dev/null || true)"
+          if grep -qx docs/SPEC.md <<<"$changed" && ! grep -qx docs/DECISIONS.md <<<"$changed"; then
+            echo "::error::docs/SPEC.md changed without docs/DECISIONS.md (use /spec-change)"
+            exit 1
+          fi
 
   export:
     name: Export ${{ matrix.name }}
-    needs: test
+    needs: check
     runs-on: ubuntu-latest
     strategy:
       matrix:
         include:
           - name: web
             preset: Web
+            dir: build/web
             output: build/web/index.html
           - name: linux
             preset: Linux
+            dir: build/linux
             output: build/linux/hardwire.x86_64
+          - name: windows
+            preset: Windows
+            dir: build/windows
+            output: build/windows/hardwire.exe
     steps:
       - uses: actions/checkout@v4
+
+      - name: Read pinned versions
+        run: cat tools/versions.env >> "$GITHUB_ENV"
 
       - name: Cache Godot and export templates
         uses: actions/cache@v4
@@ -67,5 +90,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: hardwire-${{ matrix.name }}
-          path: ${{ matrix.output == 'build/web/index.html' && 'build/web' || 'build/linux' }}
+          path: ${{ matrix.dir }}
           retention-days: 14
