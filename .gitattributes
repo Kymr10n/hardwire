@@ -15,6 +15,13 @@
 *.pck binary
 *.apk binary
 *.aab binary
+*.exe binary
+*.zip binary
+*.tpz binary
+*.ico binary
+*.icns binary
+*.gif binary
+*.woff2 binary
 *.svg text
 
 # GitHub language stats: count the game, not the vendored test framework or docs.

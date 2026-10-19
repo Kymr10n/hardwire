@@ -23,9 +23,12 @@ body:
     attributes:
       label: Platform
       options:
-        - Desktop (Godot editor or run from source)
-        - Web browser
+        - Steam Deck
+        - Windows / Linux / macOS build
         - Android
+        - iOS
+        - Web browser
+        - Godot editor (run from source)
         - Other
     validations:
       required: true

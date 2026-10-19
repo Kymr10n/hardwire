@@ -13,3 +13,10 @@ indent_size = 4
 [*.{json,md,yml,yaml,cfg}]
 indent_style = space
 indent_size = 2
+
+[*.sh]
+indent_style = tab
+
+[*.py]
+indent_style = space
+indent_size = 4

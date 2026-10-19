@@ -12,7 +12,7 @@ An endless incremental puzzle game for phones and the Steam Deck. Upgrade a comp
 
 ## Status
 
-Playable prototype (version 0.1.0). All three minigames, the tier overview, the upgrade shop, prestige ("Rebuild") and idle income are in. The web build runs; the Android build and testing on real phones are still to come. Progress per milestone is tracked in the [spec](docs/SPEC.md#milestones-and-acceptance-criteria).
+Playable prototype (version 0.1.0). All three minigames, the tier overview, the upgrade shop, prestige ("Rebuild") and idle income are in; it runs on Linux / Steam Deck, Windows and the web with touch, mouse, keyboard or gamepad. The Android build, iOS and play-tests on real devices are still to come. Status and open follow-ups are in [`docs/PROGRESS.md`](docs/PROGRESS.md); the milestones are in the [spec](docs/SPEC.md#milestones-and-acceptance-criteria).
 
 ## How it plays
 
@@ -36,7 +36,7 @@ godot --headless --path . --import   # first run: import assets
 godot --path .                        # play in a 1280x800 window (Steam Deck size)
 ```
 
-Use the mouse as your finger (touch is emulated), or a gamepad / keyboard: D-pad or arrows move the focus, A / Enter / Space selects (and is the CPU tile), B / Esc goes back, Y / C commits a RAM pattern. Make the window taller than wide to get the phone layout. In debug builds, tap the stat bar 5 times to open the debug panel, where you can set stats and tiers and force a minigame or modifier.
+Use the mouse as your finger (touch is emulated), or a gamepad / keyboard: D-pad or arrows move the focus, A / Enter / Space selects (and is the CPU tile), B / Esc goes back, Y / C commits a RAM pattern. Make the window taller than wide to get the phone layout. In debug builds, F1 (or 5 taps on the stat bar) opens the debug panel, where you can set stats and tiers and force a minigame or modifier.
 
 ## Develop
 
@@ -91,24 +91,17 @@ tools/export.sh Web build/web/index.html            # Web (single-threaded; serv
 godot --headless --path . --export-debug "Android" build/android/hardwire.apk
 ```
 
-CI builds the Linux, Windows and web exports on every push to `main` and attaches them as artifacts.
+CI builds the Linux, Windows and web exports on every push to `main` (not on pull requests) and attaches them as artifacts.
 
 ### Steam Deck
 
-`tools/deck.sh` exports the Linux build and copies it to `~/Games/hardwire/` on the Deck over SSH. The target is `$DECK`, or `DECK=...` in the git-ignored `tools/deck.local.env`, default `deck@steamdeck`. `--run` also starts the game there (desktop mode); `--no-export` copies the existing build. One-time setup:
+The game is a single file, `hardwire.x86_64`, that Steam runs like any non-Steam game: it starts fullscreen (Steam sets `SteamDeck=1`) and plays with touch or the built-in controls.
 
-1. On the Deck in desktop mode, open Konsole: `passwd` (set a password), then `sudo systemctl enable --now sshd`.
-2. On the dev PC: `ssh-copy-id deck@steamdeck` and, if the Deck has another address, `echo 'DECK=deck@<host-or-ip>' > tools/deck.local.env`.
-3. Run `tools/deck.sh` once. On the Deck in desktop mode: Steam → Add a Game → Add a Non-Steam Game → browse to `~/Games/hardwire/hardwire.x86_64`.
+1. Get the file onto the Deck at `~/Games/hardwire/hardwire.x86_64`, either by SSH with `tools/deck.sh` (below) or by copying the export (or the `hardwire-linux` CI artifact) in Desktop Mode and marking it executable (right-click → Properties → Permissions → "Is executable").
+2. Once, in Desktop Mode: Steam → Add a Game → Add a Non-Steam Game → browse to that file.
+3. Switch to Game Mode and press Play. If the controls don't respond, pick the "Gamepad" layout in the game's Steam controller settings.
 
-After that the loop is: edit, `tools/deck.sh` (or the VS Code task "Deploy: Steam Deck"), press Play in game mode. Steam sets `SteamDeck=1`, so the game starts fullscreen. For log output, run the binary over `ssh` while the Deck is in desktop mode.
-
-Without SSH:
-
-1. Get `hardwire.x86_64` (export it as above, or download the `hardwire-linux` artifact from a CI run).
-2. On the Deck, switch to Desktop Mode and copy the file anywhere, for example `~/Games/hardwire/`. Make it executable: right-click → Properties → Permissions → "Is executable" (or `chmod +x hardwire.x86_64`).
-3. In Steam (Desktop Mode): Games → "Add a Non-Steam Game to My Library…" → browse to the file.
-4. Switch back to Game Mode and start Hardwire from your library. It starts fullscreen (Steam sets `SteamDeck=1`) and plays with touch or the built-in controls. In the game's Steam controller settings, pick the "Gamepad" layout if it isn't the default.
+**Deploying over SSH.** On the Deck in Desktop Mode, open Konsole: `passwd` (set a password), then `sudo systemctl enable --now sshd`. On the dev PC: `ssh-copy-id deck@steamdeck` and, if the Deck has another address, `echo 'DECK=deck@<host-or-ip>' > tools/deck.local.env` (git-ignored). Then every `tools/deck.sh` (or the VS Code task "Deploy: Steam Deck") exports the Linux build and copies it into place; `--run` also starts it in Desktop Mode, `--no-export` copies the existing build. For log output, run the binary over `ssh` while the Deck is in Desktop Mode.
 
 ## License
 

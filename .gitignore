@@ -1,6 +1,5 @@
 # Godot cache and build output
 .godot/
-.mono/
 /android/
 /build/
 *.tmp

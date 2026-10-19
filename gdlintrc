@@ -19,7 +19,9 @@ disable: []
 excluded_directories: !!set
   .git: null
   .godot: null
+  .venv: null
   addons: null
+  build: null
 function-arguments-number: 5
 max-file-lines: 300
 max-line-length: 100

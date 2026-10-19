@@ -18,7 +18,7 @@ Recent history:
 
 Follow these steps in order. Do not skip steps; do not start the next milestone.
 
-1. **Understand.** Read `CLAUDE.md`, then the `docs/SPEC.md` sections that $ARGUMENTS depends on, its "Done when" row, and `docs/DECISIONS.md`. Read the existing code you will touch. If a previous milestone is not `done`, stop and say so.
+1. **Understand.** Read `CLAUDE.md`, then the `docs/SPEC.md` sections that $ARGUMENTS depends on, its "Done when" row, and `docs/DECISIONS.md`. Read the existing code you will touch. If a previous milestone is not `done`, stop and say so, unless `docs/PROGRESS.md` says only a device check is pending for it.
 2. **Clarify.** If anything in scope is ambiguous or contradictory, ask the user now — one short list of questions. Do not guess. If the spec looks wrong, propose `/spec-change` instead of working around it.
 3. **Plan small.** Write a plan of at most 10 bullets: files to change (prefer existing ones), functions, tests. For each new abstraction, name its second user; if there is none, don't create it. Mark $ARGUMENTS `in progress` in `docs/PROGRESS.md`.
 4. **Tests first.** For everything in `logic/`, write GUT tests that encode the spec's rules and numbers (the Sample tiers table is the fixture for formulas). Run them and see them fail for the right reason.

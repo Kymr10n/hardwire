@@ -12,4 +12,6 @@ allowed-tools: Bash(git status:*) Bash(git diff:*) Bash(tools/check.sh)
 1. Run `tools/check.sh`.
 2. Launch the `reviewer` subagent on the current changes. If `docs/SPEC.md`, `data/balance.json` or anything in `logic/` changed, launch the `spec-auditor` subagent in parallel.
 3. Fix every "must fix" and drift item; apply "should fix" items that remove code. Re-run `tools/check.sh`.
-4. Summarize in a few lines what was found and what you changed. $ARGUMENTS
+4. Summarize in a few lines what was found and what you changed.
+
+Focus, if given: $ARGUMENTS
