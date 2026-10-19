@@ -72,3 +72,14 @@ func test_five_taps_on_stat_bar_open_debug_panel() -> void:
 		touch.position = bar.get_global_rect().get_center()
 		bar._input(touch)
 	assert_signal_emitted(overview, "debug_requested")
+
+
+func test_slot_cards_draw_their_frame() -> void:
+	var overview := _overview()
+	var card: SlotCard = overview.rows()[0].cards[0]
+	assert_false(card.flat, "a flat button would skip the card frame")
+	var style := card.get_theme_stylebox("normal") as StyleBoxFlat
+	assert_eq(style.bg_color, card.get_theme_color("card", "Hardwire"))
+	assert_eq(
+		style.border_color, card.get_theme_color("ram", "Hardwire"), "new slot: accent border"
+	)
