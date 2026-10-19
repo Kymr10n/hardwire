@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Install Hardwire
+Comment=Installs or updates Hardwire: Boot Sequence and adds it to Steam
+Icon=steam
+Terminal=false
+Exec=konsole --noclose -e bash -c "curl -fsSL https://raw.githubusercontent.com/Kymr10n/hardwire/main/tools/steamdeck_install.sh | bash"
+Categories=Game;

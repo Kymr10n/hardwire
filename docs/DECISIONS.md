@@ -263,3 +263,9 @@ the CPU tile (tone and rumble while held) and Watch playback (rumble while a pad
 **Affects:** Minigame: Storage (Input phase); Platforms and input (Haptics); `StoragePad`,
 `StoragePuzzle`, `PuzzleBase` (abort on exit), `Synth.start_note`; tests `test_storage_puzzle`,
 `test_polish`.
+
+## D-038 — 2026-10-19 — One-click Steam Deck install and tagged releases
+
+**Decision:** Players install on a Steam Deck the EmuDeck way: download `Hardwire-SteamDeck.desktop` from the latest GitHub release, double-click it in Desktop Mode, done. It runs `tools/steamdeck_install.sh`, which fetches the latest release's Linux build into `~/Games/hardwire`, registers it as a non-Steam game with `tools/steamdeck_shortcut.py` (Steam is closed and restarted around the edit of `shortcuts.vdf`), carries a 0.1.0 save into the `Hardwire` save folder, and updates the game when run again. Releases are made by pushing a tag `v<version>`: `.github/workflows/release.yml` checks the tag against `config/version`, exports Linux, Windows and Web and publishes them with the installer and the CHANGELOG section as notes. `tools/deck.sh` stays the developer's SSH path.
+**Why:** The owner wants an idiot-proof install for the Deck without SSH or Steam's add-a-game dialog; EmuDeck's download-and-double-click flow is what Deck users know. An install that follows the latest release needs releases to be one command.
+**Affects:** Technical architecture (folder structure); `tools/steamdeck_install.sh`, `tools/steamdeck_shortcut.py`, `tools/Hardwire-SteamDeck.desktop`, `docs/icon.png`, `.github/workflows/release.yml`; README (Steam Deck), CONTRIBUTING (releases).

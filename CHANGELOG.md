@@ -4,6 +4,10 @@ All notable changes to Hardwire are documented here. The format follows [Keep a 
 
 ## [Unreleased]
 
+### Added
+
+- One-click Steam Deck install: download `Hardwire-SteamDeck.desktop` from the latest release, double-click it in Desktop Mode; it installs or updates the game and adds it to Steam. Releases are published by pushing a `v<version>` tag.
+
 ## [0.2.0] - 2026-10-19
 
 Renamed to *Hardwire: Boot Sequence*, with an ambient score, hold feedback on the Storage pads and the groundwork for a Steam release.

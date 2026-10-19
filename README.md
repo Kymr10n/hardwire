@@ -93,15 +93,21 @@ godot --headless --path . --export-debug "Android" build/android/hardwire.apk
 
 CI builds the Linux, Windows and web exports on every push to `main` (not on pull requests) and attaches them as artifacts.
 
+**Releases.** Set `config/version` in `project.godot` (the export presets must match; `tools/check.sh` checks), add the version's section to `CHANGELOG.md`, then `git tag v<version> && git push origin v<version>`. The Release workflow builds every platform and publishes the GitHub release with the builds, the Steam Deck installer and that CHANGELOG section as notes; the one-click Deck install picks it up from then on.
+
 ### Steam Deck
 
-The game is a single file, `hardwire.x86_64`, that Steam runs like any non-Steam game: it starts fullscreen (Steam sets `SteamDeck=1`) and plays with touch or the built-in controls.
+**One-click install.** On the Deck, switch to Desktop Mode and open this page in the browser:
 
-1. Get the file onto the Deck at `~/Games/hardwire/hardwire.x86_64`, either by SSH with `tools/deck.sh` (below) or by copying the export (or the `hardwire-linux` CI artifact) in Desktop Mode and marking it executable (right-click → Properties → Permissions → "Is executable").
-2. Once, in Desktop Mode: Steam → Add a Game → Add a Non-Steam Game → browse to that file.
-3. Switch to Game Mode and press Play. If the controls don't respond, pick the "Gamepad" layout in the game's Steam controller settings.
+1. Download [Hardwire-SteamDeck.desktop](https://github.com/Kymr10n/hardwire/releases/latest/download/Hardwire-SteamDeck.desktop).
+2. Open the Downloads folder and double-click it. If Dolphin asks whether to run a file that is not marked executable, choose "Continue".
+3. A terminal shows the steps: it downloads the latest release into `~/Games/hardwire`, closes Steam for a moment, adds "Hardwire: Boot Sequence" to your library and starts Steam again. When it says "Done", switch back to Game Mode and press Play.
 
-**Deploying over SSH.** On the Deck in Desktop Mode, open Konsole: `passwd` (set a password), then `sudo systemctl enable --now sshd`. On the dev PC: `ssh-copy-id deck@steamdeck` and, if the Deck has another address, `echo 'DECK=deck@<host-or-ip>' > tools/deck.local.env` (git-ignored). Then every `tools/deck.sh` (or the VS Code task "Deploy: Steam Deck") exports the Linux build and copies it into place; `--run` also starts it in Desktop Mode, `--no-export` copies the existing build. For log output, run the binary over `ssh` while the Deck is in Desktop Mode.
+Run the same file again whenever you want to update. If the controls don't respond in Game Mode, pick the "Gamepad" layout in the game's Steam controller settings. (What it runs: `tools/steamdeck_install.sh` and `tools/steamdeck_shortcut.py`.)
+
+The game is a single file, `hardwire.x86_64`, that Steam runs like any non-Steam game: it starts fullscreen (Steam sets `SteamDeck=1`) and plays with touch or the built-in controls. Without the installer: copy a release's `hardwire-<version>-linux-x86_64` to `~/Games/hardwire/hardwire.x86_64`, mark it executable (right-click → Properties → Permissions) and add it in Steam → Add a Game → Add a Non-Steam Game.
+
+**Deploying over SSH (development).** On the Deck in Desktop Mode, open Konsole: `passwd` (set a password), then `sudo systemctl enable --now sshd`. On the dev PC: `ssh-copy-id deck@steamdeck` and, if the Deck has another address, `echo 'DECK=deck@<host-or-ip>' > tools/deck.local.env` (git-ignored). Then every `tools/deck.sh` (or the VS Code task "Deploy: Steam Deck") exports the Linux build and copies it into place; `--run` also starts it in Desktop Mode, `--no-export` copies the existing build. For log output, run the binary over `ssh` while the Deck is in Desktop Mode.
 
 ### Steam
 

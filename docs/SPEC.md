@@ -407,7 +407,9 @@ res://
   fonts/                  # JetBrains Mono + OFL
   tests/                  # GUT tests: tests/logic/ mirrors logic/ one-to-one
   tools/                  # versions.env, setup.sh, check.sh, drift_check.py (the quality gate),
-                          # install_godot.sh, export.sh, deck.sh
+                          # install_godot.sh, export.sh, deck.sh, steam_upload.sh;
+                          # steamdeck_install.sh, steamdeck_shortcut.py and
+                          # Hardwire-SteamDeck.desktop (one-click Deck install, D-038)
 ```
 
 **Conventions** (enforced by `CLAUDE.md` and `tools/check.sh`):

@@ -1,0 +1,62 @@
+name: Release
+
+# Pushing a tag v<version> builds every platform and publishes a GitHub release with the builds
+# and the Steam Deck installer, so the one-click install always finds a current build.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and publish ${{ github.ref_name }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Read pinned versions
+        run: grep -E "^[A-Z_]+=" tools/versions.env >> "$GITHUB_ENV"
+
+      - name: Check the tag against config/version
+        run: |
+          version="$(grep -oP 'config/version="\K[^"]+' project.godot)"
+          [ "v$version" = "${{ github.ref_name }}" ] || {
+            echo "Tag ${{ github.ref_name }} does not match config/version=$version in project.godot"; exit 1; }
+          echo "VERSION=$version" >> "$GITHUB_ENV"
+
+      - name: Cache Godot and export templates
+        uses: actions/cache@v6
+        with:
+          path: ~/godot
+          key: godot-${{ env.GODOT_VERSION }}-templates
+
+      - name: Install Godot and export templates
+        run: tools/install_godot.sh "$GODOT_VERSION" "$HOME/godot" --templates
+
+      - name: Export
+        run: |
+          export GODOT="$HOME/godot/godot"
+          tools/export.sh Linux "build/linux/hardwire-$VERSION-linux-x86_64"
+          tools/export.sh Windows "build/windows/hardwire-$VERSION-windows-x86_64.exe"
+          tools/export.sh Web build/web/index.html
+          (cd build/web && zip -qr "../hardwire-$VERSION-web.zip" .)
+
+      - name: Release notes from the CHANGELOG
+        run: |
+          awk -v v="$VERSION" '
+            /^## \[/ { show = index($0, "[" v "]") > 0; next }
+            show { print }' CHANGELOG.md > notes.md
+          [ -s notes.md ] || echo "Hardwire $VERSION." > notes.md
+
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ github.ref_name }}" --title "Hardwire $VERSION" --notes-file notes.md \
+            "build/linux/hardwire-$VERSION-linux-x86_64" \
+            "build/windows/hardwire-$VERSION-windows-x86_64.exe" \
+            "build/hardwire-$VERSION-web.zip" \
+            tools/Hardwire-SteamDeck.desktop
