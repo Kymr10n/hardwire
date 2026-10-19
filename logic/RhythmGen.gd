@@ -54,7 +54,7 @@ static func make(slot: SlotDef, seed: int) -> Dictionary:
 	for s: float in steps:
 		target_ms.append(s * p.step_ms)
 		total_ms += s * p.step_ms
-	return {
+	var attempt := {
 		"beats": p.beats,
 		"step_ms": p.step_ms,
 		"tolerance": tolerance,
@@ -62,10 +62,11 @@ static func make(slot: SlotDef, seed: int) -> Dictionary:
 		"steps": steps,
 		"target_ms": target_ms,
 		"total_ms": total_ms,
-		"max_total_ms": RhythmJudge.max_total_ms(target_ms, tolerance, abs_ms),
 		"first_press_timeout_s":
 		float(c.first_press_timeout_s) * (1.0 + slot.assist_effect("time_dilation")),
 	}
+	attempt.max_total_ms = RhythmJudge.max_total_ms(attempt)
+	return attempt
 
 
 static func _range_steps(lo: int, hi: int) -> Array[float]:

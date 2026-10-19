@@ -159,23 +159,23 @@ A central tile plays a rhythm of on and off phases, and the player mimics it by 
 - Off-segments between them, each 1 to 2 steps long.
 - No off-segment before the first beat or after the last.
 
-**Watch phase.** The tile lights and plays a steady tone for each on-segment and goes dark for each off-segment.
+**Watch phase.** The tile lights and plays a steady tone for each on-segment and goes dark for each off-segment. Under the tile, one marker per beat shows its length: a dot for a tap, a bar as long as its steps for a hold. Markers fill as beats play, and again as the player presses.
 
 **Input phase.**
 
 - The clock starts at the player's first press. There is no count-in and no need to hit a beat grid.
 - Each press and release is timestamped with `Time.get_ticks_usec()` in `_input`, not in `_process`.
 - Input ends 600 ms after the player's release of beat number `beats`, so extra presses are still caught.
-- It also ends once no input could still pass: when the time since the first press exceeds the longest passing rhythm (every segment at its upper tolerance) plus 600 ms. A uniformly slow but in-tolerance player is never cut off.
+- It also ends once no input could still pass: when the time since the first press exceeds the longest passing rhythm (every beat interval and the last beat at their upper tolerance) plus 600 ms. A uniformly slow but in-tolerance player is never cut off. This window also caps how long the last beat, even a tap, may be held.
 - With no first press within 5 s, the attempt times out. A press beyond `beats` fails at once.
 - **Failure:** the tile replays the target rhythm silently, compressed to fit the 1 s answer reveal.
 
 **Judging.**
 
-1. The number of presses must equal `beats`, otherwise the attempt fails.
-2. Build the player's segment list (on, off, on, …) from the timestamps.
-3. Compare each segment with the target: it passes if `abs(actual − target) <= max(60 ms, tolerance × target)`.
-4. All segments pass → success.
+1. The number of presses must equal `beats`, and every press must be released; otherwise the attempt fails.
+2. **Beats:** for each beat but the last, the time from its press to the next press is compared with its target (its on-segment plus the following off-segment).
+3. **Holds:** for each hold (an on-segment longer than one step), the time from press to release is compared with the hold's length. Taps (one step or shorter) are not timed, so a quick tap or click is fine.
+4. A comparison passes if `abs(actual − target) <= max(60 ms, tolerance × target)`. All pass → success.
 
 The judge is a pure function with unit tests, because it decides whether the minigame feels fair.
 
@@ -183,7 +183,7 @@ The judge is a pure function with unit tests, because it decides whether the min
 
 **Modifiers** (from tier 8):
 
-- *Audio only:* the tile stays dark during playback; only the tone plays.
+- *Audio only:* the tile stays dark during playback; only the tone plays. The beat markers are plain dots that do not fill during playback, only for the player's presses.
 - *Syncopated:* on- and off-segments may also be 0.5 or 1.5 steps long, and every syncopated rhythm contains at least one such half-step segment.
 
 ## Difficulty curve and slot tiers
@@ -293,6 +293,8 @@ The prototype has five screens around one hub, the overview. Every screen works 
 On PC, Settings adds "Fullscreen" and "Quit"; B on the overview never quits. With the `SteamDeck=1` environment variable (set by Steam on the Deck) the game starts fullscreen.
 
 **First run:** each minigame shows a one-line instruction overlay the first time it opens ("Repeat the sequence", "Recreate the pattern", "Copy the rhythm by holding the tile"). The attempt starts when the player taps the overlay; the hint is then recorded in `seen_tutorials`.
+
+**Modifier hints:** a modifier slot shows one dim line above the play area: "Set the dark cells" (Inverted), "Enter it rotated" (Rotated, next to the arrow icon), "Listen" (Audio only), "Half steps" (Syncopated). Reverse and Decoy show only their name in the header.
 
 **Transitions:** each new screen fades in over 150 ms.
 

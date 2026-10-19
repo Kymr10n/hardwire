@@ -7,12 +7,14 @@ extends PuzzleBase
 ## Layout, as fractions of the available square and of tap_min.
 const TILE_FILL := 0.75
 const RESERVED_ROWS := 3.0
-const DOT_RADIUS := 0.12
-const DOT_SPACING := 3.0
-const DOT_RING := 0.3
-const ARC_SEGMENTS := 24
+## Beat markers: radius as a fraction of tap_min; gap and outline as fractions of the radius.
+const MARKER_RADIUS := 0.2
+const MARKER_GAP := 1.0
+const MARKER_RING := 0.3
 
 var _attempt: Dictionary = {}
+var _marker_on := StyleBoxFlat.new()
+var _marker_off := StyleBoxFlat.new()
 var _tile: CpuTile
 var _hint: Label
 var _presses: Array[int] = []
@@ -31,6 +33,7 @@ func _ready() -> void:
 	add_child(_hint)
 	_tile = CpuTile.new()
 	add_child(_tile)
+	_marker_off.draw_center = false
 	resized.connect(_layout)
 	_layout()
 
@@ -157,7 +160,7 @@ func _set_watch_on(on: bool) -> void:
 		_start_tone()
 	else:
 		_stop_tone()
-	_tile.lit = on and slot.modifier != RhythmGen.MOD_AUDIO_ONLY
+	_tile.lit = on and not _audio_only()
 
 
 func _on_phase_entered(p_phase: Phase) -> void:
@@ -170,9 +173,7 @@ func _on_time_up() -> void:
 	if _presses.is_empty():
 		_fail()
 		return
-	_last_result = RhythmJudge.judge(
-		_presses, _releases, _attempt.target_ms, _attempt.tolerance, _attempt.abs_ms
-	)
+	_last_result = RhythmJudge.judge(_presses, _releases, _attempt)
 	if _last_result.passed:
 		_release_tile()
 		_succeed({"slot_id": slot.id(), "judge": _last_result})
@@ -239,23 +240,54 @@ func _layout() -> void:
 	queue_redraw()
 
 
-## Beat dots under the tile: filled per press in the input phase, per played beat while watching.
+## Beat markers under the tile (SPEC: Watch phase, D-022): a dot per tap and a bar as long as its
+## steps per hold, filled per played beat while watching and per press during input. Under Audio
+## only every marker is a dot that fills only for presses.
 func _draw() -> void:
 	if _attempt.is_empty() or _tile == null:
 		return
-	var beats: int = _attempt.beats
-	var r: float = get_theme_constant("tap_min", "Hardwire") * DOT_RADIUS
-	var gap: float = r * DOT_SPACING
-	var y: float = _tile.position.y + _tile.size.y + get_theme_constant("margin", "Hardwire") + r
-	var x0: float = size.x / 2.0 - gap * (beats - 1) / 2.0
-	var filled: int = _presses.size()
+	var rects: Array[Rect2] = marker_rects()
+	var r: float = rects[0].size.y / 2.0
+	_marker_on.bg_color = get_theme_color("cpu", "Hardwire")
+	_marker_off.border_color = get_theme_color("text_dim", "Hardwire")
+	_marker_off.set_border_width_all(int(r * MARKER_RING))
+	for style: StyleBoxFlat in [_marker_on, _marker_off]:
+		style.set_corner_radius_all(int(r))
+	var filled: int = filled_markers()
+	for i: int in rects.size():
+		draw_style_box(_marker_on if i < filled else _marker_off, rects[i])
+
+
+## Markers laid out centered under the tile. Widths in radii: 2 per step for holds, 2 for taps
+## (and for every beat under Audio only). The radius shrinks only if the row would not fit
+## between the margins.
+func marker_rects() -> Array[Rect2]:
+	var units: Array[float] = []
+	var total: float = MARKER_GAP * (_attempt.beats - 1)
+	var steps: Array[float] = _attempt.steps
+	for i: int in range(0, steps.size(), 2):
+		var u: float = 2.0 * (1.0 if _audio_only() else maxf(1.0, steps[i]))
+		units.append(u)
+		total += u
+	var margin: float = get_theme_constant("margin", "Hardwire")
+	var tap: float = get_theme_constant("tap_min", "Hardwire")
+	var r: float = minf(tap * MARKER_RADIUS, (size.x - 2.0 * margin) / total)
+	var x: float = (size.x - total * r) / 2.0
+	var y: float = _tile.position.y + _tile.size.y + margin
+	var rects: Array[Rect2] = []
+	for u: float in units:
+		rects.append(Rect2(x, y, u * r, r * 2.0))
+		x += (u + MARKER_GAP) * r
+	return rects
+
+
+## How many markers are filled: beats played so far while watching (none under Audio only),
+## presses during input.
+func filled_markers() -> int:
 	if phase == Phase.WATCH:
-		filled = _watch_beat + 1
-	var accent: Color = get_theme_color("cpu", "Hardwire")
-	for i: int in beats:
-		var c := Vector2(x0 + gap * i, y)
-		if i < filled:
-			draw_circle(c, r, accent)
-		else:
-			var dim: Color = get_theme_color("text_dim", "Hardwire")
-			draw_arc(c, r, 0.0, TAU, ARC_SEGMENTS, dim, r * DOT_RING, true)
+		return 0 if _audio_only() else _watch_beat + 1
+	return _presses.size()
+
+
+func _audio_only() -> bool:
+	return slot.modifier == RhythmGen.MOD_AUDIO_ONLY
