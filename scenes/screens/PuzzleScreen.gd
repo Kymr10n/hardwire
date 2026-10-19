@@ -131,7 +131,12 @@ func _on_phase_changed(phase: PuzzleBase.Phase, text: String) -> void:
 func _on_solved(_result: Dictionary) -> void:
 	var gain: Dictionary = GameState.apply_solve(slot)
 	SaveManager.save_game()
-	_overlay.show_result("Write complete", get_theme_color(slot.type, "Hardwire"), SlotDef.STAT_NAMES[slot.type], gain)
+	_overlay.show_result(
+		"Write complete",
+		get_theme_color(slot.type, "Hardwire"),
+		SlotDef.STAT_NAMES[slot.type],
+		gain
+	)
 
 
 func _on_failed() -> void:

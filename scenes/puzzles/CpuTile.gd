@@ -33,12 +33,18 @@ func _animate() -> void:
 		_tween.kill()
 	var target: float = get_theme_constant("glow_scale_pct", "Hardwire") / 100.0 if lit else 1.0
 	_tween = create_tween()
-	_tween.tween_property(self, "scale", Vector2.ONE * target, get_theme_constant("glow_ms", "Hardwire") / 1000.0)
+	_tween.tween_property(
+		self, "scale", Vector2.ONE * target, get_theme_constant("glow_ms", "Hardwire") / 1000.0
+	)
 
 
 func _draw() -> void:
 	var accent: Color = get_theme_color("cpu", "Hardwire")
-	_style.bg_color = accent if lit else accent.darkened(1.0 - get_theme_constant("pad_idle_pct", "Hardwire") / 100.0)
+	_style.bg_color = (
+		accent
+		if lit
+		else accent.darkened(1.0 - get_theme_constant("pad_idle_pct", "Hardwire") / 100.0)
+	)
 	_style.set_corner_radius_all(int(size.x * 0.12))
 	draw_style_box(_style, Rect2(Vector2.ZERO, size))
 	Ui.draw_focus(self, Rect2(Vector2.ZERO, size))

@@ -114,6 +114,7 @@ func _countdown_text(elapsed: float) -> String:
 
 # --- Overridden by each minigame ---
 
+
 ## Control that should hold gamepad/keyboard focus while this puzzle runs (null = none).
 func default_focus() -> Control:
 	return null

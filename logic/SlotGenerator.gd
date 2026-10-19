@@ -28,7 +28,9 @@ static func modifier_chance(tier: int) -> float:
 	var m: Dictionary = Balance.modifiers()
 	if tier < int(m.from_tier):
 		return 0.0
-	return minf(float(m.chance_max), float(m.chance_base) + float(m.chance_step) * (tier - int(m.from_tier)))
+	return minf(
+		float(m.chance_max), float(m.chance_base) + float(m.chance_step) * (tier - int(m.from_tier))
+	)
 
 
 ## Deterministic modifier for a slot: low 16 hash bits roll the chance, high 16 bits pick from the pool.

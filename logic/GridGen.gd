@@ -13,9 +13,13 @@ static func params(tier: int) -> Dictionary:
 	var r: Dictionary = Balance.ram()
 	var t: int = maxi(1, tier)
 	var n: int = Balance.tier_table("ram", "grid_by_tier", t)
-	var filled: int = mini(int(r.filled_base) + floori((t - 1) / float(r.filled_tier_divisor)),
-		floori(float(r.filled_max_ratio) * n * n))
-	var show_ms: int = maxi(int(r.show_ms_min), int(r.show_ms_start) - int(r.show_ms_step) * (t - 1))
+	var filled: int = mini(
+		int(r.filled_base) + floori((t - 1) / float(r.filled_tier_divisor)),
+		floori(float(r.filled_max_ratio) * n * n)
+	)
+	var show_ms: int = maxi(
+		int(r.show_ms_min), int(r.show_ms_start) - int(r.show_ms_step) * (t - 1)
+	)
 	return {"n": n, "filled": filled, "show_ms": show_ms}
 
 
@@ -46,8 +50,11 @@ static func make(slot: SlotDef, seed: int) -> Dictionary:
 		"pattern": pattern,
 		"expected": expected,
 		"show_ms": roundi(p.show_ms * (1.0 + slot.assist_effect("longer_exposure"))),
-		"time_limit_s": (float(r.input_s_base) + float(r.input_s_per_cell) * expected.size())
-			* (1.0 + slot.assist_effect("time_dilation")),
+		"time_limit_s":
+		(
+			(float(r.input_s_base) + float(r.input_s_per_cell) * expected.size())
+			* (1.0 + slot.assist_effect("time_dilation"))
+		),
 	}
 
 

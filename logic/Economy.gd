@@ -10,19 +10,22 @@ static func core_multiplier(cores: int) -> float:
 
 
 ## Stat points and Cycles for one solve. All factors multiply; the results are rounded.
-static func solve_reward(slot: SlotDef, first_solve: bool, overclock_lvl: int, miner_lvl: int, cores: int) -> Dictionary:
+static func solve_reward(
+	slot: SlotDef, first_solve: bool, overclock_lvl: int, miner_lvl: int, cores: int
+) -> Dictionary:
 	var mult: float = core_multiplier(cores)
 	if first_solve:
 		mult *= Balance.get_num("economy", "first_solve_mult")
 	if not slot.modifier.is_empty():
 		mult *= Balance.get_num("economy", "modifier_mult")
-	var stat_mult: float = 1.0 + float(Balance.upgrade("overclock").effect_per_level) * overclock_lvl
+	var stat_mult: float = (
+		1.0 + float(Balance.upgrade("overclock").effect_per_level) * overclock_lvl
+	)
 	var cycle_mult: float = 1.0 + float(Balance.upgrade("cycle_miner").effect_per_level) * miner_lvl
 	return {
 		"stat": roundi(slot.reward * mult * stat_mult),
 		"cycles": roundi(slot.cycles * mult * cycle_mult),
 	}
-
 
 
 ## Cost of the next level when the upgrade is at `level`: round(base x growth^level).
@@ -35,6 +38,7 @@ static func upgrade_cost(id: String, level: int) -> int:
 static func is_maxed(id: String, level: int) -> bool:
 	var max_level: int = int(Balance.upgrade(id).max_level)
 	return max_level >= 0 and level >= max_level
+
 
 ## Cores a Rebuild pays: max(0, highest_tier_solved - prestige_core_offset).
 static func cores_for(highest_tier_solved: int) -> int:

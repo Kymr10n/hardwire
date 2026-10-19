@@ -5,7 +5,6 @@ const RamPuzzle := preload("res://scenes/puzzles/RamPuzzle.gd")
 const PuzzleScreen := preload("res://scenes/screens/PuzzleScreen.gd")
 
 
-
 func _puzzle(tier: int, modifier: String = "", seed: int = 7) -> PuzzleBase:
 	var puzzle: PuzzleBase = RamPuzzle.new()
 	puzzle.size = Vector2(1000, 1400)
@@ -142,7 +141,9 @@ func test_rotated_rejects_unrotated_and_accepts_rotated() -> void:
 	var puzzle := _puzzle(5, GridGen.MOD_ROTATED, 2)
 	watch_signals(puzzle)
 	_run_until(puzzle, PuzzleBase.Phase.INPUT)
-	assert_ne(puzzle.pattern(), puzzle.expected(), "seed gives a pattern that changes under rotation")
+	assert_ne(
+		puzzle.pattern(), puzzle.expected(), "seed gives a pattern that changes under rotation"
+	)
 	var rotated: Array[int] = []
 	for i: int in puzzle.pattern():
 		rotated.append(GridGen.rotate_cw(i, 4))
@@ -157,7 +158,6 @@ func test_rotated_rejects_unrotated_and_accepts_rotated() -> void:
 	second.commit()
 	assert_eq(second.phase, PuzzleBase.Phase.RESULT)
 	assert_signal_not_emitted(second, "solved")
-
 
 
 func _not_in(cells: Array[int], count: int) -> int:

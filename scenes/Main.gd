@@ -39,8 +39,10 @@ static func wants_fullscreen(steam_deck_env: String) -> bool:
 
 ## Base size for the current window aspect: the project's portrait size, or the same size swapped.
 static func base_size(window_size: Vector2i) -> Vector2i:
-	var portrait := Vector2i(ProjectSettings.get_setting("display/window/size/viewport_width"),
-		ProjectSettings.get_setting("display/window/size/viewport_height"))
+	var portrait := Vector2i(
+		ProjectSettings.get_setting("display/window/size/viewport_width"),
+		ProjectSettings.get_setting("display/window/size/viewport_height")
+	)
 	return Vector2i(portrait.y, portrait.x) if window_size.x > window_size.y else portrait
 
 
@@ -97,11 +99,14 @@ func check_idle() -> void:
 	var amount: int = GameState.idle_offer(int(Time.get_unix_time_from_system()))
 	if amount <= 0:
 		return
-	var dialog := ConfirmDialog.open(screen, "While you were away",
-		"Your rig computed %d Cycles." % amount, "Collect", "")
-	dialog.confirmed.connect(func() -> void:
-		GameState.collect_idle(amount)
-		SaveManager.save_game())
+	var dialog := ConfirmDialog.open(
+		screen, "While you were away", "Your rig computed %d Cycles." % amount, "Collect", ""
+	)
+	dialog.confirmed.connect(
+		func() -> void:
+			GameState.collect_idle(amount)
+			SaveManager.save_game()
+	)
 
 
 ## Confirm dialog with Cores to gain and the new multiplier (SPEC: Prestige).
@@ -109,14 +114,22 @@ func show_rebuild_dialog() -> void:
 	if not GameState.can_rebuild():
 		return
 	var gained: int = GameState.rebuild_cores()
-	var message: String = "Gain %d %s: rewards x%s -> x%s.\nStats, Cycles, upgrades and first solves reset." % [
-		gained, "Core" if gained == 1 else "Cores", Economy.core_multiplier(GameState.cores),
-		Economy.core_multiplier(GameState.cores + gained)]
+	var message: String = (
+		"Gain %d %s: rewards x%s -> x%s.\nStats, Cycles, upgrades and first solves reset."
+		% [
+			gained,
+			"Core" if gained == 1 else "Cores",
+			Economy.core_multiplier(GameState.cores),
+			Economy.core_multiplier(GameState.cores + gained)
+		]
+	)
 	var dialog := ConfirmDialog.open(screen, "Rebuild?", message, "Rebuild")
-	dialog.confirmed.connect(func() -> void:
-		GameState.rebuild()
-		SaveManager.save_game()
-		show_overview())
+	dialog.confirmed.connect(
+		func() -> void:
+			GameState.rebuild()
+			SaveManager.save_game()
+			show_overview()
+	)
 
 
 func show_puzzle(slot: SlotDef) -> void:
@@ -177,5 +190,6 @@ func _show(next: Control, rebuild: Callable) -> void:
 	add_child(screen)
 	Ui.focus_first(screen)
 	screen.modulate.a = 0.0
-	screen.create_tween().tween_property(screen, "modulate:a", 1.0,
-		get_theme_constant("transition_ms", "Hardwire") / 1000.0)
+	screen.create_tween().tween_property(
+		screen, "modulate:a", 1.0, get_theme_constant("transition_ms", "Hardwire") / 1000.0
+	)

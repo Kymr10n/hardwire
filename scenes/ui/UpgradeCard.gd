@@ -54,7 +54,9 @@ func refresh() -> void:
 	var level: int = GameState.upgrade_level(id)
 	var max_level: int = int(Balance.upgrade(id).max_level)
 	var maxed: bool = Economy.is_maxed(id, level)
-	_title.text = "%s  Lv %d%s" % [NAMES.get(id, id), level, ("/%d" % max_level) if max_level >= 0 else ""]
+	_title.text = (
+		"%s  Lv %d%s" % [NAMES.get(id, id), level, ("/%d" % max_level) if max_level >= 0 else ""]
+	)
 	if maxed:
 		_effect.text = effect_text(id, level) + "  (max)"
 		_buy.text = "Max"

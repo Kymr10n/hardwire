@@ -13,7 +13,13 @@ var _cancel_text: String
 
 
 ## cancel_text = "" shows only the confirm button.
-static func open(parent: Node, title: String, message: String, confirm_text: String, cancel_text: String = "Cancel") -> ConfirmDialog:
+static func open(
+	parent: Node,
+	title: String,
+	message: String,
+	confirm_text: String,
+	cancel_text: String = "Cancel"
+) -> ConfirmDialog:
 	var dialog := ConfirmDialog.new()
 	dialog._title = title
 	dialog._message = message

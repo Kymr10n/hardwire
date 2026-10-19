@@ -11,5 +11,9 @@ func pulse(duration_ms: int = -1) -> void:
 	if OS.has_feature("mobile"):
 		Input.vibrate_handheld(ms)
 	for device: int in Input.get_connected_joypads():
-		Input.start_joy_vibration(device, Balance.get_num("haptics", "rumble_weak"),
-			Balance.get_num("haptics", "rumble_strong"), ms / 1000.0)
+		Input.start_joy_vibration(
+			device,
+			Balance.get_num("haptics", "rumble_weak"),
+			Balance.get_num("haptics", "rumble_strong"),
+			ms / 1000.0
+		)

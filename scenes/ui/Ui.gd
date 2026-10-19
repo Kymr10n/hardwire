@@ -12,12 +12,16 @@ static func is_landscape(node: Node) -> bool:
 
 ## Fills `screen` with margins and returns the content column. With `max_width` > 0, landscape
 ## widens the side margins so the column is at most that wide. `margin_scale` scales the theme margin.
-static func screen_root(screen: Control, max_width: float = 0.0, margin_scale: float = 0.5) -> VBoxContainer:
+static func screen_root(
+	screen: Control, max_width: float = 0.0, margin_scale: float = 0.5
+) -> VBoxContainer:
 	screen.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var margin: int = int(screen.get_theme_constant("margin", "Hardwire") * margin_scale)
 	var side: int = margin
 	if max_width > 0.0 and is_landscape(screen):
-		side = maxi(margin, int((screen.get_viewport().get_visible_rect().size.x - max_width) / 2.0))
+		side = maxi(
+			margin, int((screen.get_viewport().get_visible_rect().size.x - max_width) / 2.0)
+		)
 	var root := MarginContainer.new()
 	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root.add_theme_constant_override("margin_top", margin)
@@ -26,17 +30,23 @@ static func screen_root(screen: Control, max_width: float = 0.0, margin_scale: f
 	root.add_theme_constant_override("margin_right", side)
 	screen.add_child(root)
 	var column := VBoxContainer.new()
-	column.add_theme_constant_override("separation", screen.get_theme_constant("margin", "Hardwire") / 2)
+	column.add_theme_constant_override(
+		"separation", screen.get_theme_constant("margin", "Hardwire") / 2
+	)
 	root.add_child(column)
 	return column
 
 
 ## Adds a header (back button and title) to `parent` and returns the title label. The title sits
 ## right of the button, or below it when `stacked` (narrow landscape side panels).
-static func header(parent: Control, title: String, on_back: Callable, stacked: bool = false) -> Label:
+static func header(
+	parent: Control, title: String, on_back: Callable, stacked: bool = false
+) -> Label:
 	var row := BoxContainer.new()
 	row.vertical = stacked
-	row.add_theme_constant_override("separation", parent.get_theme_constant("margin", "Hardwire") / 2)
+	row.add_theme_constant_override(
+		"separation", parent.get_theme_constant("margin", "Hardwire") / 2
+	)
 	parent.add_child(row)
 	var tap: float = parent.get_theme_constant("tap_min", "Hardwire")
 	var back := Button.new()
@@ -48,9 +58,13 @@ static func header(parent: Control, title: String, on_back: Callable, stacked: b
 	var label := Label.new()
 	label.text = title
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT if stacked else HORIZONTAL_ALIGNMENT_RIGHT
+	label.horizontal_alignment = (
+		HORIZONTAL_ALIGNMENT_LEFT if stacked else HORIZONTAL_ALIGNMENT_RIGHT
+	)
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	label.add_theme_font_size_override("font_size", parent.get_theme_font_size("header", "Hardwire"))
+	label.add_theme_font_size_override(
+		"font_size", parent.get_theme_font_size("header", "Hardwire")
+	)
 	row.add_child(label)
 	return label
 
@@ -71,7 +85,11 @@ static func focus_first(screen: Control) -> void:
 	if target == null:
 		for node: Node in screen.find_children("*", "BaseButton", true, false):
 			var button := node as BaseButton
-			if button.is_visible_in_tree() and not button.disabled and button.focus_mode != Control.FOCUS_NONE:
+			if (
+				button.is_visible_in_tree()
+				and not button.disabled
+				and button.focus_mode != Control.FOCUS_NONE
+			):
 				target = button
 				break
 	if target != null:

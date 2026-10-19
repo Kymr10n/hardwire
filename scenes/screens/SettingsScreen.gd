@@ -82,8 +82,12 @@ func _toggle_setting(key: String) -> void:
 
 
 func _on_reset() -> void:
-	var dialog := ConfirmDialog.open(self, "Reset save?", "All progress, Cores and statistics will be erased.", "Erase")
-	dialog.confirmed.connect(func() -> void:
-		GameState.reset_all()
-		SaveManager.save_game()
-		_refresh())
+	var dialog := ConfirmDialog.open(
+		self, "Reset save?", "All progress, Cores and statistics will be erased.", "Erase"
+	)
+	dialog.confirmed.connect(
+		func() -> void:
+			GameState.reset_all()
+			SaveManager.save_game()
+			_refresh()
+	)

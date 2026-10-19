@@ -54,8 +54,10 @@ func refresh() -> void:
 	for chip: Label in _chips:
 		var type: String = chip.get_meta("type")
 		var met: bool = GameState.stat(type) >= Balance.req(tier)
-		chip.add_theme_color_override("font_color",
-			get_theme_color("text_dim", "Hardwire") if met else get_theme_color(type, "Hardwire"))
+		chip.add_theme_color_override(
+			"font_color",
+			get_theme_color("text_dim", "Hardwire") if met else get_theme_color(type, "Hardwire")
+		)
 	for card: SlotCard in cards:
 		card.refresh()
 	queue_redraw()
@@ -63,5 +65,7 @@ func refresh() -> void:
 
 func _draw() -> void:
 	var trace: Color = get_theme_color("trace", "Hardwire")
-	draw_line(Vector2(8, 0), Vector2(8, size.y + get_theme_constant("margin", "Hardwire")), trace, 3.0)
+	draw_line(
+		Vector2(8, 0), Vector2(8, size.y + get_theme_constant("margin", "Hardwire")), trace, 3.0
+	)
 	draw_circle(Vector2(8, 30), 8, trace)

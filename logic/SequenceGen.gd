@@ -11,10 +11,16 @@ const MOD_DECOY := "decoy"
 static func params(tier: int) -> Dictionary:
 	var s: Dictionary = Balance.storage()
 	var t: int = maxi(1, tier)
-	var length: int = mini(int(s.length_base) + floori(t / float(s.length_tier_divisor)), int(s.length_max))
-	var show_ms: int = maxi(int(s.show_ms_min), int(s.show_ms_start) - int(s.show_ms_step) * (t - 1))
-	var per_item: float = maxf(float(s.input_s_per_item_min),
-		float(s.input_s_per_item_start) - float(s.input_s_per_item_step) * (t - 1))
+	var length: int = mini(
+		int(s.length_base) + floori(t / float(s.length_tier_divisor)), int(s.length_max)
+	)
+	var show_ms: int = maxi(
+		int(s.show_ms_min), int(s.show_ms_start) - int(s.show_ms_step) * (t - 1)
+	)
+	var per_item: float = maxf(
+		float(s.input_s_per_item_min),
+		float(s.input_s_per_item_start) - float(s.input_s_per_item_step) * (t - 1)
+	)
 	return {
 		"length": length,
 		"pads": Balance.tier_table("storage", "pads_by_tier", t),
@@ -61,7 +67,7 @@ static func make(slot: SlotDef, seed: int) -> Dictionary:
 		"pads": pads,
 		"show_ms": p.show_ms,
 		"gap_ms": p.gap_ms,
-		"time_limit_s": p.length * float(p.input_s_per_item) * (1.0 + slot.assist_effect("time_dilation")),
+		"time_limit_s":
+		p.length * float(p.input_s_per_item) * (1.0 + slot.assist_effect("time_dilation")),
 		"replays": slot.assist_level("replay_buffer"),
 	}
-

@@ -42,7 +42,9 @@ func play_note(index: int, duration_ms: float, volume: float = 1.0) -> void:
 
 
 func play_click() -> void:
-	_add_voice(Wave.SINE, Balance.get_num("audio", "click_hz"), Balance.get_num("audio", "click_ms"), 1.0)
+	_add_voice(
+		Wave.SINE, Balance.get_num("audio", "click_hz"), Balance.get_num("audio", "click_ms"), 1.0
+	)
 
 
 ## Starts a sustained tone (CPU tile). Returns an id for stop_tone, or 0 if sound is off.
@@ -72,20 +74,27 @@ func stop_all() -> void:
 	_voices.clear()
 
 
-func _add_voice(wave: Wave, hz: float, length_ms: float, volume: float, delay_ms: float = 0.0) -> int:
+func _add_voice(
+	wave: Wave, hz: float, length_ms: float, volume: float, delay_ms: float = 0.0
+) -> int:
 	if not GameState.settings.get("sound", true):
 		return 0
 	var id: int = _next_voice_id
 	_next_voice_id += 1
-	_voices.append({
-		"id": id,
-		"wave": wave,
-		"step": TAU * hz / MIX_RATE,
-		"phase": 0.0,
-		"t": -_ms_to_samples(delay_ms),
-		"length": _ms_to_samples(length_ms) if length_ms >= 0.0 else -1,
-		"amp": volume * Balance.get_num("audio", "volume"),
-	})
+	(
+		_voices
+		. append(
+			{
+				"id": id,
+				"wave": wave,
+				"step": TAU * hz / MIX_RATE,
+				"phase": 0.0,
+				"t": -_ms_to_samples(delay_ms),
+				"length": _ms_to_samples(length_ms) if length_ms >= 0.0 else -1,
+				"amp": volume * Balance.get_num("audio", "volume"),
+			}
+		)
+	)
 	return id
 
 

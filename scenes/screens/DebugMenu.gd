@@ -72,7 +72,10 @@ func _ready() -> void:
 
 
 func _refresh() -> void:
-	_stats_label.text = "RAM %d   CPU %d   STO %d   Cycles %d" % [GameState.ram, GameState.cpu, GameState.sto, GameState.cycles]
+	_stats_label.text = (
+		"RAM %d   CPU %d   STO %d   Cycles %d"
+		% [GameState.ram, GameState.cpu, GameState.sto, GameState.cycles]
+	)
 	_tier_label.text = "T%d" % tier
 	var type: String = TYPES[type_index]
 	_type_button.text = "Minigame: %s" % SlotDef.TYPE_NAMES[type]

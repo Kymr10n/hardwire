@@ -12,9 +12,11 @@ static func params(tier: int) -> Dictionary:
 	var c: Dictionary = Balance.cpu()
 	var t: int = maxi(1, tier)
 	return {
-		"beats": mini(int(c.beats_base) + floori(t / float(c.beats_tier_divisor)), int(c.beats_max)),
+		"beats":
+		mini(int(c.beats_base) + floori(t / float(c.beats_tier_divisor)), int(c.beats_max)),
 		"step_ms": maxi(int(c.step_ms_min), int(c.step_ms_start) - int(c.step_ms_step) * (t - 1)),
-		"tolerance": maxf(float(c.tolerance_min), float(c.tolerance_start) - float(c.tolerance_step) * (t - 1)),
+		"tolerance":
+		maxf(float(c.tolerance_min), float(c.tolerance_start) - float(c.tolerance_step) * (t - 1)),
 	}
 
 
@@ -61,7 +63,8 @@ static func make(slot: SlotDef, seed: int) -> Dictionary:
 		"target_ms": target_ms,
 		"total_ms": total_ms,
 		"max_total_ms": RhythmJudge.max_total_ms(target_ms, tolerance, abs_ms),
-		"first_press_timeout_s": float(c.first_press_timeout_s) * (1.0 + slot.assist_effect("time_dilation")),
+		"first_press_timeout_s":
+		float(c.first_press_timeout_s) * (1.0 + slot.assist_effect("time_dilation")),
 	}
 
 

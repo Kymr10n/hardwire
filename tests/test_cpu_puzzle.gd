@@ -4,7 +4,6 @@ extends "res://tests/hardwire_test.gd"
 const CpuPuzzle := preload("res://scenes/puzzles/CpuPuzzle.gd")
 
 
-
 func _puzzle(tier: int, modifier: String = "", seed: int = 7) -> PuzzleBase:
 	var puzzle: PuzzleBase = CpuPuzzle.new()
 	puzzle.size = Vector2(1000, 1400)

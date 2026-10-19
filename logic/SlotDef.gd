@@ -12,10 +12,10 @@ const STAT_NAMES := {TYPE_STO: "STO", TYPE_RAM: "RAM", TYPE_CPU: "CPU"}
 
 var tier: int = 1
 var type: String = TYPE_STO
-var modifier: String = "" # "" = none; see balance.json modifiers.pools
+var modifier: String = ""  # "" = none; see balance.json modifiers.pools
 var req: Dictionary = {"ram": 0, "cpu": 0, "sto": 0}
-var reward: int = 0 # stat points per replay, before multipliers
-var cycles: int = 0 # Cycles per replay, before multipliers
+var reward: int = 0  # stat points per replay, before multipliers
+var cycles: int = 0  # Cycles per replay, before multipliers
 ## Upgrade levels applied when an attempt is built ({upgrade_id: level}); copied from GameState
 ## by the puzzle screen so puzzles never read GameState.
 var assist: Dictionary = {}
@@ -31,7 +31,9 @@ func assist_level(upgrade_id: String) -> int:
 
 ## Total assist effect of an upgrade: effect_per_level x level (balance.json upgrades).
 func assist_effect(upgrade_id: String) -> float:
-	return float(Balance.upgrade(upgrade_id).get("effect_per_level", 0.0)) * assist_level(upgrade_id)
+	return (
+		float(Balance.upgrade(upgrade_id).get("effect_per_level", 0.0)) * assist_level(upgrade_id)
+	)
 
 
 ## Builds a bare slot for a given tier, type and (optionally forced) modifier.

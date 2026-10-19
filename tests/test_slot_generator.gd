@@ -26,7 +26,11 @@ func test_formulas_match_sample_tiers() -> void:
 			assert_eq(slot.req, {"ram": row[0], "cpu": row[0], "sto": row[0]}, "req tier %d" % tier)
 			var first: Dictionary = Economy.solve_reward(slot, true, 0, 0, 0)
 			var replay: Dictionary = Economy.solve_reward(slot, false, 0, 0, 0)
-			assert_eq([first.stat, replay.stat, first.cycles, replay.cycles], row.slice(1), "rewards tier %d" % tier)
+			assert_eq(
+				[first.stat, replay.stat, first.cycles, replay.cycles],
+				row.slice(1),
+				"rewards tier %d" % tier
+			)
 
 
 func test_tier_slots_order() -> void:
@@ -46,7 +50,9 @@ func test_fnv1a_reference_values() -> void:
 func test_modifiers_are_deterministic() -> void:
 	for tier: int in range(1, 60):
 		for type: String in SlotGenerator.TYPES:
-			assert_eq(SlotGenerator.make(tier, type).modifier, SlotGenerator.make(tier, type).modifier)
+			assert_eq(
+				SlotGenerator.make(tier, type).modifier, SlotGenerator.make(tier, type).modifier
+			)
 
 
 func test_no_modifiers_before_tier_8() -> void:
@@ -64,7 +70,9 @@ func test_modifier_pools_by_tier() -> void:
 			if mod.is_empty():
 				continue
 			if tier < 14:
-				assert_eq(mod, pools[type][0], "tier %d %s uses the first modifier only" % [tier, type])
+				assert_eq(
+					mod, pools[type][0], "tier %d %s uses the first modifier only" % [tier, type]
+				)
 			else:
 				assert_true(pools[type].has(mod))
 				seen_second = seen_second or mod == pools[type][1]

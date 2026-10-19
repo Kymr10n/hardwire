@@ -34,7 +34,12 @@ func save_game() -> bool:
 	d["version"] = SAVE_VERSION
 	var file := FileAccess.open(tmp_path(), FileAccess.WRITE)
 	if file == null:
-		push_error("SaveManager: cannot write %s (%s)" % [tmp_path(), error_string(FileAccess.get_open_error())])
+		push_error(
+			(
+				"SaveManager: cannot write %s (%s)"
+				% [tmp_path(), error_string(FileAccess.get_open_error())]
+			)
+		)
 		return false
 	var ok: bool = file.store_string(JSON.stringify(d, "\t"))
 	file.close()
@@ -43,7 +48,9 @@ func save_game() -> bool:
 		return false
 	var err := DirAccess.rename_absolute(tmp_path(), save_path)
 	if err != OK:
-		push_error("SaveManager: cannot rename %s to %s (%s)" % [tmp_path(), save_path, error_string(err)])
+		push_error(
+			"SaveManager: cannot rename %s to %s (%s)" % [tmp_path(), save_path, error_string(err)]
+		)
 		return false
 	return true
 
@@ -59,7 +66,12 @@ func load_game() -> bool:
 	if json.parse(FileAccess.get_file_as_string(save_path)) == OK:
 		parsed = json.data
 	if not (parsed is Dictionary) or not _is_known_version(parsed.get("version")):
-		push_warning("SaveManager: %s is broken or has an unknown version; backing up to %s" % [save_path, backup_path()])
+		push_warning(
+			(
+				"SaveManager: %s is broken or has an unknown version; backing up to %s"
+				% [save_path, backup_path()]
+			)
+		)
 		_backup()
 		GameState.reset_all()
 		return false

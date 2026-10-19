@@ -60,7 +60,9 @@ func _apply_level(p_level: float) -> void:
 	if p_level > 0.0:
 		target = get_theme_constant("glow_scale_pct", "Hardwire") / 100.0
 	_tween = create_tween()
-	_tween.tween_property(self, "scale", Vector2.ONE * target, get_theme_constant("glow_ms", "Hardwire") / 1000.0)
+	_tween.tween_property(
+		self, "scale", Vector2.ONE * target, get_theme_constant("glow_ms", "Hardwire") / 1000.0
+	)
 
 
 func _draw() -> void:

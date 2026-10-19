@@ -162,7 +162,9 @@ func _on_time_up() -> void:
 	if _presses.is_empty():
 		_fail()
 		return
-	_last_result = RhythmJudge.judge(_presses, _releases, _attempt.target_ms, _attempt.tolerance, _attempt.abs_ms)
+	_last_result = RhythmJudge.judge(
+		_presses, _releases, _attempt.target_ms, _attempt.tolerance, _attempt.abs_ms
+	)
 	if _last_result.passed:
 		_release_tile()
 		_succeed({"slot_id": slot.id(), "judge": _last_result})
@@ -189,7 +191,7 @@ func _start_tone() -> void:
 	if _tone_id == 0:
 		_tone_id = Synth.start_tone()
 		if _tone_id == 0:
-			_tone_id = -1 # sound off: still track the on state
+			_tone_id = -1  # sound off: still track the on state
 
 
 func _stop_tone() -> void:

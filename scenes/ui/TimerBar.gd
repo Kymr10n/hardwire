@@ -18,7 +18,9 @@ func _draw() -> void:
 	var radius: float = size.y / 2.0
 	_draw_pill(Rect2(Vector2.ZERO, size), get_theme_color("trace", "Hardwire"), radius)
 	if fraction > 0.0:
-		_draw_pill(Rect2(Vector2.ZERO, Vector2(maxf(size.y, size.x * fraction), size.y)), color, radius)
+		_draw_pill(
+			Rect2(Vector2.ZERO, Vector2(maxf(size.y, size.x * fraction), size.y)), color, radius
+		)
 
 
 func _draw_pill(rect: Rect2, fill: Color, radius: float) -> void:

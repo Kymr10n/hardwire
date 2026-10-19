@@ -37,7 +37,11 @@ func test_rhythm_model() -> void:
 		for seed: int in 30:
 			var a: Dictionary = _make(tier, "", seed)
 			var steps: Array[float] = a.steps
-			assert_eq(steps.size(), a.beats * 2 - 1, "no off-segment before the first or after the last beat")
+			assert_eq(
+				steps.size(),
+				a.beats * 2 - 1,
+				"no off-segment before the first or after the last beat"
+			)
 			for i: int in steps.size():
 				assert_eq(steps[i], roundf(steps[i]), "whole steps without Syncopated")
 				if i % 2 == 0:
@@ -61,7 +65,9 @@ func test_totals() -> void:
 	for t: float in a.target_ms:
 		total += t
 	assert_almost_eq(a.total_ms, total, 0.001)
-	assert_almost_eq(a.max_total_ms, RhythmJudge.max_total_ms(a.target_ms, a.tolerance, a.abs_ms), 0.001)
+	assert_almost_eq(
+		a.max_total_ms, RhythmJudge.max_total_ms(a.target_ms, a.tolerance, a.abs_ms), 0.001
+	)
 	assert_eq(a.abs_ms, 60.0)
 
 

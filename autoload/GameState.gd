@@ -96,8 +96,9 @@ func highest_solved_tier() -> int:
 func apply_solve(slot: SlotDef) -> Dictionary:
 	var first: bool = not is_solved(slot)
 	var before: int = highest_unlocked_tier()
-	var gain: Dictionary = Economy.solve_reward(slot, first, int(upgrades.get("overclock", 0)),
-		int(upgrades.get("cycle_miner", 0)), cores)
+	var gain: Dictionary = Economy.solve_reward(
+		slot, first, int(upgrades.get("overclock", 0)), int(upgrades.get("cycle_miner", 0)), cores
+	)
 	match slot.type:
 		SlotDef.TYPE_RAM:
 			ram += gain.stat
@@ -113,7 +114,12 @@ func apply_solve(slot: SlotDef) -> Dictionary:
 	stats_changed.emit()
 	cycles_changed.emit()
 	var after: int = highest_unlocked_tier()
-	return {"stat": gain.stat, "cycles": gain.cycles, "first_solve": first, "new_tier": after if after > before else 0}
+	return {
+		"stat": gain.stat,
+		"cycles": gain.cycles,
+		"first_solve": first,
+		"new_tier": after if after > before else 0
+	}
 
 
 func upgrade_level(id: String) -> int:

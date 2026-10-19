@@ -104,9 +104,15 @@ func tier_table(section_name: String, key: String, tier: int) -> int:
 
 # --- Economy formulas (SPEC: Difficulty curve > Economy formulas) ---
 
+
 ## Stat requirement per stat for a tier: req_factor x (T - 1)^req_exponent.
 func req(tier: int) -> int:
-	return int(get_num("economy", "req_factor") * pow(maxi(0, tier - 1), get_num("economy", "req_exponent")))
+	return int(
+		(
+			get_num("economy", "req_factor")
+			* pow(maxi(0, tier - 1), get_num("economy", "req_exponent"))
+		)
+	)
 
 
 ## Stat points per replay, before multipliers: T + reward_offset.

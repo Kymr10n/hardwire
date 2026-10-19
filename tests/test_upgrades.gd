@@ -22,7 +22,9 @@ func test_costs() -> void:
 	}
 	for id: String in expected:
 		for level: int in expected[id].size():
-			assert_eq(Economy.upgrade_cost(id, level), expected[id][level], "%s level %d" % [id, level])
+			assert_eq(
+				Economy.upgrade_cost(id, level), expected[id][level], "%s level %d" % [id, level]
+			)
 
 
 func test_caps() -> void:
@@ -65,19 +67,33 @@ func test_upgrades_persist() -> void:
 
 func test_longer_exposure_extends_ram_show_time() -> void:
 	assert_eq(GridGen.make(_slot(1, SlotDef.TYPE_RAM, {"longer_exposure": 3}), 1).show_ms, 3250)
-	assert_eq(GridGen.make(_slot(20, SlotDef.TYPE_RAM, {"longer_exposure": 5}), 1).show_ms, 1500, "applies after the floor")
+	assert_eq(
+		GridGen.make(_slot(20, SlotDef.TYPE_RAM, {"longer_exposure": 5}), 1).show_ms,
+		1500,
+		"applies after the floor"
+	)
 
 
 func test_metronome_widens_cpu_tolerance() -> void:
-	assert_almost_eq(RhythmGen.make(_slot(1, SlotDef.TYPE_CPU, {"metronome": 2}), 1).tolerance, 0.36, 0.0001)
-	assert_almost_eq(RhythmGen.make(_slot(40, SlotDef.TYPE_CPU, {"metronome": 5}), 1).tolerance, 0.30, 0.0001)
+	assert_almost_eq(
+		RhythmGen.make(_slot(1, SlotDef.TYPE_CPU, {"metronome": 2}), 1).tolerance, 0.36, 0.0001
+	)
+	assert_almost_eq(
+		RhythmGen.make(_slot(40, SlotDef.TYPE_CPU, {"metronome": 5}), 1).tolerance, 0.30, 0.0001
+	)
 
 
 func test_time_dilation_extends_all_limits() -> void:
 	var td := {"time_dilation": 2}
-	assert_almost_eq(SequenceGen.make(_slot(1, SlotDef.TYPE_STO, td), 1).time_limit_s, 4.5 * 1.3, 0.0001)
-	assert_almost_eq(GridGen.make(_slot(1, SlotDef.TYPE_RAM, td), 1).time_limit_s, 6.4 * 1.3, 0.0001)
-	assert_almost_eq(RhythmGen.make(_slot(1, SlotDef.TYPE_CPU, td), 1).first_press_timeout_s, 6.5, 0.0001)
+	assert_almost_eq(
+		SequenceGen.make(_slot(1, SlotDef.TYPE_STO, td), 1).time_limit_s, 4.5 * 1.3, 0.0001
+	)
+	assert_almost_eq(
+		GridGen.make(_slot(1, SlotDef.TYPE_RAM, td), 1).time_limit_s, 6.4 * 1.3, 0.0001
+	)
+	assert_almost_eq(
+		RhythmGen.make(_slot(1, SlotDef.TYPE_CPU, td), 1).first_press_timeout_s, 6.5, 0.0001
+	)
 
 
 func test_overclock_and_miner_boost_rewards() -> void:
@@ -132,7 +148,9 @@ func test_replay_buffer_replays_and_resets() -> void:
 	assert_eq(puzzle.replays_left(), 1)
 	while puzzle.phase != PuzzleBase.Phase.INPUT:
 		puzzle._process(FRAME)
-	assert_almost_eq(puzzle.time_left_s, puzzle.time_limit_s, 0.0001, "timer restarts at full length")
+	assert_almost_eq(
+		puzzle.time_left_s, puzzle.time_limit_s, 0.0001, "timer restarts at full length"
+	)
 	puzzle.replay()
 	assert_eq(puzzle.replays_left(), 0)
 	while puzzle.phase != PuzzleBase.Phase.INPUT:

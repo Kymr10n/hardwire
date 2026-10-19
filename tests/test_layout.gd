@@ -28,7 +28,9 @@ func _check_controls(screen: Control, label: String) -> void:
 		if not button.is_visible_in_tree() or _in_scroll(button):
 			continue
 		var rect: Rect2 = button.get_global_rect()
-		assert_true(view.encloses(rect.grow(-1.0)), "%s: %s at %s is off screen" % [label, button, rect])
+		assert_true(
+			view.encloses(rect.grow(-1.0)), "%s: %s at %s is off screen" % [label, button, rect]
+		)
 		assert_gte(rect.size.y, tap - 0.5, "%s: %s is shorter than tap_min" % [label, button])
 
 
@@ -44,7 +46,9 @@ func _in_scroll(node: Node) -> bool:
 func _assert_no_overlap(rects: Array[Rect2], label: String) -> void:
 	for i: int in rects.size():
 		for j: int in range(i + 1, rects.size()):
-			assert_false(rects[i].intersects(rects[j]), "%s: items %d and %d overlap" % [label, i, j])
+			assert_false(
+				rects[i].intersects(rects[j]), "%s: items %d and %d overlap" % [label, i, j]
+			)
 
 
 func test_menu_screens() -> void:
@@ -66,7 +70,9 @@ func test_storage_pads_at_every_size() -> void:
 		var rects: Array[Rect2] = []
 		for pad: StoragePad in screen.puzzle.pads():
 			assert_gte(pad.size.x, 160.0, "pads are at least 160 px")
-			assert_true(Rect2(Vector2.ZERO, Vector2(size)).encloses(pad.get_global_rect()), "pad on screen")
+			assert_true(
+				Rect2(Vector2.ZERO, Vector2(size)).encloses(pad.get_global_rect()), "pad on screen"
+			)
 			rects.append(pad.get_global_rect())
 		assert_eq(rects.size(), 8)
 		_assert_no_overlap(rects, "storage %s" % size)
@@ -82,7 +88,9 @@ func test_ram_cells_at_every_size() -> void:
 		var grid: RamGrid = screen.puzzle.grid()
 		assert_eq(grid.n, 6)
 		assert_gte(grid._cell_rect(0).size.x, 120.0, "cells are at least 120 px")
-		assert_eq(grid.cell_at(grid.global_position + grid._cell_rect(7).get_center()), 7, "hit test")
+		assert_eq(
+			grid.cell_at(grid.global_position + grid._cell_rect(7).get_center()), 7, "hit test"
+		)
 		screen.get_parent().queue_free()
 
 

@@ -5,7 +5,6 @@ const StoragePuzzle := preload("res://scenes/puzzles/StoragePuzzle.gd")
 const PuzzleScreen := preload("res://scenes/screens/PuzzleScreen.gd")
 
 
-
 func _puzzle(tier: int, modifier: String = "", seed: int = 7) -> PuzzleBase:
 	var puzzle: PuzzleBase = StoragePuzzle.new()
 	puzzle.size = Vector2(1000, 1200)

@@ -55,8 +55,18 @@ func test_fresh_state_has_all_upgrades_at_zero() -> void:
 func test_to_dict_matches_save_schema() -> void:
 	var keys: Array = GameState.to_dict().keys()
 	keys.sort()
-	var expected: Array = ["best_tier_ever", "cores", "cycles", "last_seen", "lifetime", "seen_tutorials",
-		"settings", "solved_slots", "stats", "upgrades"]
+	var expected: Array = [
+		"best_tier_ever",
+		"cores",
+		"cycles",
+		"last_seen",
+		"lifetime",
+		"seen_tutorials",
+		"settings",
+		"solved_slots",
+		"stats",
+		"upgrades"
+	]
 	assert_eq(keys, expected)
 
 
@@ -81,7 +91,9 @@ func test_from_dict_survives_json_floats() -> void:
 
 
 func test_from_dict_fills_missing_fields() -> void:
-	GameState.from_dict({"stats": {"ram": 4}, "upgrades": {"bogus": 9}, "settings": {"sound": "no"}})
+	GameState.from_dict(
+		{"stats": {"ram": 4}, "upgrades": {"bogus": 9}, "settings": {"sound": "no"}}
+	)
 	assert_eq(GameState.ram, 4)
 	assert_eq(GameState.cpu, 0)
 	assert_false(GameState.upgrades.has("bogus"))

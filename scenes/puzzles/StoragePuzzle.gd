@@ -167,7 +167,9 @@ func _layout() -> void:
 		return
 	var pad_size: float = get_theme_constant("pad_size", "Hardwire")
 	var center: Vector2 = size / 2.0
-	var radius: float = maxf(0.0, minf(size.x, size.y) / 2.0 - pad_size / 2.0 - get_theme_constant("margin", "Hardwire"))
+	var radius: float = maxf(
+		0.0, minf(size.x, size.y) / 2.0 - pad_size / 2.0 - get_theme_constant("margin", "Hardwire")
+	)
 	for pad: StoragePad in _pads:
 		var angle: float = -PI / 2.0 + TAU * pad.index / _pads.size()
 		pad.size = Vector2(pad_size, pad_size)

@@ -101,7 +101,9 @@ func test_license_reflow_joins_wrapped_lines() -> void:
 func test_base_size_follows_window_aspect() -> void:
 	assert_eq(MainScript.base_size(Vector2i(1280, 800)), Vector2i(1920, 1080))
 	assert_eq(MainScript.base_size(Vector2i(540, 960)), Vector2i(1080, 1920))
-	assert_eq(MainScript.base_size(Vector2i(800, 800)), Vector2i(1080, 1920), "square counts as portrait")
+	assert_eq(
+		MainScript.base_size(Vector2i(800, 800)), Vector2i(1080, 1920), "square counts as portrait"
+	)
 
 
 func test_fullscreen_only_on_steam_deck() -> void:

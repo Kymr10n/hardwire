@@ -12,7 +12,7 @@ func _puzzle_screen(tier: int, type: String, modifier: String = "") -> Control:
 	var screen := PuzzleScreen.new()
 	screen.setup(SlotDef.create(tier, type, modifier))
 	in_viewport(screen, LANDSCAPE)
-	Ui.focus_first(screen) # as Main._show does
+	Ui.focus_first(screen)  # as Main._show does
 	await wait_process_frames(2)
 	for i: int in 3000:
 		if screen.puzzle.phase == PuzzleBase.Phase.INPUT:

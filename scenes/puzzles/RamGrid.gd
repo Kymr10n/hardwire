@@ -7,7 +7,12 @@ extends Control
 
 signal cell_activated(index: int)
 
-const DIRECTIONS := {"ui_left": Vector2i(-1, 0), "ui_right": Vector2i(1, 0), "ui_up": Vector2i(0, -1), "ui_down": Vector2i(0, 1)}
+const DIRECTIONS := {
+	"ui_left": Vector2i(-1, 0),
+	"ui_right": Vector2i(1, 0),
+	"ui_up": Vector2i(0, -1),
+	"ui_down": Vector2i(0, 1)
+}
 
 var n: int = 0
 var cursor: int = 0
@@ -77,7 +82,9 @@ func _gui_input(event: InputEvent) -> void:
 		return
 	for action: String in DIRECTIONS:
 		if event.is_action_pressed(action, true):
-			var cell: Vector2i = Vector2i(cursor % n, floori(float(cursor) / n)) + DIRECTIONS[action]
+			var cell: Vector2i = (
+				Vector2i(cursor % n, floori(float(cursor) / n)) + DIRECTIONS[action]
+			)
 			if cell.x >= 0 and cell.x < n and cell.y >= 0 and cell.y < n:
 				cursor = cell.y * n + cell.x
 				accept_event()

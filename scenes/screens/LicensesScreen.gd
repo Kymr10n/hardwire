@@ -29,7 +29,9 @@ func _ready() -> void:
 	text_label.fit_content = true
 	text_label.scroll_active = false
 	text_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	text_label.add_theme_font_size_override("normal_font_size", get_theme_font_size("small", "Hardwire"))
+	text_label.add_theme_font_size_override(
+		"normal_font_size", get_theme_font_size("small", "Hardwire")
+	)
 	text_label.text = full_text()
 	scroll.add_child(text_label)
 
