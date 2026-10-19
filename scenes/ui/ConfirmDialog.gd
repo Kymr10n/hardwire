@@ -6,10 +6,6 @@ extends Control
 signal confirmed
 signal cancelled
 
-const DIM := 0.8
-const WIDTH := 860.0
-const BUTTON_TAPS := 2.5
-
 var _title: String
 var _message: String
 var _confirm_text: String
@@ -35,7 +31,9 @@ static func open(
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
-	var box: VBoxContainer = Ui.modal(self, DIM, WIDTH)
+	var box: VBoxContainer = Ui.modal(
+		self, Ui.pct(self, "dialog_dim_pct"), get_theme_constant("dialog_width", "Hardwire")
+	)
 	box.add_child(Ui.label(_title, get_theme_font_size("header", "Hardwire")))
 	var message: Label = Ui.label(_message)
 	message.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -45,8 +43,8 @@ func _ready() -> void:
 	buttons.add_theme_constant_override("separation", get_theme_constant("margin", "Hardwire"))
 	box.add_child(buttons)
 	if not _cancel_text.is_empty():
-		buttons.add_child(Ui.button(_cancel_text, _close.bind(false), BUTTON_TAPS))
-	var ok: Button = Ui.button(_confirm_text, _close.bind(true), BUTTON_TAPS)
+		buttons.add_child(Ui.button(_cancel_text, _close.bind(false), true))
+	var ok: Button = Ui.button(_confirm_text, _close.bind(true), true)
 	buttons.add_child(ok)
 	ok.grab_focus.call_deferred(true)
 

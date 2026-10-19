@@ -8,8 +8,8 @@ extends Control
 signal again_pressed
 signal overview_pressed
 
-const DIM := 0.6
-const BUTTON_TAPS := 3.0
+## Guards the division by the count-up time in case it is tuned to 0.
+const MIN_COUNTUP_S := 0.001
 
 var _title: Label
 var _gain: Label
@@ -22,7 +22,7 @@ var _again: Button
 
 
 func _ready() -> void:
-	var box: VBoxContainer = Ui.modal(self, DIM)
+	var box: VBoxContainer = Ui.modal(self, Ui.pct(self, "overlay_dim_pct"))
 	_title = Ui.label("", get_theme_font_size("phase", "Hardwire"))
 	box.add_child(_title)
 	_gain = Ui.label("")
@@ -32,9 +32,9 @@ func _ready() -> void:
 	var buttons := HBoxContainer.new()
 	buttons.add_theme_constant_override("separation", get_theme_constant("margin", "Hardwire"))
 	box.add_child(buttons)
-	_again = Ui.button("Again", again_pressed.emit, BUTTON_TAPS)
+	_again = Ui.button("Again", again_pressed.emit, true)
 	buttons.add_child(_again)
-	buttons.add_child(Ui.button("Overview", overview_pressed.emit, BUTTON_TAPS))
+	buttons.add_child(Ui.button("Overview", overview_pressed.emit, true))
 	hide()
 
 
@@ -66,5 +66,7 @@ func _process(delta: float) -> void:
 
 
 func _update_gain() -> void:
-	var f: float = clampf(_t / maxf(0.001, Balance.get_num("flow", "reward_countup_s")), 0.0, 1.0)
+	var f: float = clampf(
+		_t / maxf(MIN_COUNTUP_S, Balance.get_num("flow", "reward_countup_s")), 0.0, 1.0
+	)
 	_gain.text = "+%d %s    +%d Cycles" % [roundi(_stat * f), _stat_name, roundi(_cycles * f)]

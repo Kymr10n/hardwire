@@ -4,8 +4,6 @@ extends PuzzleBase
 ## A wrong pad or the timeout fails the attempt; the last correct pad solves it.
 ## With the Replay buffer upgrade a Replay button replays the sequence (progress and timer reset).
 
-const REPLAY_WIDTH_TAPS := 3.0
-
 var _attempt: Dictionary = {}
 var _pads: Array[StoragePad] = []
 var _pos: int = 0
@@ -163,7 +161,7 @@ func _ensure_pads(count: int) -> void:
 func _layout() -> void:
 	if _replay_button:
 		var tap: float = get_theme_constant("tap_min", "Hardwire")
-		_replay_button.size = Vector2(tap * REPLAY_WIDTH_TAPS, tap)
+		_replay_button.size = Vector2(get_theme_constant("button_width", "Hardwire"), tap)
 		_replay_button.position = Vector2((size.x - _replay_button.size.x) / 2.0, size.y - tap)
 	if _pads.is_empty():
 		return

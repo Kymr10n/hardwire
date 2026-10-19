@@ -12,11 +12,15 @@ const MARKER_RADIUS := 0.2
 const MARKER_GAP := 1.0
 const MARKER_RING := 0.3
 
+## One-line modifier hints above the tile (SPEC: Modifier hints).
+const HINTS := {RhythmGen.MOD_AUDIO_ONLY: "Listen", RhythmGen.MOD_SYNCOPATED: "Half steps"}
+
+var hint: Label
+
 var _attempt: Dictionary = {}
 var _marker_on := StyleBoxFlat.new()
 var _marker_off := StyleBoxFlat.new()
 var _tile: CpuTile
-var _hint: Label
 var _presses: Array[int] = []
 var _releases: Array[int] = []
 var _holding: bool = false
@@ -27,10 +31,8 @@ var _last_result: Dictionary = {}
 
 
 func _ready() -> void:
-	_hint = Label.new()
-	_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_hint.add_theme_color_override("font_color", get_theme_color("text_dim", "Hardwire"))
-	add_child(_hint)
+	hint = Ui.dim_label("")
+	add_child(hint)
 	_tile = CpuTile.new()
 	add_child(_tile)
 	_marker_off.draw_center = false
@@ -110,7 +112,8 @@ func _input(event: InputEvent) -> void:
 
 
 func _process(delta: float) -> void:
-	super._process(delta)
+	# The input window runs in real time like the judging, whatever the debug time scale.
+	super._process(delta / Engine.time_scale if phase == Phase.INPUT else delta)
 	if phase == Phase.RESULT and not _succeeded:
 		# Silent replay of the target, compressed into the answer reveal.
 		var reveal_s: float = Balance.get_num("flow", "fail_reveal_s")
@@ -129,13 +132,7 @@ func _build_attempt() -> void:
 	_last_result = {}
 	_stop_tone()
 	_tile.lit = false
-	match slot.modifier:
-		RhythmGen.MOD_AUDIO_ONLY:
-			_hint.text = "Listen"
-		RhythmGen.MOD_SYNCOPATED:
-			_hint.text = "Half steps"
-		_:
-			_hint.text = ""
+	hint.text = HINTS.get(slot.modifier, "")
 	queue_redraw()
 
 
@@ -235,8 +232,8 @@ func _layout() -> void:
 	_tile.size = Vector2(side, side)
 	_tile.position = (size - _tile.size) / 2.0
 	_tile.pivot_offset = _tile.size / 2.0
-	_hint.position = Vector2(0.0, _tile.position.y - row_h - margin / 2.0)
-	_hint.size = Vector2(size.x, row_h)
+	hint.position = Vector2(0.0, _tile.position.y - row_h - margin / 2.0)
+	hint.size = Vector2(size.x, row_h)
 	queue_redraw()
 
 

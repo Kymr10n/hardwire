@@ -17,6 +17,7 @@ run/main_scene="res://scenes/Main.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://icon.svg"
 config/quit_on_go_back=false
+run/max_fps=60
 
 [autoload]
 

@@ -14,7 +14,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 CODE_DIRS = ["autoload", "logic", "scenes"]
 # Where tuning numbers must come from Balance or the theme (named constants are exempt).
-NUMBER_DIRS = ["logic", "scenes/puzzles"]
+NUMBER_DIRS = ["logic", "scenes", "autoload"]
 ALLOWED_VALUES = {0, 1, 2, -1, 0.5, 1000, 1_000_000}
 DUP_WINDOW = 6  # identical significant lines in a row that count as duplicated code
 MAX_FUNC_LINES = 40

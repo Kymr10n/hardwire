@@ -64,7 +64,7 @@ func refresh() -> void:
 	_glyph.visible = not slot.modifier.is_empty()
 	_glyph.text = MOD_GLYPHS.get(slot.modifier, "*")
 	_badge_style(_glyph, dim if locked else accent)
-	_modifier.text = slot.modifier.capitalize()
+	_modifier.text = SlotDef.modifier_name(slot.modifier)
 	_lines.text = _missing_text() if locked else _reward_text(not solved)
 	_lines.add_theme_color_override(
 		"font_color", dim if locked else get_theme_color("text", "Hardwire")

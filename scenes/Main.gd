@@ -186,6 +186,8 @@ func go_back() -> void:
 			get_tree().quit()
 	elif screen is PuzzleScreen:
 		screen.go_back()
+	elif screen is LicensesScreen:
+		show_settings()
 	else:
 		show_overview()
 

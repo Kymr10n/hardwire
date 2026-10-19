@@ -43,11 +43,8 @@ func _grid(parent: Control) -> GridContainer:
 
 
 func _add_button(parent: Control, text: String, on_pressed: Callable) -> Button:
-	var button := Button.new()
-	button.text = text
-	button.custom_minimum_size.y = get_theme_constant("tap_min", "Hardwire")
+	var button: Button = Ui.button(text, on_pressed)
 	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	button.pressed.connect(on_pressed)
 	parent.add_child(button)
 	return button
 

@@ -42,7 +42,7 @@ Every screen and minigame must be fully playable with touch, mouse, keyboard and
 
 **Legibility.** Minimum font size is 32 px at the reference size (about 21 px on a 1280 × 800 Steam Deck screen). Tap and click targets are at least 120 px at the reference size.
 
-**Input actions.** Godot's UI actions plus one game action, defined in `project.godot`:
+**Input actions.** Godot's UI actions plus two game actions (`commit`, `debug_panel`), defined in `project.godot`:
 
 | Action | Touch / mouse | Keyboard | Gamepad |
 | --- | --- | --- | --- |
@@ -55,7 +55,7 @@ Every screen and minigame must be fully playable with touch, mouse, keyboard and
 | CPU tile | Hold tile | Hold Space or Enter | Hold A |
 | Debug panel (`debug_panel`, debug builds) | Tap the stat bar 5 times | F1 | View (Select) |
 
-The focus outline shows only for keyboard and gamepad input. Storage pads keep their ring on every input method (D-021).
+The focus outline shows only for keyboard and gamepad input; when the overview opens, focus starts on the first unsolved slot of the newest unlocked tier. Storage pads keep their ring on every input method (D-021).
 
 **Glyphs.** On-screen prompts show the glyphs of the last-used input device: none for touch ("Tap to …"), keys for keyboard and mouse ("Click or press Enter to …"), A/B/X/Y for gamepad (Xbox layout, which matches Steam Deck). Keyboard prompts never appear while a gamepad is in use.
 
@@ -65,7 +65,7 @@ The focus outline shows only for keyboard and gamepad input. Storage pads keep t
 - Runs at 1280 × 800, smallest text at least 9 px (target 12 px or more).
 - No launcher, no unsupported-platform warnings.
 - No text entry, so no on-screen keyboard is needed.
-- At least 30 fps at 800p; the game targets a 60 fps cap.
+- At least 30 fps at 800p; the game caps at 60 fps (`application/run/max_fps`).
 
 **Haptics.** Phones use `Input.vibrate_handheld`; gamepads use `Input.start_joy_vibration`. Both go through the Haptics autoload and respect the setting.
 
@@ -226,7 +226,7 @@ cycles gain = round(cycles(T) × first × modifier × (1 + 0.10 × Cycle miner) 
 
 Without upgrades or modifiers, reaching tier 10 takes about 8 replays per minigame in total (1 to 2 per tier from tier 4), and tier 20 about 24.
 
-**Modifiers.** From tier 8 a slot may carry one modifier. The chance is `min(0.8, 0.3 + 0.025(T−8))`, decided by the slot's hash. Tiers 8 to 13 draw from the first modifier of each minigame (Reverse, Inverted, Audio only); tier 14 onward adds the second (Decoy, Rotated, Syncopated). A modifier slot shows its icon and name on the overview.
+**Modifiers.** From tier 8 a slot may carry one modifier. The chance is `min(0.8, 0.3 + 0.025(T−8))`, decided by the slot's hash. Tiers 8 to 13 draw from the first modifier of each minigame (Reverse, Inverted, Audio only); tier 14 onward adds the second (Decoy, Rotated, Syncopated). A modifier slot shows its icon and name on the overview and in the puzzle header; the names are Reverse, Decoy, Inverted, Rotated, Audio only and Syncopated.
 
 ## Upgrade shop
 
@@ -272,23 +272,23 @@ While the app is closed, the player earns Cycles (never stats), capped at 8 hour
 The prototype has five screens around one hub, the overview. Every screen works in portrait and landscape and with every input method (see Platforms and input).
 
 | Screen | Contents | Leads to |
-| --- | --- | --- | --- |
+| --- | --- | --- |
 | Boot | Title, "Press any button" ("Tap to start" on touch), loads the save | Overview |
-| Overview | Top bar with RAM, CPU, STO, Cycles and Cores; vertical scroll list of tier rows (tier 1 at the top), newest unlocked tier in view on open; each row = tier number, requirement chips and 3 slot cards (RAM, CPU, STO); bottom bar with Shop, Rebuild and Settings | Puzzle, Shop, Rebuild dialog, Settings |
+| Overview | Top bar with RAM, CPU, STO, Cycles and Cores (compact above 9999: 12.3K, 4.56M); vertical scroll list of tier rows (tier 1 at the top), newest unlocked tier in view on open; each row = tier number, requirement chips (accent-coloured while unmet) and 3 slot cards (RAM, CPU, STO); bottom bar with Shop, Rebuild and Settings | Puzzle, Shop, Rebuild dialog, Settings |
 | Puzzle | Header with minigame name, tier, modifier and a back button; phase label ("Watch" / "Your turn"); timer bar; the minigame area; result overlay | Overview |
 | Shop | List of upgrade cards, Cycles balance on top | Overview |
-| Settings | Sound on or off, haptics on or off, licenses (full texts of Hardwire, the font and Godot with its third-party components), reset save (with confirm) | Overview, Licenses |
+| Settings | Sound on or off, haptics on or off, licenses (full texts of Hardwire, the font and Godot with its third-party components; the text scrolls with the D-pad or arrows; Back returns to Settings), reset save (with confirm) | Overview, Licenses |
 
-**Slot card states:** locked (greyed, shows missing stats), unlocked and never solved (accent border, "NEW" badge), solved (normal), modifier (icon in the corner).
+**Slot card states:** locked (greyed, shows missing stats), unlocked and never solved (accent border, "NEW" badge), solved (normal), modifier (icon in the corner). Unlocked cards show what the next solve pays (+stat, +Cycles).
 
 **Result overlay:**
 
-- Success: "Write complete", the stat and Cycles gained (counting up over 0.6 s), a note if a new tier unlocked, then buttons "Again" (same slot, new sequence) and "Overview".
+- Success: "Write complete", the stat and Cycles gained (counting up over 0.6 s), a "First solve ×2" note on a first solve and a note if a new tier unlocked, then buttons "Again" (same slot, new sequence) and "Overview".
 - Failure: "Corrupted", the correct answer shown for 1 s, then the next attempt starts automatically. The back button is always available.
 
 **Feedback on every input:** pad or cell flash, its tone, and a light haptic pulse (phone vibration or gamepad rumble).
 
-**Landscape:** the same screens with one code path each. The puzzle screen puts header, phase label and timer in a side panel next to the puzzle; the overview puts the stats and the Shop / Rebuild / Settings buttons in a sidebar next to the tier list; the shop shows two columns; other screens use a centered column.
+**Landscape:** the same screens with one code path each; a window that changes orientation re-creates the current screen, and a running attempt restarts with a fresh sequence (no penalty). The puzzle screen puts header, phase label and timer in a side panel next to the puzzle; the overview puts the stats and the Shop / Rebuild / Settings buttons in a sidebar next to the tier list; the shop shows two columns; other screens use a centered column.
 
 On PC, Settings adds "Fullscreen" and "Quit"; B on the overview never quits. With the `SteamDeck=1` environment variable (set by Steam on the Deck) the game starts fullscreen.
 
@@ -322,7 +322,7 @@ The look is a dark, flat circuit board drawn entirely with Godot shapes and one 
 
 ## Save system
 
-The game saves one JSON file to `user://save.json` after every solve, purchase, prestige and settings change. Godot maps `user://` to the right per-user folder on every target platform (browser storage on the web), so the same code works everywhere.
+The game saves one JSON file to `user://save.json` after every solve, purchase, prestige and settings change, and on window close or app pause (so `last_seen` is current). Godot maps `user://` to the right per-user folder on every target platform (browser storage on the web), so the same code works everywhere.
 
 ```json
 {
@@ -377,17 +377,19 @@ res://
     Economy.gd            # rewards, costs, multipliers, prestige cores, idle income
     Progress.gd           # gating, tiers, rebuild eligibility, idle offer over the player state
   scenes/
-    Main.tscn             # holds the current screen, handles transitions
-    screens/              # Boot, Overview, Shop, Settings
+    Main.tscn, Main.gd    # holds the current screen, orientation, transitions, back, idle offer
+    screens/              # Boot, Overview, Puzzle, Shop, Settings, Licenses, DebugMenu
     puzzles/
       PuzzleBase.gd       # state machine COUNTDOWN -> WATCH -> INPUT -> RESULT; signals solved/failed
-      StoragePuzzle, RamPuzzle, CpuPuzzle (.gd, .tscn as needed)
-    ui/                   # SlotCard, TierRow, StatBar, TimerBar, ResultOverlay, UpgradeCard
+      StoragePuzzle + StoragePad, RamPuzzle + RamGrid, CpuPuzzle + CpuTile
+    ui/                   # Ui (shared builders), SlotCard, TierRow, StatBar, TimerBar,
+                          # ResultOverlay, ConfirmDialog, HintOverlay, UpgradeCard
   theme/
-    hardwire_theme.tres   # colors, font sizes, durations
-  fonts/
+    hardwire_theme.tres   # colors, font sizes, sizes, durations
+  fonts/                  # JetBrains Mono + OFL
   tests/                  # GUT tests: tests/logic/ mirrors logic/ one-to-one
-  tools/                  # versions.env, setup.sh, check.sh, drift_check.py (the quality gate)
+  tools/                  # versions.env, setup.sh, check.sh, drift_check.py (the quality gate),
+                          # install_godot.sh, export.sh, deck.sh
 ```
 
 **Conventions** (enforced by `CLAUDE.md` and `tools/check.sh`):
@@ -397,7 +399,7 @@ res://
 - Puzzles receive a `SlotDef` and an attempt seed, and emit `solved(result)` or `failed()`; they never touch `GameState` directly.
 - Rhythm timing uses `Time.get_ticks_usec()` inside `_input`.
 - `tools/check.sh` is the single quality gate (format, lint, drift checks, script errors, tests).
-- A debug panel (only in debug builds, opened by tapping the stat bar 5 times within 3 s, or with F1 / gamepad View) can set stats, Cycles and tier, force a minigame and change the time scale. Balancing relies on it. The time scale speeds up playback and timers only; rhythm judging always uses real time.
+- A debug panel (only in debug builds, opened by tapping the stat bar 5 times within 3 s, or with F1 / gamepad View) can set stats, Cycles and tier, force a minigame and change the time scale. Balancing relies on it. The time scale speeds up playback and timers only; rhythm judging and the CPU input window always use real time, so the minigame stays playable at every scale.
 
 ## Milestones and acceptance criteria
 
@@ -405,7 +407,7 @@ Build one milestone per session, in order. Each milestone ends with a playable b
 
 | # | Milestone | Done when |
 | --- | --- | --- |
-| M1 | Skeleton: project settings, autoloads, `balance.json`, save/load, GUT set up | App opens in a portrait window; a debug button adds stats and they survive a restart; tests run headless |
+| M1 | Skeleton: project settings, autoloads, `balance.json`, save/load, GUT set up | App opens in a window (portrait on phones, 1280 × 800 landscape on desktop); a debug button adds stats and they survive a restart; tests run headless |
 | M2 | Storage minigame, launched from a debug menu with a tier picker | Tiers 1, 5 and 20 play as specified; wrong tap and timeout both start a new sequence; Reverse and Decoy work when forced; generator tests pass |
 | M3 | RAM minigame | Toggle, Commit and timeout work; failed attempts flash the answer; Inverted and Rotated work when forced |
 | M4 | CPU minigame and `RhythmJudge` | Judge tests cover exact input, input within tolerance, too many presses, and one segment out of tolerance; playing a tier 1 rhythm by ear passes |

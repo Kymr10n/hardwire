@@ -9,6 +9,15 @@ const TYPE_CPU := "cpu"
 const TYPE_NAMES := {TYPE_STO: "Storage", TYPE_RAM: "RAM", TYPE_CPU: "CPU"}
 ## Stat abbreviations (the stat each minigame raises).
 const STAT_NAMES := {TYPE_STO: "STO", TYPE_RAM: "RAM", TYPE_CPU: "CPU"}
+## Display names of the modifiers in balance.json modifiers.pools (SPEC: Modifiers).
+const MODIFIER_NAMES := {
+	"reverse": "Reverse",
+	"decoy": "Decoy",
+	"inverted": "Inverted",
+	"rotated": "Rotated",
+	"audio_only": "Audio only",
+	"syncopated": "Syncopated",
+}
 
 var tier: int = 1
 var type: String = TYPE_STO
@@ -44,3 +53,7 @@ static func create(p_tier: int, p_type: String, p_modifier: String = "") -> Slot
 	slot.type = p_type
 	slot.modifier = p_modifier
 	return slot
+
+
+static func modifier_name(modifier: String) -> String:
+	return MODIFIER_NAMES.get(modifier, modifier)

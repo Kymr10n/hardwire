@@ -41,11 +41,8 @@ func _ready() -> void:
 	_effect.add_theme_color_override("font_color", get_theme_color("text_dim", "Hardwire"))
 	_effect.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	text.add_child(_effect)
-	_buy = Button.new()
-	var tap: float = get_theme_constant("tap_min", "Hardwire")
-	_buy.custom_minimum_size = Vector2(tap * 2.2, tap)
+	_buy = Ui.button("", func() -> void: buy_pressed.emit(id), true)
 	_buy.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	_buy.pressed.connect(func() -> void: buy_pressed.emit(id))
 	row.add_child(_buy)
 	refresh()
 
@@ -73,13 +70,13 @@ static func effect_text(upgrade_id: String, level: int) -> String:
 		"replay_buffer":
 			return "Storage: %d replays" % int(e)
 		"longer_exposure":
-			return "RAM: +%d%% show time" % roundi(e * 100.0)
+			return "RAM: +%d%% show time" % roundi(e * Ui.PERCENT)
 		"metronome":
-			return "CPU: +%d pts tolerance" % roundi(e * 100.0)
+			return "CPU: +%d pts tolerance" % roundi(e * Ui.PERCENT)
 		"time_dilation":
-			return "All: +%d%% input time" % roundi(e * 100.0)
+			return "All: +%d%% input time" % roundi(e * Ui.PERCENT)
 		"overclock":
-			return "+%d%% stat rewards" % roundi(e * 100.0)
+			return "+%d%% stat rewards" % roundi(e * Ui.PERCENT)
 		"cycle_miner":
-			return "+%d%% Cycles" % roundi(e * 100.0)
+			return "+%d%% Cycles" % roundi(e * Ui.PERCENT)
 	return str(e)

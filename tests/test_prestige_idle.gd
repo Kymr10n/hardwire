@@ -115,3 +115,13 @@ func test_rebuild_dialog_flow() -> void:
 	assert_eq(GameState.cores, 1)
 	assert_eq(GameState.ram, 0)
 	assert_true(main.screen.rebuild_button.disabled, "fresh overview after the reset")
+
+
+func test_idle_dialog_waits_while_a_puzzle_is_open() -> void:
+	_solve(5, SlotDef.TYPE_RAM)
+	GameState.last_seen = int(Time.get_unix_time_from_system()) - 2 * 3600
+	var main := _main()
+	main.show_puzzle(SlotGenerator.make(1, SlotDef.TYPE_STO))
+	assert_eq(_dialogs(main.screen).size(), 0, "never over a running puzzle")
+	main.show_overview()
+	assert_eq(_dialogs(main.screen).size(), 1, "offered once back on the overview")

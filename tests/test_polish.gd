@@ -1,3 +1,4 @@
+# gdlint: disable=max-public-methods
 extends "res://tests/hardwire_test.gd"
 ## M8 polish: first-run hints, screen transitions, Android back navigation.
 
@@ -91,6 +92,8 @@ func test_settings_opens_licenses_and_back_returns() -> void:
 	main.screen.licenses_requested.emit()
 	assert_true(main.screen is LicensesScreen)
 	main.go_back()
+	assert_true(main.screen is SettingsScreen, "Back from Licenses returns to Settings (D-023)")
+	main.go_back()
 	assert_true(main.screen is OverviewScreen)
 
 
@@ -117,3 +120,38 @@ func test_back_never_quits_on_pc_overview() -> void:
 	main.go_back()
 	assert_true(main.screen is OverviewScreen, "still on the overview (tests run on PC)")
 	assert_false(get_tree().root.is_queued_for_deletion())
+
+
+func test_theme_motion_constants_match_spec() -> void:
+	var theme: Theme = ThemeDB.get_project_theme()
+	assert_eq(theme.get_constant("glow_ms", "Hardwire"), 80)
+	assert_eq(theme.get_constant("glow_scale_pct", "Hardwire"), 105)
+	assert_eq(theme.get_constant("transition_ms", "Hardwire"), 150)
+
+
+func test_modifier_display_names() -> void:
+	assert_eq(SlotDef.modifier_name("audio_only"), "Audio only")
+	assert_eq(SlotDef.modifier_name("reverse"), "Reverse")
+	for type: String in SlotGenerator.TYPES:
+		for modifier: Variant in Balance.section("modifiers").pools[type]:
+			assert_true(SlotDef.MODIFIER_NAMES.has(modifier), "%s has a display name" % modifier)
+	var screen: Control = PuzzleScreen.new()
+	screen.setup(SlotDef.create(8, SlotDef.TYPE_CPU, "audio_only"))
+	assert_eq(screen.title_text(), "CPU  T8  [Audio only]")
+	screen.free()
+
+
+func test_modifier_hint_lines() -> void:
+	var ram: PuzzleBase = preload("res://scenes/puzzles/RamPuzzle.gd").new()
+	add_child_autofree(ram)
+	ram.setup(SlotDef.create(8, SlotDef.TYPE_RAM, GridGen.MOD_INVERTED), 1)
+	ram.start()
+	assert_eq(ram.hint.text, "Set the dark cells")
+	ram.setup(SlotDef.create(8, SlotDef.TYPE_RAM), 1)
+	ram.start()
+	assert_eq(ram.hint.text, "", "no hint without a modifier")
+	var cpu: PuzzleBase = preload("res://scenes/puzzles/CpuPuzzle.gd").new()
+	add_child_autofree(cpu)
+	cpu.setup(SlotDef.create(8, SlotDef.TYPE_CPU, RhythmGen.MOD_SYNCOPATED), 1)
+	cpu.start()
+	assert_eq(cpu.hint.text, "Half steps")

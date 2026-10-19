@@ -3,8 +3,7 @@ extends PuzzleBase
 ## The pattern shows for show_ms, then the player toggles cells and presses Commit once the
 ## set count equals the cells needed. A wrong Commit or the timeout fails the attempt.
 
-## Layout, in units of tap_min and margin.
-const COMMIT_WIDTH := 2.5
+## Layout, in units of margin.
 const WIDE_MARGINS := 3.0
 ## Rotation arrow, as fractions of tap_min and of its radius.
 const ICON_RADIUS := 0.3
@@ -15,9 +14,13 @@ const ARROW_HEAD_HALF := 0.6
 const ARROW_HEAD_LENGTH := 0.8
 const ARC_SEGMENTS := 32
 
+## One-line modifier hints above the grid (SPEC: Modifier hints).
+const HINTS := {GridGen.MOD_INVERTED: "Set the dark cells", GridGen.MOD_ROTATED: "Enter it rotated"}
+
+var hint: Label
+
 var _attempt: Dictionary = {}
 var _grid: RamGrid
-var _hint: Label
 var _counter: Label
 var _commit: Button
 var _shown: bool = false
@@ -25,11 +28,9 @@ var _icon_center: Vector2 = Vector2.ZERO
 
 
 func _ready() -> void:
-	_hint = Label.new()
-	_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_hint.add_theme_color_override("font_color", get_theme_color("text_dim", "Hardwire"))
-	add_child(_hint)
+	hint = Ui.dim_label("")
+	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	add_child(hint)
 	_grid = RamGrid.new()
 	_grid.cell_activated.connect(toggle_cell)
 	add_child(_grid)
@@ -113,13 +114,7 @@ func _build_attempt() -> void:
 	time_limit_s = _attempt.time_limit_s
 	_shown = false
 	_grid.setup(_attempt.n)
-	match slot.modifier:
-		GridGen.MOD_INVERTED:
-			_hint.text = "Set the dark cells"
-		GridGen.MOD_ROTATED:
-			_hint.text = "Enter it rotated"
-		_:
-			_hint.text = ""
+	hint.text = HINTS.get(slot.modifier, "")
 	queue_redraw()
 	_update_counter()
 	_layout()
@@ -164,7 +159,7 @@ func _layout() -> void:
 		return
 	var margin: float = get_theme_constant("margin", "Hardwire")
 	var row_h: float = get_theme_constant("tap_min", "Hardwire")
-	var commit_w: float = row_h * COMMIT_WIDTH
+	var commit_w: float = get_theme_constant("button_width", "Hardwire")
 	var wide: bool = size.x - WIDE_MARGINS * margin - commit_w > size.y - 2.0 * row_h - 2.0 * margin
 	var side: float
 	if wide:
@@ -174,8 +169,8 @@ func _layout() -> void:
 		var column_x: float = left + side + margin
 		_grid.position = Vector2(left, top)
 		_icon_center = Vector2(column_x + row_h * ICON_RADIUS, top + row_h / 2.0)
-		_hint.position = Vector2(column_x, top + row_h)
-		_hint.size = Vector2(commit_w, row_h * 2.0)
+		hint.position = Vector2(column_x, top + row_h)
+		hint.size = Vector2(commit_w, row_h * 2.0)
 		_commit.position = Vector2(column_x, top + side - row_h)
 		_counter.position = Vector2(column_x, _commit.position.y - row_h - margin / 2.0)
 		_counter.size = Vector2(commit_w, row_h)
@@ -183,10 +178,10 @@ func _layout() -> void:
 		side = maxf(0.0, minf(size.x - 2.0 * margin, size.y - 2.0 * row_h - 2.0 * margin))
 		var top: float = maxf(row_h + margin, (size.y - side) / 2.0)
 		_grid.position = Vector2((size.x - side) / 2.0, top)
-		_hint.position = Vector2(_grid.position.x, top - row_h - margin / 2.0)
-		_hint.size = Vector2(side, row_h)
+		hint.position = Vector2(_grid.position.x, top - row_h - margin / 2.0)
+		hint.size = Vector2(side, row_h)
 		_icon_center = Vector2(
-			_grid.position.x + row_h * ICON_RADIUS, _hint.position.y + row_h / 2.0
+			_grid.position.x + row_h * ICON_RADIUS, hint.position.y + row_h / 2.0
 		)
 		var bottom: float = top + side + margin / 2.0
 		_counter.position = Vector2(_grid.position.x, bottom)

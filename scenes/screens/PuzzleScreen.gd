@@ -72,7 +72,7 @@ func _build_panel(landscape: bool) -> BoxContainer:
 	var panel: BoxContainer = Ui.box(true)
 	if landscape:
 		panel.custom_minimum_size.x = get_theme_constant("side_panel", "Hardwire")
-	var title: Label = Ui.header(panel, _title_text(), go_back, landscape)
+	var title: Label = Ui.header(panel, title_text(), go_back, landscape)
 	title.add_theme_color_override("font_color", accent)
 	_phase_label = Ui.label("", get_theme_font_size("phase", "Hardwire"))
 	panel.add_child(_phase_label)
@@ -105,10 +105,11 @@ func _process(_delta: float) -> void:
 	_timer_bar.fraction = puzzle.time_fraction()
 
 
-func _title_text() -> String:
+## Header text: minigame, tier and the modifier name (SPEC: Puzzle screen).
+func title_text() -> String:
 	var text: String = "%s  T%d" % [SlotDef.TYPE_NAMES.get(slot.type, slot.type), slot.tier]
 	if not slot.modifier.is_empty():
-		text += "  [%s]" % slot.modifier.capitalize()
+		text += "  [%s]" % SlotDef.modifier_name(slot.modifier)
 	return text
 
 

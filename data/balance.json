@@ -27,6 +27,8 @@
   },
   "audio": {
     "volume": 0.3,
+    "buffer_s": 0.05,
+    "fail_volume": 0.6,
     "attack_ms": 5,
     "release_ms": 30,
     "pad_notes_hz": [261.63, 293.66, 329.63, 392.0, 440.0, 523.25, 587.33, 659.25],

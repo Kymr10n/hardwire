@@ -3,6 +3,9 @@ extends RefCounted
 ## Shared UI helpers for screens built in code (SPEC: Landscape). One code path per screen:
 ## helpers adapt to the orientation instead of screens having separate layouts.
 
+## Theme `*_pct` constants are percentages.
+const PERCENT := 100.0
+
 
 ## True when the node's viewport is wider than tall (Steam Deck, desktop).
 static func is_landscape(node: Node) -> bool:
@@ -49,12 +52,8 @@ static func header(
 		"separation", parent.get_theme_constant("margin", "Hardwire") / 2
 	)
 	parent.add_child(row)
-	var tap: float = parent.get_theme_constant("tap_min", "Hardwire")
-	var back := Button.new()
-	back.text = "< Back"
-	back.custom_minimum_size = Vector2(tap * 1.5, tap)
+	var back: Button = button("< Back", on_back)
 	back.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-	back.pressed.connect(on_back)
 	row.add_child(back)
 	var label := Label.new()
 	label.text = title
@@ -105,16 +104,17 @@ static func draw_focus(control: Control, rect: Rect2) -> void:
 
 ## A `*_pct` theme constant as a ratio (glow_scale_pct 105 -> 1.05).
 static func pct(control: Control, name: String) -> float:
-	return control.get_theme_constant(name, "Hardwire") / 100.0
+	return control.get_theme_constant(name, "Hardwire") / PERCENT
 
 
-## A button at least tap_min tall and `width_taps` x tap_min wide (0 = as wide as its text).
-static func button(text: String, on_pressed: Callable, width_taps: float = 0.0) -> Button:
+## A button at least tap_min tall; `wide` makes it the theme's button_width (dialogs, actions).
+static func button(text: String, on_pressed: Callable, wide: bool = false) -> Button:
 	var b := Button.new()
 	b.text = text
 	b.pressed.connect(on_pressed)
-	var tap: float = ThemeDB.get_project_theme().get_constant("tap_min", "Hardwire")
-	b.custom_minimum_size = Vector2(tap * width_taps, tap)
+	var theme: Theme = ThemeDB.get_project_theme()
+	var width: float = theme.get_constant("button_width", "Hardwire") if wide else 0.0
+	b.custom_minimum_size = Vector2(width, theme.get_constant("tap_min", "Hardwire"))
 	return b
 
 

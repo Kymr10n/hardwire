@@ -11,7 +11,7 @@ var prompt: Label
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var dim := ColorRect.new()
-	dim.color = Color(get_theme_color("bg", "Hardwire"), 0.85)
+	dim.color = Color(get_theme_color("bg", "Hardwire"), Ui.pct(self, "hint_dim_pct"))
 	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(dim)
 	var box := VBoxContainer.new()

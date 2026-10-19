@@ -18,7 +18,7 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	var generator := AudioStreamGenerator.new()
 	generator.mix_rate = MIX_RATE
-	generator.buffer_length = 0.05
+	generator.buffer_length = Balance.get_num("audio", "buffer_s")
 	_player = AudioStreamPlayer.new()
 	_player.stream = generator
 	# Web exports default to "sample" playback, which cannot play a generator.
@@ -68,7 +68,12 @@ func play_success() -> void:
 
 
 func play_fail() -> void:
-	_add_voice(Wave.NOISE, 0.0, Balance.get_num("audio", "fail_noise_ms"), 0.6)
+	_add_voice(
+		Wave.NOISE,
+		0.0,
+		Balance.get_num("audio", "fail_noise_ms"),
+		Balance.get_num("audio", "fail_volume")
+	)
 
 
 func stop_all() -> void:

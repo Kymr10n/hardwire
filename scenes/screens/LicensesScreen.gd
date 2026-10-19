@@ -10,6 +10,9 @@ const FILES := {
 	"JetBrains Mono": "res://fonts/JetBrainsMono-OFL.txt",
 }
 
+## D-pad scrolling step, in tap_min units.
+const SCROLL_STEP_TAPS := 3
+
 var text_label: RichTextLabel
 
 var _scroll: ScrollContainer
@@ -38,7 +41,7 @@ func _ready() -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	for action: String in ["ui_up", "ui_down"]:
 		if event.is_action_pressed(action, true):
-			var step: int = get_theme_constant("tap_min", "Hardwire") * 3
+			var step: int = get_theme_constant("tap_min", "Hardwire") * SCROLL_STEP_TAPS
 			_scroll.scroll_vertical += step if action == "ui_down" else -step
 			get_viewport().set_input_as_handled()
 

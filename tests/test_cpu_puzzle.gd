@@ -252,3 +252,14 @@ func test_fail_reveal_lasts_the_reveal_time() -> void:
 		puzzle._process(FRAME)
 		t += FRAME
 	assert_almost_eq(t, Balance.get_num("flow", "fail_reveal_s"), 2 * FRAME)
+
+
+func test_input_window_ignores_debug_time_scale() -> void:
+	# SPEC: judging and the input window use real time at every time scale (D-023).
+	var puzzle := _puzzle(1)
+	_run_until(puzzle, PuzzleBase.Phase.INPUT)
+	puzzle.press_at(1_000_000)
+	var before: float = puzzle.time_left_s
+	Engine.time_scale = 4.0
+	puzzle._process(0.4)  # 0.4 s of scaled time = 0.1 s real
+	assert_almost_eq(before - puzzle.time_left_s, 0.1, 0.0001)

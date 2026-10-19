@@ -7,7 +7,6 @@ signal play_requested(slot: SlotDef)
 signal exit_requested
 
 const QUICK_TIERS: Array[int] = [1, 5, 10, 20]
-const BUTTON_TAPS := 1.5
 const TYPES: Array[String] = [SlotDef.TYPE_STO, SlotDef.TYPE_RAM, SlotDef.TYPE_CPU]
 
 ## Kept across screen changes so returning from a puzzle keeps the picks.
@@ -71,7 +70,9 @@ func _refresh() -> void:
 	var type: String = TYPES[type_index]
 	_type_button.text = "Minigame: %s" % SlotDef.TYPE_NAMES[type]
 	var mod: String = _modifiers()[modifier_index]
-	_modifier_button.text = "Modifier: %s" % ("none" if mod.is_empty() else mod.capitalize())
+	_modifier_button.text = (
+		"Modifier: %s" % ("none" if mod.is_empty() else SlotDef.modifier_name(mod))
+	)
 	_play_button.text = "Play %s T%d" % [SlotDef.TYPE_NAMES[type], tier]
 	_play_button.add_theme_color_override("font_color", get_theme_color(type, "Hardwire"))
 	_scale_button.text = "Time scale: %sx" % Engine.time_scale
@@ -144,7 +145,7 @@ func _row(parent: Control) -> BoxContainer:
 
 
 func _button(text: String, on_pressed: Callable) -> Button:
-	var button: Button = Ui.button(text, on_pressed, BUTTON_TAPS)
+	var button: Button = Ui.button(text, on_pressed)
 	button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	return button
 
