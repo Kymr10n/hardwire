@@ -2,9 +2,10 @@ class_name CpuPuzzle
 extends PuzzleBase
 ## CPU minigame: copy the rhythm by holding the central tile. SPEC: Minigame: CPU.
 ## Presses and releases are timestamped with Time.get_ticks_usec() inside _input, not _process;
-## RhythmJudge compares relative intervals. Input ends 600 ms after the last beat is released,
-## or once no input could pass any more; no first press within the timeout fails. The controller
-## rumbles with the tile while it is lit or held (not during Audio only playback).
+## RhythmJudge compares relative intervals as they come in (D-030): the first miss ends the
+## attempt with a red marker and the reason in the hint line, the last release wins. Input also
+## ends once no input could pass any more; no first press within the timeout fails. The
+## controller rumbles with the tile while it is lit or held (not during Audio only playback).
 
 ## Layout, as fractions of the available square and of tap_min.
 const TILE_FILL := 0.75
@@ -57,11 +58,8 @@ func last_result() -> Dictionary:
 func press_at(usec: int) -> void:
 	if phase != Phase.INPUT or _holding:
 		return
-	if _presses.size() >= _attempt.beats:
-		_fail()
-		return
 	if _presses.is_empty():
-		time_limit_s = (_attempt.max_total_ms + _grace_ms()) / 1000.0
+		time_limit_s = _attempt.max_total_ms / 1000.0
 		time_left_s = time_limit_s
 	_presses.append(usec)
 	_holding = true
@@ -69,6 +67,7 @@ func press_at(usec: int) -> void:
 	_start_tone()
 	Haptics.start_hold()
 	markers.filled = _presses.size()
+	_check()
 
 
 ## Registers a release at `usec` (public for tests).
@@ -80,8 +79,29 @@ func release_at(usec: int) -> void:
 	_tile.lit = false
 	_stop_tone()
 	Haptics.stop_hold()
-	if _releases.size() == _attempt.beats:
-		time_left_s = minf(time_left_s, _grace_ms() / 1000.0)
+	_check()
+
+
+## Judged as you play: the first miss ends the attempt with its reason; the last release wins.
+func _check() -> void:
+	var misses: Array[Dictionary] = RhythmJudge.misses(_presses, _releases, _attempt)
+	if not misses.is_empty():
+		_last_result = {"passed": false, "reason": "timing", "misses": misses}
+		markers.missed = misses[0].beat
+		hint.text = _miss_text(misses[0])
+		_fail()
+	elif _releases.size() == _attempt.beats:
+		_last_result = RhythmJudge.judge(_presses, _releases, _attempt)
+		_succeed({"slot_id": slot.id(), "judge": _last_result})
+
+
+## "Beat 3 too late" / "too early" / "held too short" / "held too long", beats counted from 1.
+static func _miss_text(miss: Dictionary) -> String:
+	var over: bool = miss.delta_ms > 0.0
+	var what: String = "too late" if over else "too early"
+	if miss.kind == RhythmJudge.KIND_HOLD:
+		what = "held too long" if over else "held too short"
+	return "Beat %d %s" % [miss.beat + 1, what]
 
 
 func default_focus() -> Control:
@@ -170,16 +190,10 @@ func _on_phase_entered(p_phase: Phase) -> void:
 		markers.filled = _presses.size()
 
 
+## No first press, a beat never released or too few presses: the window ran out.
 func _on_time_up() -> void:
-	if _presses.is_empty():
-		_fail()
-		return
 	_last_result = RhythmJudge.judge(_presses, _releases, _attempt)
-	if _last_result.passed:
-		_release_tile()
-		_succeed({"slot_id": slot.id(), "judge": _last_result})
-	else:
-		_fail()
+	_fail()
 
 
 func _fail() -> void:
@@ -219,10 +233,6 @@ func _segment_at(t_ms: float) -> int:
 		if t_ms < acc:
 			return i
 	return -1
-
-
-func _grace_ms() -> float:
-	return Balance.get_num("cpu", "end_grace_ms")
 
 
 func _layout() -> void:

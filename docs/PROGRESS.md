@@ -8,7 +8,7 @@ Status values: `todo`, `in progress`, `done`. Milestone scope and "Done when" cr
 | M1 | done | Skeleton, save/load, GUT, debug stat button (2026-10-19) |
 | M2 | done | Storage minigame with Reverse and Decoy; awaiting play-test |
 | M3 | done | RAM minigame with Inverted and Rotated; awaiting play-test |
-| M4 | done | CPU rhythm and RhythmJudge; judging reworked by D-022, re-test by ear and with a mouse pending |
+| M4 | done | CPU rhythm and RhythmJudge; judged as you play with wider tolerance since D-030, re-test pending |
 | M5 | done | Overview, slot generation, gating, rewards, Boot, Settings, debug panel |
 | M6 | done | Shop and upgrades |
 | M7 | done | Rebuild (prestige) and idle income |
@@ -28,7 +28,7 @@ Status values: `todo`, `in progress`, `done`. Milestone scope and "Done when" cr
 Deferred work, each with what it needs:
 
 - **Android:** [issue #5](https://github.com/Kymr10n/hardwire/issues/5): accept the SDK licences, export the APK, test on a real phone. Needs the owner.
-- **CPU re-test (M4, D-022/D-024):** tier 1 and tier 10 with mouse, touch and gamepad; Syncopated 1.5-step holds vs taps may still be hard to tell apart.
+- **CPU re-test (M4, D-030):** tier 1 and tier 10 with mouse, touch and gamepad after the judge-as-you-play rework; is 40% at tier 1 too loose? Syncopated 1.5-step holds vs taps may still be hard to tell apart.
 - **Bundle ID:** `org.hardwire.prototype` (Android and macOS presets) must become the final ID before any store release; it cannot change afterwards. Owner decision (D-021 kept the placeholder).
 - **iOS preset:** none yet; waits for a Mac with current Xcode (D-008).
 - **Private vulnerability reporting:** `SECURITY.md` points at GitHub's private report form; the owner enables it under Settings → Code security (`gh api -X PUT repos/Kymr10n/hardwire/private-vulnerability-reporting`).
@@ -40,5 +40,6 @@ Deferred work, each with what it needs:
 
 Add dated notes here after play-testing (what felt wrong, which numbers to tune). Turn agreed changes into `/spec-change`.
 
+- 2026-10-19, Steam Deck: the CPU minigame was not fun: no feedback while playing (pass/fail arrived 600 ms after the last release, without saying which beat was wrong) and the timing felt too strict. D-030: judged as you play, the first miss ends the attempt with a red marker and the reason ("Beat 3 too late"), success at the last release, tolerance 40% → 25% with a 100 ms floor. Re-test: tier 1 and tier 10 with touch and gamepad; is the tolerance now too loose at tier 1? Tests: 214 in 23 scripts.
 - 2026-10-19, Steam Deck touchscreen: swiping the overview list did not scroll it. Cause: `ScrollContainer` drag-scrolls on (emulated) mouse events, and the slot cards, as Buttons with `MOUSE_FILTER_STOP`, swallowed them; the shop list scrolled because its cards are PanelContainers. Fixed: buttons in lists pass pointer events up (the engine cancels the press when a scroll starts) and lists have a `scroll_deadzone` (theme) so a wobbly tap is still a tap. Re-test: swipe and tap on the overview and the shop.
 - 2026-10-19, desktop with a mouse: CPU taps did not register as intended. A natural click (100–150 ms) failed because 1-step taps were timed like short holds (210–390 ms at tier 1), and holds were hard to read during playback. Fixed by D-022 (judge beats and holds, not tap length; beat-length markers). Re-test: tier 1 and tier 10 with mouse, touch and gamepad; Syncopated 1.5-step holds vs taps may still be hard to tell apart.

@@ -56,7 +56,6 @@ const REQUIRED := {
 		"tolerance_step",
 		"tolerance_min",
 		"tolerance_abs_ms",
-		"end_grace_ms",
 		"first_press_timeout_s"
 	],
 	"modifiers": ["from_tier", "second_pool_from_tier", "chance_base", "chance_step", "chance_max"],
@@ -102,7 +101,7 @@ func test_upgrade_ids_match_spec() -> void:
 
 
 func test_get_num_reads_values() -> void:
-	assert_eq(Balance.get_num("cpu", "tolerance_start"), 0.30)
+	assert_eq(Balance.get_num("cpu", "tolerance_start"), 0.40)
 	assert_eq(Balance.get_int("economy", "cycles_per_tier"), 5)
 
 
@@ -114,7 +113,7 @@ func test_spec_numbers() -> void:
 		"idle": {"replays_per_hour": 6, "cap_hours": 8, "min_away_minutes": 5},
 		"storage": {"gap_ms": 150, "show_ms_min": 300, "length_max": 12},
 		"ram": {"show_ms_min": 1000, "input_s_base": 4.0, "input_s_per_cell": 0.8},
-		"cpu": {"tolerance_abs_ms": 60, "end_grace_ms": 600, "first_press_timeout_s": 5.0},
+		"cpu": {"tolerance_abs_ms": 100, "first_press_timeout_s": 5.0},
 		"modifiers": {"from_tier": 8, "second_pool_from_tier": 14, "chance_max": 0.8},
 	}
 	for section: String in spec:

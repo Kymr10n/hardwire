@@ -51,10 +51,10 @@ func test_longer_exposure_extends_ram_show_time() -> void:
 
 func test_metronome_widens_cpu_tolerance() -> void:
 	assert_almost_eq(
-		RhythmGen.make(_slot(1, SlotDef.TYPE_CPU, {"metronome": 2}), 1).tolerance, 0.36, 0.0001
+		RhythmGen.make(_slot(1, SlotDef.TYPE_CPU, {"metronome": 2}), 1).tolerance, 0.46, 0.0001
 	)
 	assert_almost_eq(
-		RhythmGen.make(_slot(40, SlotDef.TYPE_CPU, {"metronome": 5}), 1).tolerance, 0.30, 0.0001
+		RhythmGen.make(_slot(40, SlotDef.TYPE_CPU, {"metronome": 5}), 1).tolerance, 0.40, 0.0001
 	)
 
 

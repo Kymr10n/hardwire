@@ -5,11 +5,12 @@ extends GutTest
 
 ## A rhythm as RhythmGen builds it.
 func _rhythm(target: Array[float], step_ms: int = 300, tolerance: float = 0.3) -> Dictionary:
-	return {"target_ms": target, "step_ms": step_ms, "tolerance": tolerance, "abs_ms": 60.0}
+	return {"target_ms": target, "step_ms": step_ms, "tolerance": tolerance, "abs_ms": 100.0}
 
 
-## tap 300, gap 300, hold 600, gap 300, tap 300 (tier 1 steps 1, 1, 2, 1, 1 at 300 ms):
-## beat intervals 600 and 900; one hold (beat 1, 600 ms); taps are not timed.
+## tap 300, gap 300, hold 600, gap 300, tap 300 (tier 1 steps 1, 1, 2, 1, 1 at 300 ms), judged
+## at 30% so the boundary numbers stay round (the judge takes the tolerance as data; the tier
+## curve is tested in test_rhythm_gen): beat intervals 600 and 900; one hold (beat 1, 600 ms).
 func _tier1() -> Dictionary:
 	return _rhythm([300.0, 300.0, 600.0, 300.0, 300.0] as Array[float])
 
@@ -30,6 +31,19 @@ func _input_from(held: Array, intervals: Array, start_usec: int = 5_000_000) -> 
 func _judge(held: Array, intervals: Array, rhythm: Dictionary = _tier1()) -> Dictionary:
 	var io: Array = _input_from(held, intervals)
 	return RhythmJudge.judge(io[0], io[1], rhythm)
+
+
+func _misses(held: Array, intervals: Array, rhythm: Dictionary = _tier1()) -> Array[Dictionary]:
+	var io: Array = _input_from(held, intervals)
+	return RhythmJudge.misses(io[0], io[1], rhythm)
+
+
+## {beat, kind} of each miss, without the delta.
+func _where(misses: Array[Dictionary]) -> Array:
+	var out: Array = []
+	for m: Dictionary in misses:
+		out.append([m.beat, m.kind])
+	return out
 
 
 func test_exact_input_passes() -> void:
@@ -56,11 +70,26 @@ func test_beats_within_tolerance_pass() -> void:
 
 
 func test_beat_out_of_tolerance_fails() -> void:
+	# The second interval is 300 ms long, so the third press (beat 2) came late.
 	var r: Dictionary = _judge([300, 600, 300], [600, 1200])
 	assert_false(r.passed)
 	assert_eq(r.reason, "timing")
-	assert_eq(r.failed_beats, [1] as Array[int])
-	assert_eq(r.failed_holds, [] as Array[int])
+	assert_eq(_where(r.misses), [[2, "beat"]])
+	assert_almost_eq(r.misses[0].delta_ms, 300.0, 0.001)
+
+
+## Judged as you play (D-030): only the checks the input so far determines are made.
+func test_misses_judge_partial_input() -> void:
+	assert_eq(_misses([300, 600, 300], [600, 900]), [] as Array[Dictionary], "exact input")
+	assert_eq(_misses([300], []), [] as Array[Dictionary], "one tap: nothing to check yet")
+	var late: Array[Dictionary] = _misses([300, 600], [1200])
+	assert_eq(_where(late), [[1, "beat"]], "second press late: reported on beat 1")
+	assert_almost_eq(late[0].delta_ms, 600.0, 0.001)
+	var early: Array[Dictionary] = _misses([300, 600], [300])
+	assert_almost_eq(early[0].delta_ms, -300.0, 0.001, "early press: negative delta")
+	var short: Array[Dictionary] = _misses([300, 200], [600])
+	assert_eq(_where(short), [[1, "hold"]], "hold judged at its release")
+	assert_almost_eq(short[0].delta_ms, -400.0, 0.001)
 
 
 func test_hold_within_tolerance_passes() -> void:
@@ -70,10 +99,9 @@ func test_hold_within_tolerance_passes() -> void:
 
 func test_hold_outside_tolerance_fails() -> void:
 	var short: Dictionary = _judge([300, 300, 300], [600, 900])
-	assert_eq(short.failed_holds, [1] as Array[int], "too short")
-	assert_eq(short.failed_beats, [] as Array[int])
+	assert_eq(_where(short.misses), [[1, "hold"]], "too short")
 	var long: Dictionary = _judge([300, 781, 300], [600, 900])
-	assert_eq(long.failed_holds, [1] as Array[int], "too long, just past 600 + 180")
+	assert_eq(_where(long.misses), [[1, "hold"]], "too long, just past 600 + 180")
 
 
 func test_last_beat_hold_is_judged() -> void:
@@ -82,7 +110,7 @@ func test_last_beat_hold_is_judged() -> void:
 	assert_true(_judge([100, 600], [600], rhythm).passed)
 	var r: Dictionary = _judge([100, 300], [600], rhythm)
 	assert_false(r.passed)
-	assert_eq(r.failed_holds, [1] as Array[int])
+	assert_eq(_where(r.misses), [[1, "hold"]])
 
 
 func test_too_many_presses_fails() -> void:
@@ -107,10 +135,10 @@ func test_missing_release_fails() -> void:
 
 
 func test_absolute_floor_for_short_beats() -> void:
-	# 100 ms steps: interval target 200 ms; 20% of 200 ms = 40 ms, so the 60 ms floor applies.
+	# 100 ms steps: interval target 200 ms; 20% of 200 ms = 40 ms, so the 100 ms floor applies.
 	var fast := _rhythm([100.0, 100.0, 100.0] as Array[float], 100, 0.2)
-	assert_true(_judge([50, 50], [260], fast).passed)
-	assert_false(_judge([50, 50], [261], fast).passed)
+	assert_true(_judge([50, 50], [300], fast).passed)
+	assert_false(_judge([50, 50], [301], fast).passed)
 
 
 func test_uniformly_slow_within_tolerance_passes() -> void:
@@ -126,7 +154,7 @@ func test_half_steps_are_taps() -> void:
 
 
 func test_allowance_and_max_total() -> void:
-	assert_eq(RhythmJudge.allowance(100.0, 0.3, 60.0), 60.0)
-	assert_almost_eq(RhythmJudge.allowance(600.0, 0.3, 60.0), 180.0, 0.001)
-	# Intervals 600+180 and 900+270, then the last beat 300+90.
-	assert_almost_eq(RhythmJudge.max_total_ms(_tier1()), 2340.0, 0.001)
+	assert_eq(RhythmJudge.allowance(100.0, 0.3, 100.0), 100.0)
+	assert_almost_eq(RhythmJudge.allowance(600.0, 0.3, 100.0), 180.0, 0.001)
+	# Intervals 600+180 and 900+270, then the last beat 300+100 (the floor).
+	assert_almost_eq(RhythmJudge.max_total_ms(_tier1()), 2350.0, 0.001)

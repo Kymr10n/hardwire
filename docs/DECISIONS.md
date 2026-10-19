@@ -188,3 +188,9 @@ the scale moves with the bass. The spec names the screens where the score pauses
 tuning stays in `balance.json` → `audio`.
 **Why:** The owner listened to the score in game and asked for high notes on top and a fitting beat.
 **Affects:** Visual and audio style; `MusicGen`; `Synth`; `balance.json` → `audio`.
+
+## D-030 — 2026-10-19 — CPU judged as you play; wider tolerance
+
+**Decision:** The CPU minigame judges each check the moment the input determines it: a beat's interval when the next press lands, a hold when it is released. The first check out of tolerance ends the attempt at once: that beat's marker turns red and the hint line above the tile says why ("Beat 3 too late", "too early", "held too short", "held too long"). The attempt succeeds at the release of the last beat. The 600 ms grace after the last release and the "press beyond `beats` fails" rule are gone (input has already ended); the longest-passing-rhythm cap stays as a stall guard. Tolerance is `max(0.25, 0.40 − 0.0075(T−1))` with a 100 ms minimum (was 0.30 to 0.15, 60 ms). Supersedes the input-end rule of D-022 and D-013 and the tolerance formula.
+**Why:** Play-test: the game was not fun. The player pressed blind and learned pass/fail 600 ms after the last release without knowing which beat was wrong, and the timing felt too strict. Failing at the first miss with the reason shown is how Storage already behaves on a wrong pad.
+**Affects:** Minigame: CPU (Input phase, Judging); Difficulty curve (formulas, sample tiers); `balance.json` → `cpu` (`tolerance_start`, `tolerance_min`, `tolerance_abs_ms`; `end_grace_ms` removed); `RhythmJudge`, `CpuPuzzle`, `CpuMarkers`; tests `test_rhythm_judge`, `test_rhythm_gen`, `test_cpu_puzzle`.

@@ -4,12 +4,12 @@ extends GutTest
 
 # tier: [beats, step_ms, tolerance]
 const SAMPLE_TIERS := {
-	1: [3, 300, 0.30],
-	2: [3, 292, 0.2925],
-	3: [4, 284, 0.285],
-	5: [4, 268, 0.27],
-	10: [6, 228, 0.2325],
-	20: [9, 150, 0.1575],
+	1: [3, 300, 0.40],
+	2: [3, 292, 0.3925],
+	3: [4, 284, 0.385],
+	5: [4, 268, 0.37],
+	10: [6, 228, 0.3325],
+	20: [9, 150, 0.2575],
 }
 
 
@@ -30,7 +30,7 @@ func test_caps() -> void:
 	var p: Dictionary = RhythmGen.params(200)
 	assert_eq(p.beats, 10)
 	assert_eq(p.step_ms, 150)
-	assert_almost_eq(p.tolerance, 0.15, 0.00001)
+	assert_almost_eq(p.tolerance, 0.25, 0.00001)
 
 
 func test_rhythm_model() -> void:
@@ -67,7 +67,7 @@ func test_totals() -> void:
 		total += t
 	assert_almost_eq(a.total_ms, total, 0.001)
 	assert_gt(a.max_total_ms, a.total_ms, "the input window allows the tolerance on top")
-	assert_eq(a.abs_ms, 60.0)
+	assert_eq(a.abs_ms, 100.0)
 
 
 func test_deterministic() -> void:

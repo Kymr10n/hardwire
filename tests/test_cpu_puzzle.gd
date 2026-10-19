@@ -44,38 +44,50 @@ func test_audio_only_tile_stays_dark() -> void:
 	assert_false(any_lit)
 
 
-func test_exact_rhythm_solves_after_grace() -> void:
+func test_exact_rhythm_solves_at_last_release() -> void:
 	var puzzle := make_puzzle(CpuPuzzle, 1)
 	watch_signals(puzzle)
 	run_until(puzzle, PuzzleBase.Phase.INPUT)
 	_play(puzzle)
-	assert_eq(puzzle.phase, PuzzleBase.Phase.INPUT, "waits for extra presses")
-	run_for(puzzle, 0.55)
-	assert_signal_not_emitted(puzzle, "solved")
-	run_for(puzzle, 0.1)
-	assert_signal_emitted(puzzle, "solved")
+	assert_signal_emitted(puzzle, "solved", "judged as you play: no wait after the last release")
+	assert_true(puzzle.last_result().passed)
 
 
-func test_one_segment_off_fails() -> void:
+## Tier 1, seed 7: on 3, off 2, on 2, off 2, on 1 steps. Segment 2 (the second hold) 60% too long
+## is caught at its release: beat 2 (counted from 1) held too long.
+func test_long_hold_fails_at_its_release_with_reason() -> void:
 	var puzzle := make_puzzle(CpuPuzzle, 1)
 	watch_signals(puzzle)
 	run_until(puzzle, PuzzleBase.Phase.INPUT)
 	_play(puzzle, 1.0, 2, 1.6)
-	run_for(puzzle, 0.7)
-	assert_eq(puzzle.last_result().reason, "timing")
 	assert_eq(puzzle.phase, PuzzleBase.Phase.RESULT)
+	assert_eq(puzzle.last_result().reason, "timing")
+	assert_eq(puzzle.markers.missed, 1, "the second marker turns red")
+	assert_eq(puzzle.hint.text, "Beat 2 held too long")
 	run_until(puzzle, PuzzleBase.Phase.IDLE, 2.0)
 	assert_signal_emitted(puzzle, "failed")
 
 
-func test_extra_press_fails_at_once() -> void:
+## Segment 1 (the gap after beat 1, 600 ms) 2.5x too long: the second press comes 900 ms late on
+## a 1500 ms interval, past the 40% allowance.
+func test_late_press_fails_at_once_with_reason() -> void:
+	var puzzle := make_puzzle(CpuPuzzle, 1)
+	run_until(puzzle, PuzzleBase.Phase.INPUT)
+	_play(puzzle, 1.0, 1, 2.5)
+	assert_eq(puzzle.phase, PuzzleBase.Phase.RESULT)
+	assert_eq(puzzle.markers.missed, 1)
+	assert_eq(puzzle.hint.text, "Beat 2 too late")
+
+
+func test_presses_after_success_are_ignored() -> void:
 	var puzzle := make_puzzle(CpuPuzzle, 1)
 	watch_signals(puzzle)
 	run_until(puzzle, PuzzleBase.Phase.INPUT)
 	_play(puzzle)
 	puzzle.press_at(9_000_000)
 	assert_eq(puzzle.phase, PuzzleBase.Phase.RESULT)
-	assert_false(puzzle.tile().lit or puzzle.phase == PuzzleBase.Phase.INPUT)
+	assert_false(puzzle.tile().lit)
+	assert_signal_emitted(puzzle, "solved")
 
 
 func test_no_first_press_times_out_after_5_s() -> void:
@@ -91,7 +103,7 @@ func test_no_first_press_times_out_after_5_s() -> void:
 
 
 func test_slow_player_not_cut_off() -> void:
-	# All segments 25% long (within 30%): input must stay open past the target length + 600 ms.
+	# All segments 25% long (within 40%): input must stay open past the target length.
 	var puzzle := make_puzzle(CpuPuzzle, 1)
 	watch_signals(puzzle)
 	run_until(puzzle, PuzzleBase.Phase.INPUT)
@@ -105,8 +117,6 @@ func test_slow_player_not_cut_off() -> void:
 		usec += target[i] * 1.25 * 1000.0
 		if i % 2 == 0:
 			puzzle.release_at(int(usec))
-	assert_eq(puzzle.phase, PuzzleBase.Phase.INPUT)
-	run_for(puzzle, 0.7)
 	assert_signal_emitted(puzzle, "solved")
 
 
@@ -114,7 +124,7 @@ func test_holding_too_long_ends_input() -> void:
 	var puzzle := make_puzzle(CpuPuzzle, 1)
 	run_until(puzzle, PuzzleBase.Phase.INPUT)
 	puzzle.press_at(1_000_000)
-	run_for(puzzle, (puzzle.attempt().max_total_ms + 600.0) / 1000.0 + 0.1)
+	run_for(puzzle, puzzle.attempt().max_total_ms / 1000.0 + 0.1)
 	assert_eq(puzzle.phase, PuzzleBase.Phase.RESULT)
 	assert_false(puzzle.last_result().passed)
 	assert_eq(puzzle.last_result().reason, "count")
@@ -162,8 +172,31 @@ func test_quick_clicks_on_taps_solve() -> void:
 		puzzle.release_at(int(t + (steps[i] * a.step_ms if is_hold else 100.0) * 1000.0))
 		if i + 1 < steps.size():
 			t += (steps[i] + steps[i + 1]) * a.step_ms * 1000.0
-	run_for(puzzle, 0.7)
 	assert_signal_emitted(puzzle, "solved", "judge: %s" % puzzle.last_result())
+
+
+## Tier 1, seed 7: beat 1 is a 900 ms hold, then a 600 ms gap (interval 1500 ms, allowance 600).
+## Held 600 ms (within 360 of 900), then the second press after 850 ms: 650 ms early.
+func test_early_press_fails_with_reason() -> void:
+	var puzzle := make_puzzle(CpuPuzzle, 1)
+	run_until(puzzle, PuzzleBase.Phase.INPUT)
+	puzzle.press_at(1_000_000)
+	puzzle.release_at(1_600_000)
+	puzzle.press_at(1_850_000)
+	assert_eq(puzzle.phase, PuzzleBase.Phase.RESULT)
+	assert_eq(puzzle.markers.missed, 1)
+	assert_eq(puzzle.hint.text, "Beat 2 too early")
+
+
+func test_short_hold_fails_with_reason() -> void:
+	# Tier 1, seed 7: the first beat is a 3-step hold (900 ms); 100 ms is far too short.
+	var puzzle := make_puzzle(CpuPuzzle, 1)
+	run_until(puzzle, PuzzleBase.Phase.INPUT)
+	puzzle.press_at(1_000_000)
+	puzzle.release_at(1_100_000)
+	assert_eq(puzzle.phase, PuzzleBase.Phase.RESULT)
+	assert_eq(puzzle.markers.missed, 0)
+	assert_eq(puzzle.hint.text, "Beat 1 held too short")
 
 
 func _widths(puzzle: PuzzleBase) -> Array[float]:

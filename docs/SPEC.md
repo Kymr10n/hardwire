@@ -167,17 +167,20 @@ A central tile plays a rhythm of on and off phases, and the player mimics it by 
 
 - The clock starts at the player's first press. There is no count-in and no need to hit a beat grid.
 - Each press and release is timestamped with `Time.get_ticks_usec()` in `_input`, not in `_process`.
-- Input ends 600 ms after the player's release of beat number `beats`, so extra presses are still caught.
-- It also ends once no input could still pass: when the time since the first press exceeds the longest passing rhythm (every beat interval and the last beat at their upper tolerance) plus 600 ms. A uniformly slow but in-tolerance player is never cut off. This window also caps how long the last beat, even a tap, may be held.
-- With no first press within 5 s, the attempt times out. A press beyond `beats` fails at once.
+- Input ends at the release of beat number `beats` (success) or at the first miss (failure, see Judging).
+- It also ends, as a failure, once no input could still pass: when the time since the first press exceeds the longest passing rhythm (every beat interval and the last beat at their upper tolerance). A uniformly slow but in-tolerance player is never cut off. This window also caps how long the last beat, even a tap, may be held.
+- With no first press within 5 s, the attempt times out.
 - **Failure:** the tile replays the target rhythm silently, compressed to fit the 1 s answer reveal.
 
 **Judging.**
 
-1. The number of presses must equal `beats`, and every press must be released; otherwise the attempt fails.
-2. **Beats:** for each beat but the last, the time from its press to the next press is compared with its target (its on-segment plus the following off-segment).
-3. **Holds:** for each hold (an on-segment longer than one step), the time from press to release is compared with the hold's length. Taps (one step or shorter) are not timed, so a quick tap or click is fine.
-4. A comparison passes if `abs(actual − target) <= max(60 ms, tolerance × target)`. All pass → success.
+Judged as you play: every check is made the moment the input determines it.
+
+1. **Beats:** for each beat but the last, the time from its press to the next press is compared with its target (its on-segment plus the following off-segment), as soon as the next press lands.
+2. **Holds:** for each hold (an on-segment longer than one step), the time from press to release is compared with the hold's length, as soon as it is released. Taps (one step or shorter) are not timed, so a quick tap or click is fine.
+3. A comparison passes if `abs(actual − target) <= max(100 ms, tolerance × target)`.
+4. The first failing comparison ends the attempt: the marker of the beat whose press came late or early (or whose hold was wrong) turns red, and the hint line above the tile says why: "Beat 3 too late", "Beat 3 too early", "Beat 2 held too short", "Beat 2 held too long" (beats counted from 1).
+5. Every beat released without a miss → success. If the input window runs out first (a press never released, or too few presses), the attempt fails.
 
 The judge is a pure function with unit tests, because it decides whether the minigame feels fair.
 
@@ -213,18 +216,18 @@ cycles gain = round(cycles(T) × first × modifier × (1 + 0.10 × Cycle miner) 
 
 - Storage: `length = min(3 + floor(T/2), 12)`; pads = 4 (T1 to 3), 5 (T4 to 7), 6 (T8 to 12), 8 (T13+); `show_ms = max(300, 700 − 25(T−1))`; `input_s_per_item = max(0.8, 1.5 − 0.03(T−1))`.
 - RAM: grid = 3 × 3 (T1 to 4), 4 × 4 (T5 to 9), 5 × 5 (T10 to 15), 6 × 6 (T16+); `filled = min(3 + floor((T−1)/2), floor(0.45 × n²))`; `show_ms = max(1000, 2500 − 100(T−1))`; input time = 4 s + 0.8 s per cell needed (equal to `filled` without the Inverted modifier).
-- CPU: `beats = min(3 + floor(T/3), 10)`; `step_ms = max(150, 300 − 8(T−1))`; `tolerance = max(0.15, 0.30 − 0.0075(T−1))`.
+- CPU: `beats = min(3 + floor(T/3), 10)`; `step_ms = max(150, 300 − 8(T−1))`; `tolerance = max(0.25, 0.40 − 0.0075(T−1))`.
 
 **Sample tiers** (computed from the formulas above; use as test fixtures):
 
 | Tier | Req per stat | Stat reward first / replay | Cycles first / replay | Storage length · pads · show ms | RAM grid · filled · show ms | CPU beats · step ms · tolerance |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | 0 | 4 / 2 | 10 / 5 | 3 · 4 · 700 | 3×3 · 3 · 2500 | 3 · 300 · 30% |
-| 2 | 2 | 6 / 3 | 20 / 10 | 4 · 4 · 675 | 3×3 · 3 · 2400 | 3 · 292 · 29.25% |
-| 3 | 8 | 8 / 4 | 30 / 15 | 4 · 4 · 650 | 3×3 · 4 · 2300 | 4 · 284 · 28.5% |
-| 5 | 32 | 12 / 6 | 50 / 25 | 5 · 5 · 600 | 4×4 · 5 · 2100 | 4 · 268 · 27% |
-| 10 | 162 | 22 / 11 | 100 / 50 | 8 · 6 · 475 | 5×5 · 7 · 1600 | 6 · 228 · 23.25% |
-| 20 | 722 | 42 / 21 | 200 / 100 | 12 · 8 · 300 | 6×6 · 12 · 1000 | 9 · 150 · 15.75% |
+| 1 | 0 | 4 / 2 | 10 / 5 | 3 · 4 · 700 | 3×3 · 3 · 2500 | 3 · 300 · 40% |
+| 2 | 2 | 6 / 3 | 20 / 10 | 4 · 4 · 675 | 3×3 · 3 · 2400 | 3 · 292 · 39.25% |
+| 3 | 8 | 8 / 4 | 30 / 15 | 4 · 4 · 650 | 3×3 · 4 · 2300 | 4 · 284 · 38.5% |
+| 5 | 32 | 12 / 6 | 50 / 25 | 5 · 5 · 600 | 4×4 · 5 · 2100 | 4 · 268 · 37% |
+| 10 | 162 | 22 / 11 | 100 / 50 | 8 · 6 · 475 | 5×5 · 7 · 1600 | 6 · 228 · 33.25% |
+| 20 | 722 | 42 / 21 | 200 / 100 | 12 · 8 · 300 | 6×6 · 12 · 1000 | 9 · 150 · 25.75% |
 
 Without upgrades or modifiers, reaching tier 10 takes about 8 replays per minigame in total (1 to 2 per tier from tier 4), and tier 20 about 24.
 

@@ -6,6 +6,8 @@ All notable changes to Hardwire are documented here. The format follows [Keep a 
 
 ### Changed
 
+- CPU minigame judged as you play: the first beat out of tolerance ends the attempt at once with a red marker and the reason ("Beat 3 too late"); success shows at the last release; tolerance widened to 40% at tier 1 (25% floor, 100 ms minimum).
+- Swiping over the slot cards scrolls the overview; a wobbly tap is still a tap.
 - Per-frame UI code replaced by Godot built-ins: tweened reward count-up and pad flash, the overview scrolls to the newest tier on layout, the timer is a `ProgressBar`, and pads, grid, stat bar and the first-run hint take pointer input through `_gui_input`.
 - Audio mixes at 22.05 kHz (every tone stays well below half of it).
 - The quality gate runs Godot with a throwaway data directory, so it never touches the developer's save; CI exports all platforms in one job.

@@ -1,13 +1,17 @@
 class_name RhythmJudge
 extends RefCounted
-## Pure function: player press/release timestamps (usec) + a target rhythm -> pass/fail.
-## Judges beats (press to next press) and holds (press to release of on-segments longer than one
-## step); taps are not timed, so a quick click is fine. A check passes if
+## Pure function: player press/release timestamps (usec) + a target rhythm -> misses, pass/fail.
+## Judged as you play (D-030): a beat's interval (press to next press) is checked once the next
+## press exists, a hold (an on-segment longer than one step) once it is released; taps are not
+## timed, so a quick click is fine. A check passes if
 ## abs(actual - target) <= max(abs_ms, tolerance * target). Only relative times count.
-## SPEC: Minigame: CPU > Judging (D-022).
+## SPEC: Minigame: CPU > Judging.
 ##
 ## `rhythm` is a RhythmGen attempt: target_ms (on, off, on, ...; 2 * beats - 1 entries),
 ## step_ms, tolerance, abs_ms.
+
+const KIND_BEAT := "beat"
+const KIND_HOLD := "hold"
 
 
 ## Allowed deviation for one check.
@@ -27,38 +31,48 @@ static func max_total_ms(rhythm: Dictionary) -> float:
 	return total
 
 
-## Returns {passed: bool, reason: String ("" | "count" | "unreleased" | "timing"),
-##          failed_beats: Array[int] (beats whose press-to-next-press interval is off),
-##          failed_holds: Array[int]}.
+## Every failing check the input so far determines, in input order:
+## {beat: int, kind: KIND_BEAT | KIND_HOLD, delta_ms: float (actual - target)}.
+## A beat check reports the beat whose press came early or late (the next one).
+static func misses(
+	presses_usec: Array[int], releases_usec: Array[int], rhythm: Dictionary
+) -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	var target: Array[float] = rhythm.target_ms
+	var beats: int = _beats(rhythm)
+	for beat: int in mini(beats, presses_usec.size()):
+		var on: float = target[beat * 2]
+		if beat < releases_usec.size() and on > float(rhythm.step_ms):
+			var held: float = (releases_usec[beat] - presses_usec[beat]) / 1000.0
+			if not _passes(held, on, rhythm):
+				out.append({"beat": beat, "kind": KIND_HOLD, "delta_ms": held - on})
+		if beat + 1 < beats and beat + 1 < presses_usec.size():
+			var interval: float = (presses_usec[beat + 1] - presses_usec[beat]) / 1000.0
+			var want: float = on + target[beat * 2 + 1]
+			if not _passes(interval, want, rhythm):
+				out.append({"beat": beat + 1, "kind": KIND_BEAT, "delta_ms": interval - want})
+	return out
+
+
+## Verdict once input is over: {passed: bool, reason: "" | "count" | "unreleased" | "timing",
+## misses: Array[Dictionary] (see misses())}.
 static func judge(
 	presses_usec: Array[int], releases_usec: Array[int], rhythm: Dictionary
 ) -> Dictionary:
-	var result := {
-		"passed": false,
-		"reason": "",
-		"failed_beats": [] as Array[int],
-		"failed_holds": [] as Array[int]
-	}
-	var target: Array[float] = rhythm.target_ms
-	var beats: int = floori((target.size() + 1) / 2.0)
-	if presses_usec.size() != beats:
+	var result := {"passed": false, "reason": "", "misses": [] as Array[Dictionary]}
+	if presses_usec.size() != _beats(rhythm):
 		result.reason = "count"
-		return result
-	if releases_usec.size() != presses_usec.size():
+	elif releases_usec.size() != presses_usec.size():
 		result.reason = "unreleased"
-		return result
-	for beat: int in beats:
-		var on: float = target[beat * 2]
-		if beat + 1 < beats:
-			var interval: float = (presses_usec[beat + 1] - presses_usec[beat]) / 1000.0
-			if not _passes(interval, on + target[beat * 2 + 1], rhythm):
-				result.failed_beats.append(beat)
-		var held: float = (releases_usec[beat] - presses_usec[beat]) / 1000.0
-		if on > float(rhythm.step_ms) and not _passes(held, on, rhythm):
-			result.failed_holds.append(beat)
-	result.passed = result.failed_beats.is_empty() and result.failed_holds.is_empty()
-	result.reason = "" if result.passed else "timing"
+	else:
+		result.misses = misses(presses_usec, releases_usec, rhythm)
+		result.passed = result.misses.is_empty()
+		result.reason = "" if result.passed else "timing"
 	return result
+
+
+static func _beats(rhythm: Dictionary) -> int:
+	return floori((rhythm.target_ms.size() + 1) / 2.0)
 
 
 static func _passes(actual: float, target: float, rhythm: Dictionary) -> bool:
