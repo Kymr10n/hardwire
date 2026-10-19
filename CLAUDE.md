@@ -1,0 +1,40 @@
+# Hardwire — instructions for Claude Code
+
+Hardwire is a Godot 4 (GDScript) mobile puzzle game. **`docs/SPEC.md` is the source of truth** — read the relevant sections before every task.
+
+## How we work
+
+- Build one milestone per session, in order (SPEC: "Milestones and acceptance criteria"). Do not start the next milestone until the current one meets its "Done when" criteria.
+- At the end of a milestone: run the tests, run the game once headless to check for script errors, and summarize what to play-test.
+- If the spec is ambiguous or a number seems wrong, ask instead of guessing. Never change `docs/SPEC.md` silently; propose the change.
+
+## Conventions
+
+- Static typing everywhere (`var x: int`, typed parameters and return types).
+- Every tuning number lives in `data/balance.json` and is read through the `Balance` autoload. No balance literals in game code.
+- `logic/` is pure GDScript (`RefCounted`, no nodes, no autoload access except `Balance`) and fully unit-tested.
+- Puzzles get a `SlotDef` and an attempt seed and emit `solved(result)` / `failed()`. They never touch `GameState` directly and never own the screen (needed for the later Benchmark slot).
+- Input code handles touch events only; mouse is emulated (`emulate_touch_from_mouse`).
+- Rhythm timing: `Time.get_ticks_usec()` inside `_input`, never `_process`.
+- Build UI mostly in code on top of minimal `.tscn` files, so changes don't need the Godot editor.
+- Autoload scripts have no `class_name` (it would clash with the singleton name).
+- Indentation: tabs in `.gd` files.
+
+## Commands
+
+```bash
+# Run the game (portrait 540x960 window)
+godot --path .
+
+# Re-import resources / check for script errors without a window
+godot --headless --path . --import
+
+# Run all unit tests (requires the GUT addon in addons/gut)
+godot --headless --path . -s addons/gut/gut_cmdln.gd
+```
+
+## Gotchas
+
+- `data/balance.json` is not a Godot resource. Every export preset must include it via "Filters to export non-resource files": `data/*.json`.
+- `.godot/` is a cache; never commit or edit it.
+- Do not add ads, analytics or tracking SDKs (SPEC: Decisions — no monetization).

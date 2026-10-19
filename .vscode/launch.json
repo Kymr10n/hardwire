@@ -1,0 +1,11 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Run Hardwire",
+      "type": "godot",
+      "request": "launch",
+      "project": "${workspaceFolder}"
+    }
+  ]
+}

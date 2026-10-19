@@ -1,0 +1,14 @@
+# Godot cache and build output
+.godot/
+/android/
+/build/
+*.tmp
+
+# Keep signing secrets out of git
+export_credentials.cfg
+*.keystore
+*.jks
+
+# OS / editor noise
+.DS_Store
+Thumbs.db

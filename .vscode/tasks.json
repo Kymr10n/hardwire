@@ -1,0 +1,24 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Run game",
+      "type": "shell",
+      "command": "godot --path .",
+      "problemMatcher": []
+    },
+    {
+      "label": "Run tests",
+      "type": "shell",
+      "command": "godot --headless --path . -s addons/gut/gut_cmdln.gd",
+      "group": { "kind": "test", "isDefault": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "Open Godot editor",
+      "type": "shell",
+      "command": "godot -e --path .",
+      "problemMatcher": []
+    }
+  ]
+}
