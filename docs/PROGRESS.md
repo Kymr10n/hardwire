@@ -20,6 +20,7 @@ Status values: `todo`, `in progress`, `done`. Milestone scope and "Done when" cr
 ## Reviews
 
 - 2026-10-19: whole-project review (tooling/process, spec audit, architecture) and its fixes. Verdicts: gameplay numbers match the spec three ways (spec ↔ `balance.json` ↔ tests); layering is clean (pure `logic/`, puzzles never touch `GameState`); the gate and hooks had four holes, now closed; two real bugs fixed (Storage Replay button overlap in landscape, idle offer lost on screen re-creation). Spec reconciled by D-023; rumble added by D-024. Items not applied are listed under Follow-ups.
+- 2026-10-19, later: the review's deferred items applied. Per-frame code replaced by Godot built-ins (Tween count-up and pad flash, `sort_children` scroll, `ProgressBar` timer, pointer input through `_gui_input` with `tapped` / `cell_activated` signals; CpuPuzzle keeps `_input` for its timestamps); the architecture nits; the tooling nits (hermetic gate, one CI export job, `SECURITY.md`, hooks block without python3). Visual check done at 1280×800 and 540×960: Replay button centred in the ring, trace line and tier nodes, CPU markers, result count-up, timer bar all as intended. Tests: 208 in 23 scripts.
 
 ## Follow-ups
 
@@ -27,12 +28,9 @@ Deferred work, each with what it needs:
 
 - **Android:** [issue #5](https://github.com/Kymr10n/hardwire/issues/5): accept the SDK licences, export the APK, test on a real phone. Needs the owner.
 - **CPU re-test (M4, D-022/D-024):** tier 1 and tier 10 with mouse, touch and gamepad; Syncopated 1.5-step holds vs taps may still be hard to tell apart.
-- **Visual check of the 2026-10-19 refactors:** the Replay button in the Storage ring centre, the overview trace node, and the CPU markers as a child control were verified by tests only; the windowed harness rendered at 1 fps during the review (display throttled). Take the screenshots when the display is active.
 - **Bundle ID:** `org.hardwire.prototype` (Android and macOS presets) must become the final ID before any store release; it cannot change afterwards. Owner decision (D-021 kept the placeholder).
 - **iOS preset:** none yet; waits for a Mac with current Xcode (D-008).
-- **Godot built-ins instead of per-frame code** (architecture review, scope B, deferred on purpose): ResultOverlay count-up via Tween; OverviewScreen scroll-into-view via `sort_children`; StoragePad flash via a tween chain; TimerBar as a ProgressBar; touch hit-testing via `_gui_input` / signals on pads, grid, StatBar and HintOverlay (CpuPuzzle keeps `_input` for timestamps).
-- **Nits from the architecture review:** `Main.wants_fullscreen` wrapper; "rebuild" naming (`Main._rebuild` vs `GameState.rebuild`); `TierRow` chips via `set_meta`; `SlotCard` allocates styleboxes per refresh; `PuzzleBase.start()` sets `time_left_s` redundantly; `CpuPuzzle` `_tone_id = -1` sentinel; construction style varies (`new(i)` vs `setup()` vs `open()`); `Synth` could mix at 22.05 kHz; `GameState` default dictionaries written twice.
-- **Tooling nits:** `check.sh` boot step loads the developer's real save (not hermetic); CI restores the full export-template cache per matrix job; a `SECURITY.md`; `.claude/hooks` fail open without `python3`.
+- **Private vulnerability reporting:** `SECURITY.md` points at GitHub's private report form; the owner enables it under Settings → Code security (`gh api -X PUT repos/Kymr10n/hardwire/private-vulnerability-reporting`).
 - **Play-test the balance:** time to tiers 5, 10 and 20 on a fresh save (targets: 10 min, 1 h, several sessions); fail rate per minigame; rhythm tolerance on a real phone.
 
 ## Play-test notes

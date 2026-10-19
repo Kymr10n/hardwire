@@ -4,6 +4,16 @@ All notable changes to Hardwire are documented here. The format follows [Keep a 
 
 ## [Unreleased]
 
+### Changed
+
+- Per-frame UI code replaced by Godot built-ins: tweened reward count-up and pad flash, the overview scrolls to the newest tier on layout, the timer is a `ProgressBar`, and pads, grid, stat bar and the first-run hint take pointer input through `_gui_input`.
+- Audio mixes at 22.05 kHz (every tone stays well below half of it).
+- The quality gate runs Godot with a throwaway data directory, so it never touches the developer's save; CI exports all platforms in one job.
+
+### Added
+
+- `SECURITY.md`.
+
 ## [0.1.0] - 2026-10-19
 
 First playable prototype: all nine milestones of the spec, played on desktop and Steam Deck.
