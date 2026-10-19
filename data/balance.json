@@ -85,9 +85,9 @@
   },
   "haptics": {
     "pulse_ms": 20,
-    "pulse_strength": 0.4,
-    "hold_strength": 0.6,
-    "decoy_strength": 0.3,
+    "pulse_strength": 0.55,
+    "hold_strength": 0.8,
+    "decoy_strength": 0.4,
     "success_pulse_ms": 60,
     "success_gap_ms": 90,
     "fail_pulse_ms": 250
