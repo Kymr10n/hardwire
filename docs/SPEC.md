@@ -9,9 +9,9 @@ Hardwire is an endless incremental puzzle game for phones, built in Godot 4. The
 | Decision | Choice |
 | --- | --- |
 | Engine | Godot 4.x (latest stable), GDScript, Compatibility renderer |
-| Platforms | Android and web first, iOS later; desktop window for development |
-| Orientation | Portrait, reference resolution 1080 × 1920 |
-| Input | Touch; mouse on desktop via Godot's touch emulation |
+| Platforms | Android, web, and Linux desktop / Steam Deck; Steam release and iOS later |
+| Orientation | Portrait on phones (reference 1080 × 1920); landscape on Steam Deck and desktop (reference 1920 × 1080), chosen by window aspect |
+| Input | Touch (mouse via Godot's touch emulation), plus gamepad and keyboard through Godot's UI actions |
 | Art | Minimal flat circuit-board look, no drawn assets |
 | Audio | Synthesized tones generated in code, no audio files needed |
 | Save | Local JSON in `user://` |
@@ -241,7 +241,20 @@ The prototype has five screens around one hub, the overview. All layouts are por
 - Success: "Write complete", the stat and Cycles gained (counting up over 0.6 s), a note if a new tier unlocked, then buttons "Again" (same slot, new sequence) and "Overview".
 - Failure: "Corrupted", the correct answer shown for 1 s, then the next attempt starts automatically. The back button is always available.
 
-**Feedback on every tap:** pad or cell flash, its tone, and a light haptic pulse on mobile.
+**Feedback on every tap:** pad or cell flash, its tone, and a light haptic pulse on mobile (gamepad rumble on controllers).
+
+**Landscape:** the same screens with one code path each. The puzzle screen puts header, phase label and timer in a side panel next to the puzzle; the overview puts the stats and the Shop / Rebuild / Settings buttons in a sidebar next to the tier list; the shop shows two columns; other screens use a centered column.
+
+**Controls** (gamepad; keyboard equivalents in brackets). The focus outline shows only for gamepad and keyboard input.
+
+| Where | Control |
+| --- | --- |
+| Menus | D-pad or stick moves focus (arrows), A selects (Enter / Space), B goes back (Esc) |
+| Storage | Move focus to a pad, A taps it |
+| RAM | Move the cell cursor, A toggles the cell, Y commits (C) |
+| CPU | Hold A for each beat (Space) |
+
+On PC, Settings adds "Fullscreen" and "Quit"; B on the overview never quits. With the `SteamDeck=1` environment variable (set by Steam on the Deck) the game starts fullscreen.
 
 **First run:** each minigame shows a one-line instruction overlay the first time it opens ("Repeat the sequence", "Recreate the pattern", "Copy the rhythm by holding the tile"). The attempt starts when the player taps the overlay; the hint is then recorded in `seen_tutorials`.
 
@@ -359,6 +372,11 @@ Build one milestone per session, in order. Each milestone ends with a playable b
 | M6 | Shop and upgrades | All six upgrades buy, persist and change their puzzle as specified | Done (2026-10-19), awaiting play-test |
 | M7 | Prestige and idle income | Rebuild becomes available after a tier 10 solve; Cores and multiplier are correct; the right fields reset; idle Cycles are offered after closing the app for over 5 minutes and respect the 8 h cap | Done (2026-10-19), awaiting play-test |
 | M8 | Polish and export | Synth sounds, haptics, screen transitions, first-run hints; Android APK and web build run on a real phone | Polish and web build done (2026-10-19); Android export and real-phone test pending (needs Android SDK) |
+| M9 | Steam Deck and desktop: landscape layouts, gamepad and keyboard controls, Linux build | The Linux build runs fullscreen in Steam Deck game mode; every screen and minigame is playable with the controller alone and with touch alone; landscape layouts work at 16:10 and 16:9; CI builds Linux | In progress |
+
+## After the prototype: Steam release
+
+Hardwire is meant to go on Steam eventually, free. That needs a Steamworks app (one-time app fee), builds uploaded with SteamPipe, a default Steam Input configuration matching the Controls table, and a Steam Deck Verified review (full controller support, 1280 × 800 layout, readable text, no launcher). M9 prepares everything except the Steamworks account.
 
 ## After the prototype: Benchmark slot
 

@@ -14,7 +14,7 @@ Hardwire is a Godot 4 (GDScript) mobile puzzle game. **`docs/SPEC.md` is the sou
 - Every tuning number lives in `data/balance.json` and is read through the `Balance` autoload. No balance literals in game code.
 - `logic/` is pure GDScript (`RefCounted`, no nodes, no autoload access except `Balance`) and fully unit-tested.
 - Puzzles get a `SlotDef` and an attempt seed and emit `solved(result)` / `failed()`. They never touch `GameState` directly and never own the screen (needed for the later Benchmark slot).
-- Input code handles touch events only; mouse is emulated (`emulate_touch_from_mouse`).
+- Pointer input is touch only; the mouse is emulated (`emulate_touch_from_mouse`). Gamepad and keyboard go through InputMap actions (`ui_*`, `commit`), never raw keys or buttons.
 - Rhythm timing: `Time.get_ticks_usec()` inside `_input`, never `_process`.
 - Build UI mostly in code on top of minimal `.tscn` files, so changes don't need the Godot editor.
 - Autoload scripts have no `class_name` (it would clash with the singleton name).
