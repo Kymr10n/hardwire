@@ -9,41 +9,25 @@ var _balance: Label
 
 
 func _ready() -> void:
-	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var margin: int = get_theme_constant("margin", "Hardwire")
-	var tap: float = get_theme_constant("tap_min", "Hardwire")
-	var root := MarginContainer.new()
-	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	for side: String in ["left", "top", "right", "bottom"]:
-		root.add_theme_constant_override("margin_" + side, margin / 2)
-	add_child(root)
-	var column := VBoxContainer.new()
-	column.add_theme_constant_override("separation", margin / 2)
-	root.add_child(column)
-	var header := HBoxContainer.new()
-	column.add_child(header)
-	var back := Button.new()
-	back.text = "< Back"
-	back.custom_minimum_size = Vector2(tap * 1.5, tap)
-	back.pressed.connect(exit_requested.emit)
-	header.add_child(back)
-	_balance = Label.new()
-	_balance.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_balance.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	_balance.add_theme_font_size_override("font_size", get_theme_font_size("header", "Hardwire"))
-	header.add_child(_balance)
+	var column: VBoxContainer = Ui.screen_root(self)
+	_balance = Ui.header(column, "", exit_requested.emit)
 
 	var scroll := ScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	column.add_child(scroll)
-	var list := VBoxContainer.new()
+	# One column in portrait, two in landscape.
+	var list := GridContainer.new()
+	list.columns = 2 if Ui.is_landscape(self) else 1
 	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	list.add_theme_constant_override("separation", margin / 2)
+	list.add_theme_constant_override("h_separation", margin / 2)
+	list.add_theme_constant_override("v_separation", margin / 2)
 	scroll.add_child(list)
 	for id: String in Balance.upgrade_ids():
 		var card := UpgradeCard.new()
 		card.setup(id)
+		card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		card.buy_pressed.connect(_on_buy)
 		list.add_child(card)
 		cards.append(card)

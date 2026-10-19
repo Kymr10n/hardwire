@@ -23,19 +23,19 @@ var _scale_button: Button
 
 
 func _ready() -> void:
-	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var margin: int = get_theme_constant("margin", "Hardwire")
-	var box := VBoxContainer.new()
-	box.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	box.alignment = BoxContainer.ALIGNMENT_CENTER
-	box.add_theme_constant_override("separation", margin / 2)
-	add_child(box)
-
-	var header := _row(box)
-	header.add_child(_button("< Back", exit_requested.emit))
-	var title := _label("DEBUG", get_theme_font_size("header", "Hardwire"))
+	var column: VBoxContainer = Ui.screen_root(self, get_theme_constant("max_column", "Hardwire"))
+	var title: Label = Ui.header(column, "DEBUG", exit_requested.emit)
 	title.add_theme_color_override("font_color", get_theme_color("fail", "Hardwire"))
-	header.add_child(title)
+	var scroll := ScrollContainer.new()
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	column.add_child(scroll)
+	var box := VBoxContainer.new()
+	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	box.add_theme_constant_override("separation", margin / 2)
+	scroll.add_child(box)
+
 	_stats_label = _label("", 0)
 	box.add_child(_stats_label)
 

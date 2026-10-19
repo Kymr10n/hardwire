@@ -11,58 +11,42 @@ var _fullscreen: Button
 
 
 func _ready() -> void:
-	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	var margin: int = get_theme_constant("margin", "Hardwire")
-	var tap: float = get_theme_constant("tap_min", "Hardwire")
-	var root := MarginContainer.new()
-	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	for side: String in ["left", "top", "right", "bottom"]:
-		root.add_theme_constant_override("margin_" + side, margin)
-	add_child(root)
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", margin)
-	root.add_child(box)
-	var header := HBoxContainer.new()
-	box.add_child(header)
-	var back := Button.new()
-	back.text = "< Back"
-	back.custom_minimum_size = Vector2(tap * 1.5, tap)
-	back.pressed.connect(exit_requested.emit)
-	header.add_child(back)
-	var title := Label.new()
-	title.text = "Settings"
-	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	title.add_theme_font_size_override("font_size", get_theme_font_size("header", "Hardwire"))
-	header.add_child(title)
+	var box: VBoxContainer = Ui.screen_root(self, get_theme_constant("max_column", "Hardwire"), 1.0)
+	Ui.header(box, "Settings", exit_requested.emit)
 
-	_sound = _add_button(box, _toggle_setting.bind("sound"))
-	_haptics = _add_button(box, _toggle_setting.bind("haptics"))
-	var licenses := Button.new()
-	licenses.text = "Licenses"
-	licenses.custom_minimum_size.y = tap
-	licenses.pressed.connect(licenses_requested.emit)
-	box.add_child(licenses)
+	# One column in portrait, two in landscape; destructive actions at the bottom.
+	var options: GridContainer = _grid(box)
+	_sound = _add_button(options, "", _toggle_setting.bind("sound"))
+	_haptics = _add_button(options, "", _toggle_setting.bind("haptics"))
+	_add_button(options, "Licenses", licenses_requested.emit)
 	if OS.has_feature("pc"):
-		_fullscreen = _add_button(box, _toggle_fullscreen)
+		_fullscreen = _add_button(options, "", _toggle_fullscreen)
 	var spacer := Control.new()
 	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	box.add_child(spacer)
-	var reset := Button.new()
-	reset.text = "Reset save"
-	reset.custom_minimum_size.y = tap
+	var actions: GridContainer = _grid(box)
+	var reset: Button = _add_button(actions, "Reset save", _on_reset)
 	reset.add_theme_color_override("font_color", get_theme_color("fail", "Hardwire"))
-	reset.pressed.connect(_on_reset)
-	box.add_child(reset)
 	if OS.has_feature("pc"):
-		var quit := _add_button(box, _on_quit)
-		quit.text = "Quit"
+		_add_button(actions, "Quit", _on_quit)
 	_refresh()
 
 
-func _add_button(parent: Control, on_pressed: Callable) -> Button:
+func _grid(parent: Control) -> GridContainer:
+	var grid := GridContainer.new()
+	grid.columns = 2 if Ui.is_landscape(self) else 1
+	var gap: int = get_theme_constant("margin", "Hardwire")
+	grid.add_theme_constant_override("h_separation", gap)
+	grid.add_theme_constant_override("v_separation", gap)
+	parent.add_child(grid)
+	return grid
+
+
+func _add_button(parent: Control, text: String, on_pressed: Callable) -> Button:
 	var button := Button.new()
+	button.text = text
 	button.custom_minimum_size.y = get_theme_constant("tap_min", "Hardwire")
+	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	button.pressed.connect(on_pressed)
 	parent.add_child(button)
 	return button

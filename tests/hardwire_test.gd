@@ -40,3 +40,13 @@ func _remove_test_files() -> void:
 ## Sets all three stats to `value`.
 func set_stats(value: int) -> void:
 	GameState.add_stats(value - GameState.ram, value - GameState.cpu, value - GameState.sto)
+
+
+## Puts `node` into a new SubViewport of `size` (portrait or landscape) and returns the node.
+## Screens see that viewport's size, so layouts can be tested at any resolution.
+func in_viewport(node: Node, size: Vector2i) -> Node:
+	var viewport := SubViewport.new()
+	viewport.size = size
+	add_child_autofree(viewport)
+	viewport.add_child(node)
+	return node

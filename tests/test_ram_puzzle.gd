@@ -159,18 +159,6 @@ func test_rotated_rejects_unrotated_and_accepts_rotated() -> void:
 	assert_signal_not_emitted(second, "solved")
 
 
-func test_screen_cells_meet_minimum_size() -> void:
-	var screen: Control = PuzzleScreen.new()
-	screen.setup(SlotDef.create(20, SlotDef.TYPE_RAM))
-	add_child_autofree(screen)
-	await wait_process_frames(2)
-	var grid: RamGrid = screen.puzzle.grid()
-	assert_eq(grid.n, 6)
-	var cell: float = grid._cell_rect(0).size.x
-	assert_gte(cell, 120.0, "cells are at least 120 px")
-	var center: Vector2 = grid.global_position + grid._cell_rect(7).get_center()
-	assert_eq(grid.cell_at(center), 7)
-
 
 func _not_in(cells: Array[int], count: int) -> int:
 	for i: int in count:

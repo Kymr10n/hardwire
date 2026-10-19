@@ -14,30 +14,8 @@ var text_label: RichTextLabel
 
 
 func _ready() -> void:
-	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	var margin: int = get_theme_constant("margin", "Hardwire")
-	var tap: float = get_theme_constant("tap_min", "Hardwire")
-	var root := MarginContainer.new()
-	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	for side: String in ["left", "top", "right", "bottom"]:
-		root.add_theme_constant_override("margin_" + side, margin / 2)
-	add_child(root)
-	var column := VBoxContainer.new()
-	column.add_theme_constant_override("separation", margin / 2)
-	root.add_child(column)
-	var header := HBoxContainer.new()
-	column.add_child(header)
-	var back := Button.new()
-	back.text = "< Back"
-	back.custom_minimum_size = Vector2(tap * 1.5, tap)
-	back.pressed.connect(exit_requested.emit)
-	header.add_child(back)
-	var title := Label.new()
-	title.text = "Licenses"
-	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	title.add_theme_font_size_override("font_size", get_theme_font_size("header", "Hardwire"))
-	header.add_child(title)
+	var column: VBoxContainer = Ui.screen_root(self, get_theme_constant("max_column", "Hardwire"))
+	Ui.header(column, "Licenses", exit_requested.emit)
 
 	var scroll := ScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL

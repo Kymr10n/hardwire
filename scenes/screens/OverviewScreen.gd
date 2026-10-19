@@ -17,33 +17,47 @@ var shop_button: Button
 
 
 func _ready() -> void:
-	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var margin: int = get_theme_constant("margin", "Hardwire")
-	var root := MarginContainer.new()
-	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	for side: String in ["left", "top", "right", "bottom"]:
-		root.add_theme_constant_override("margin_" + side, margin / 2)
-	add_child(root)
-	var column := VBoxContainer.new()
-	column.add_theme_constant_override("separation", margin / 2)
-	root.add_child(column)
+	var landscape: bool = Ui.is_landscape(self)
+	var root: VBoxContainer = Ui.screen_root(self)
+
+	# Portrait: stats on top, list, buttons at the bottom.
+	# Landscape: a sidebar with stats and buttons beside the list.
+	var body := BoxContainer.new()
+	body.vertical = not landscape
+	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	body.add_theme_constant_override("separation", margin / 2)
+	root.add_child(body)
+	var side: BoxContainer = body
+	if landscape:
+		side = VBoxContainer.new()
+		side.custom_minimum_size.x = get_theme_constant("side_panel", "Hardwire")
+		side.add_theme_constant_override("separation", margin / 2)
+		body.add_child(side)
 
 	var stat_bar := StatBar.new()
+	stat_bar.vertical = landscape
 	stat_bar.debug_requested.connect(debug_requested.emit)
-	column.add_child(stat_bar)
+	side.add_child(stat_bar)
+	if landscape:
+		var spacer := Control.new()
+		spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		side.add_child(spacer)
 
 	_scroll = ScrollContainer.new()
+	_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	column.add_child(_scroll)
+	body.add_child(_scroll)
 	_list = VBoxContainer.new()
 	_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_list.add_theme_constant_override("separation", margin)
 	_scroll.add_child(_list)
 
-	var bottom := HBoxContainer.new()
+	var bottom := BoxContainer.new()
+	bottom.vertical = landscape
 	bottom.add_theme_constant_override("separation", margin / 2)
-	column.add_child(bottom)
+	side.add_child(bottom)
 	shop_button = _bottom_button("Shop", shop_requested.emit)
 	bottom.add_child(shop_button)
 	rebuild_button = _bottom_button("Rebuild", rebuild_requested.emit)

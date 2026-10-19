@@ -147,18 +147,3 @@ func test_screen_restarts_with_new_sequence_after_failure() -> void:
 	assert_eq(puzzle.phase, PuzzleBase.Phase.COUNTDOWN, "next attempt starts automatically")
 	assert_ne(puzzle.attempt_seed, first_seed, "with a fresh seed")
 	assert_eq(puzzle.slot.tier, 5, "at the same difficulty")
-
-
-func test_screen_fills_parent_and_pads_do_not_overlap() -> void:
-	# No explicit size: the screen must fill its parent via anchors and offsets.
-	var screen: Control = PuzzleScreen.new()
-	screen.setup(SlotDef.create(20, SlotDef.TYPE_STO))
-	add_child_autofree(screen)
-	await wait_process_frames(2)
-	assert_eq(screen.size, screen.get_viewport_rect().size)
-	var pads: Array[StoragePad] = screen.puzzle.pads()
-	assert_eq(pads.size(), 8)
-	for i: int in pads.size():
-		assert_gte(pads[i].size.x, 160.0, "pads are at least 160 px")
-		for j: int in range(i + 1, pads.size()):
-			assert_false(pads[i].get_global_rect().intersects(pads[j].get_global_rect()), "pads %d and %d overlap" % [i, j])

@@ -9,11 +9,13 @@ var _hint: Label
 var _counter: Label
 var _commit: Button
 var _shown: bool = false
+var _icon_center: Vector2 = Vector2.ZERO
 
 
 func _ready() -> void:
 	_hint = Label.new()
 	_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_hint.add_theme_color_override("font_color", get_theme_color("text_dim", "Hardwire"))
 	add_child(_hint)
 	_grid = RamGrid.new()
@@ -126,23 +128,42 @@ func _update_counter() -> void:
 	_counter.text = "%d / %d" % [_grid.on_cells().size(), expected().size()]
 
 
-## Hint row (and rotation icon) on top, square grid in the middle, counter and Commit below.
+## Tall area: hint row (and rotation icon) on top, square grid, counter and Commit below.
+## Wide area (landscape): grid on the left using the full height, a column with icon, hint,
+## counter and Commit on the right, so cells stay at least 120 px.
 func _layout() -> void:
 	if _grid == null:
 		return
 	var margin: float = get_theme_constant("margin", "Hardwire")
 	var row_h: float = get_theme_constant("tap_min", "Hardwire")
-	var side: float = maxf(0.0, minf(size.x - 2.0 * margin, size.y - 2.0 * row_h - 2.0 * margin))
-	var top: float = maxf(row_h + margin, (size.y - side) / 2.0)
-	_grid.position = Vector2((size.x - side) / 2.0, top)
+	var commit_w: float = row_h * 2.5
+	var wide: bool = size.x - 3.0 * margin - commit_w > size.y - 2.0 * row_h - 2.0 * margin
+	var side: float
+	if wide:
+		side = maxf(0.0, minf(size.y - 2.0 * margin, size.x - 3.0 * margin - commit_w))
+		var left: float = (size.x - side - margin - commit_w) / 2.0
+		var top: float = (size.y - side) / 2.0
+		var column_x: float = left + side + margin
+		_grid.position = Vector2(left, top)
+		_icon_center = Vector2(column_x + row_h * 0.3, top + row_h / 2.0)
+		_hint.position = Vector2(column_x, top + row_h)
+		_hint.size = Vector2(commit_w, row_h * 2.0)
+		_commit.position = Vector2(column_x, top + side - row_h)
+		_counter.position = Vector2(column_x, _commit.position.y - row_h - margin / 2.0)
+		_counter.size = Vector2(commit_w, row_h)
+	else:
+		side = maxf(0.0, minf(size.x - 2.0 * margin, size.y - 2.0 * row_h - 2.0 * margin))
+		var top: float = maxf(row_h + margin, (size.y - side) / 2.0)
+		_grid.position = Vector2((size.x - side) / 2.0, top)
+		_hint.position = Vector2(_grid.position.x, top - row_h - margin / 2.0)
+		_hint.size = Vector2(side, row_h)
+		_icon_center = Vector2(_grid.position.x + row_h * 0.3, _hint.position.y + row_h / 2.0)
+		var bottom: float = top + side + margin / 2.0
+		_counter.position = Vector2(_grid.position.x, bottom)
+		_counter.size = Vector2(side / 2.0, row_h)
+		_commit.position = Vector2(_grid.position.x + side - commit_w, bottom)
 	_grid.size = Vector2(side, side)
-	_hint.position = Vector2(0.0, top - row_h - margin / 2.0)
-	_hint.size = Vector2(size.x, row_h)
-	var bottom: float = top + side + margin / 2.0
-	_counter.position = Vector2(_grid.position.x, bottom)
-	_counter.size = Vector2(side / 2.0, row_h)
-	_commit.position = Vector2(_grid.position.x + side - row_h * 3.0, bottom)
-	_commit.size = Vector2(row_h * 3.0, row_h)
+	_commit.size = Vector2(commit_w, row_h)
 	queue_redraw()
 
 
@@ -151,7 +172,7 @@ func _draw() -> void:
 	if slot == null or slot.modifier != GridGen.MOD_ROTATED or _grid == null:
 		return
 	var r: float = get_theme_constant("tap_min", "Hardwire") * 0.3
-	var c := Vector2(_grid.position.x + r, _hint.position.y + _hint.size.y / 2.0)
+	var c: Vector2 = _icon_center
 	var color: Color = get_theme_color("ram", "Hardwire")
 	var start: float = -PI * 0.75
 	var end: float = start + PI * 1.5

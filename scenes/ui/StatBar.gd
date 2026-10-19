@@ -1,6 +1,7 @@
 class_name StatBar
-extends HBoxContainer
-## Top bar: RAM, CPU, STO in their accent colors, then Cycles and Cores. Updates on GameState signals.
+extends BoxContainer
+## Stats: RAM, CPU, STO in their accent colors, then Cycles and Cores. Updates on GameState signals.
+## A row in portrait; set `vertical` for the landscape sidebar.
 ## In debug builds, tapping it debug.panel_taps times within debug.panel_tap_window_s opens the debug panel.
 
 signal debug_requested

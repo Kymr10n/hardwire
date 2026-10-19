@@ -36,50 +36,40 @@ func setup(p_slot: SlotDef) -> void:
 
 
 func _ready() -> void:
-	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_rng.randomize()
 	var accent: Color = get_theme_color(slot.type, "Hardwire")
-	var margin: int = get_theme_constant("margin", "Hardwire")
+	var landscape: bool = Ui.is_landscape(self)
+	var root: VBoxContainer = Ui.screen_root(self, 0.0, 1.0)
 
-	var root := MarginContainer.new()
-	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	for side: String in ["left", "top", "right", "bottom"]:
-		root.add_theme_constant_override("margin_" + side, margin)
-	add_child(root)
-	var column := VBoxContainer.new()
-	column.add_theme_constant_override("separation", margin / 2)
-	root.add_child(column)
+	# Portrait: panel above the puzzle. Landscape: panel beside it.
+	var body := BoxContainer.new()
+	body.vertical = not landscape
+	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	body.add_theme_constant_override("separation", get_theme_constant("margin", "Hardwire") / 2)
+	root.add_child(body)
+	var panel := VBoxContainer.new()
+	panel.add_theme_constant_override("separation", get_theme_constant("margin", "Hardwire") / 2)
+	if landscape:
+		panel.custom_minimum_size.x = get_theme_constant("side_panel", "Hardwire")
+	body.add_child(panel)
 
-	var header := HBoxContainer.new()
-	header.add_theme_constant_override("separation", margin / 2)
-	column.add_child(header)
-	var back := Button.new()
-	back.text = "< Back"
-	back.custom_minimum_size = Vector2.ONE * get_theme_constant("tap_min", "Hardwire")
-	back.pressed.connect(go_back)
-	header.add_child(back)
-	var title := Label.new()
-	title.text = _title_text()
-	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	title.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	var title: Label = Ui.header(panel, _title_text(), go_back, landscape)
 	title.add_theme_color_override("font_color", accent)
-	title.add_theme_font_size_override("font_size", get_theme_font_size("header", "Hardwire"))
-	header.add_child(title)
 
 	_phase_label = Label.new()
 	_phase_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_phase_label.add_theme_font_size_override("font_size", get_theme_font_size("phase", "Hardwire"))
-	column.add_child(_phase_label)
+	panel.add_child(_phase_label)
 
 	_timer_bar = TimerBar.new()
 	_timer_bar.color = accent
 	_timer_bar.custom_minimum_size.y = get_theme_constant("timer_bar_height", "Hardwire")
-	column.add_child(_timer_bar)
+	panel.add_child(_timer_bar)
 
 	var area := Control.new()
+	area.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	area.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	column.add_child(area)
+	body.add_child(area)
 	puzzle = PUZZLES[slot.type].new() as PuzzleBase
 	puzzle.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	area.add_child(puzzle)
