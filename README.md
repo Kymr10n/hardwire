@@ -1,43 +1,78 @@
 # Hardwire
 
-Endless memory and timing puzzle game for phones, built with Godot 4. Design: [`docs/SPEC.md`](docs/SPEC.md).
+[![CI](https://github.com/Kymr10n/hardwire/actions/workflows/ci.yml/badge.svg)](https://github.com/Kymr10n/hardwire/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Godot 4.7](https://img.shields.io/badge/Godot-4.7-478cbf.svg)](https://godotengine.org)
 
-## Setup
+An endless incremental puzzle game for phones. Upgrade a computer by solving three short memory and timing minigames: each one raises a stat, and higher stats unlock harder puzzle slots that pay out more. Free and open source, with no ads, purchases or tracking.
 
-1. Install the latest stable **Godot 4.x** (standard build, not .NET) from https://godotengine.org/download and make sure `godot` is on your PATH.
-2. Open this folder in **VS Code** and install the recommended extensions when prompted (Godot Tools, Claude Code, EditorConfig).
-3. Open the project once in the Godot editor (`godot -e --path .`) so it imports and generates its cache. If Godot asks to upgrade the project format, accept.
-4. The test framework **GUT** (9.7.1, matching Godot 4.7) is vendored in `addons/gut` and enabled in `project.godot`; nothing to install.
-5. In VS Code, set `godotTools.editorPath.godot4` in `.vscode/settings.json` if `godot` is not on your PATH.
-6. Run with F5 (launch config "Run Hardwire") or the task "Run game". You should see the boot screen; tap to reach the overview. In debug builds, tap the stat bar 5 times to open the debug panel.
+| Overview | Storage | RAM | CPU |
+| :---: | :---: | :---: | :---: |
+| ![Overview with tier rows and slot cards](docs/screenshots/overview.png) | ![Storage: repeat the color sequence](docs/screenshots/storage.png) | ![RAM: recreate the pattern](docs/screenshots/ram.png) | ![CPU: copy the rhythm](docs/screenshots/cpu.png) |
 
-## Working with Claude Code
+## Status
 
-Start a session in this folder and ask, for example:
+Playable prototype (version 0.1.0). All three minigames, the tier overview, the upgrade shop, prestige ("Rebuild") and idle income are in. The web build runs; the Android build and testing on real phones are still to come. Progress per milestone is tracked in the [spec](docs/SPEC.md#milestones-and-acceptance-criteria).
 
-> Read CLAUDE.md and docs/SPEC.md, then implement milestone M1.
+## How it plays
 
-Work one milestone per session and play-test after each.
+- **Storage** (raises STO): pads light up in sequence; tap them back in order.
+- **RAM** (raises RAM): a pattern flashes on a grid; recreate it from memory.
+- **CPU** (raises CPU): the tile plays a rhythm; copy it by holding and releasing.
+- Puzzles take 10 to 40 seconds. A failure costs nothing; a fresh sequence starts right away.
+- Slots unlock only when every stat meets the requirement, so no minigame can be skipped. From tier 8, modifiers such as *Reverse*, *Rotated* or *Syncopated* change the rules.
+- Spend Cycles on upgrades, Rebuild for permanent Cores, and collect idle Cycles when you come back.
 
-## Layout
+The full design, including every formula, is in [`docs/SPEC.md`](docs/SPEC.md). Every tuning number lives in [`data/balance.json`](data/balance.json).
+
+## Run it
+
+Requirements: [Godot 4.7.2](https://godotengine.org/download) (standard build, not .NET), with `godot` on your PATH.
+
+```bash
+git clone https://github.com/Kymr10n/hardwire.git
+cd hardwire
+godot --headless --path . --import   # first run: import assets
+godot --path .                        # play in a 540x960 portrait window
+```
+
+Use the mouse as your finger (touch is emulated). In debug builds, tap the stat bar 5 times to open the debug panel, where you can set stats and tiers and force a minigame or modifier.
+
+## Develop
+
+```bash
+godot --headless --path . -s addons/gut/gut_cmdln.gd   # run all unit tests (GUT is vendored)
+godot -e --path .                                       # open the editor
+```
+
+The suite must end with "All tests passed" and no `SCRIPT ERROR`. VS Code users get launch and task configs for running the game and the tests; install the recommended extensions when prompted.
 
 | Path | Contents |
 | --- | --- |
-| `docs/SPEC.md` | Game design spec, milestones, acceptance criteria |
-| `data/balance.json` | Every tuning number |
-| `autoload/` | Global singletons: Balance, GameState, SaveManager, Synth, Haptics |
-| `logic/` | Pure, unit-tested game rules |
-| `scenes/` | Main scene, screens, puzzles, UI components |
+| `docs/SPEC.md` | Game design spec: source of truth, milestones, acceptance criteria |
+| `data/balance.json` | Every tuning number, read through the `Balance` autoload |
+| `autoload/` | Singletons: Balance, GameState, SaveManager, Synth (generated audio), Haptics |
+| `logic/` | Pure, unit-tested rules: generators, rhythm judge, economy |
+| `scenes/` | Main scene, screens, the three puzzles, UI components (built in code) |
+| `theme/` | Colors, sizes and durations |
 | `tests/` | GUT unit tests |
 
-## Exports
+See [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request. The project is developed with the help of [Claude Code](https://claude.com/claude-code); [`CLAUDE.md`](CLAUDE.md) holds the conventions it follows, which apply to human contributors too.
 
-Presets for Web and Android are in `export_presets.cfg`; both include `data/*.json`. Godot 4.7.2 export templates must be installed (Editor → Manage Export Templates).
+## Export
+
+Presets for Web and Android are in `export_presets.cfg`. Install the Godot 4.7.2 export templates first (Editor → Manage Export Templates).
 
 ```bash
-# Web (single-threaded; serve build/web over HTTPS or localhost)
+# Web (single-threaded build; serve build/web over HTTPS or localhost)
 godot --headless --path . --export-release "Web" build/web/index.html
 
-# Android (needs Android SDK + JDK 17 set in Editor Settings → Export → Android)
+# Android (needs the Android SDK and JDK 17 in Editor Settings → Export → Android)
 godot --headless --path . --export-debug "Android" build/android/hardwire.apk
 ```
+
+CI builds the web export on every push to `main` and attaches it as an artifact.
+
+## License
+
+Hardwire is released under the [MIT License](LICENSE). It uses the Godot Engine (MIT), the JetBrains Mono font (SIL Open Font License 1.1) and, for tests only, GUT (MIT); see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). The game lists all license texts under Settings → Licenses.

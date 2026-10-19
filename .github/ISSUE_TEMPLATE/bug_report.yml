@@ -1,0 +1,41 @@
+name: Bug report
+description: Something doesn't work as it should
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What did you see, and what did you expect instead?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open the RAM slot on tier 5
+        2. ...
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      options:
+        - Desktop (Godot editor or run from source)
+        - Web browser
+        - Android
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Build or commit
+      description: Version, commit hash, or where you got the build. Also the device or browser, if relevant.
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or screenshots
+      description: Godot output, browser console or screenshots, if you have them.

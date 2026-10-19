@@ -1,0 +1,16 @@
+name: Idea or balance feedback
+description: Suggest a feature, a new modifier, or a change to the balance
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would you like?
+      description: Describe the idea or the balance problem. For balance, say which minigame and tier, and what felt off.
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why?
+      description: What problem does it solve, or how would it make the game better?
