@@ -2,15 +2,39 @@ extends PuzzleBase
 ## Storage minigame: repeat the color sequence. SPEC: Minigame: Storage.
 ## Pads sit in a ring; each lights for show_ms with its tone, then a gap_ms pause.
 ## A wrong pad or the timeout fails the attempt; the last correct pad solves it.
+## With the Replay buffer upgrade a Replay button replays the sequence (progress and timer reset).
 
 var _attempt: Dictionary = {}
 var _pads: Array[StoragePad] = []
 var _pos: int = 0
 var _lit_item: int = -1
+var _replays_left: int = 0
+var _replay_button: Button
 
 
 func _ready() -> void:
+	_replay_button = Button.new()
+	_replay_button.pressed.connect(replay)
+	_replay_button.hide()
+	add_child(_replay_button)
 	resized.connect(_layout)
+
+
+func replays_left() -> int:
+	return _replays_left
+
+
+## Plays the sequence again during the input phase (Replay buffer); entered progress resets
+## and the timer restarts when input resumes. Public for tests.
+func replay() -> void:
+	if phase != Phase.INPUT or _replays_left <= 0:
+		return
+	_replays_left -= 1
+	_pos = 0
+	_lit_item = -1
+	for pad: StoragePad in _pads:
+		pad.set_level(0.0)
+	_set_phase(Phase.WATCH, "Watch")
 
 
 ## Number of correct pads entered so far in this attempt.
@@ -60,6 +84,7 @@ func _build_attempt() -> void:
 	time_limit_s = _attempt.time_limit_s
 	_pos = 0
 	_lit_item = -1
+	_replays_left = _attempt.replays
 	_ensure_pads(_attempt.pads)
 	for pad: StoragePad in _pads:
 		pad.set_level(0.0)
@@ -94,6 +119,11 @@ func _light_item(item: int) -> void:
 		Synth.play_note(entry.pad, _attempt.show_ms)
 
 
+func _on_phase_entered(p_phase: Phase) -> void:
+	_replay_button.visible = p_phase == Phase.INPUT and _replays_left > 0
+	_replay_button.text = "Replay (%d)" % _replays_left
+
+
 func _on_fail_reveal() -> void:
 	var target: Array[int] = expected()
 	if _pos < target.size():
@@ -120,6 +150,10 @@ func _ensure_pads(count: int) -> void:
 
 ## Ring around the center, first pad at the top, clockwise.
 func _layout() -> void:
+	if _replay_button:
+		var tap: float = get_theme_constant("tap_min", "Hardwire")
+		_replay_button.size = Vector2(tap * 3.0, tap)
+		_replay_button.position = Vector2((size.x - _replay_button.size.x) / 2.0, size.y - tap)
 	if _pads.is_empty():
 		return
 	var pad_size: float = get_theme_constant("pad_size", "Hardwire")

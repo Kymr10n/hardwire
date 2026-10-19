@@ -97,7 +97,7 @@ func _process(delta: float) -> void:
 
 func _build_attempt() -> void:
 	_attempt = RhythmGen.make(slot, attempt_seed)
-	time_limit_s = Balance.get_num("cpu", "first_press_timeout_s")
+	time_limit_s = _attempt.first_press_timeout_s
 	_presses.clear()
 	_releases.clear()
 	_holding = false

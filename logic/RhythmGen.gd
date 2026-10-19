@@ -21,7 +21,8 @@ static func params(tier: int) -> Dictionary:
 ## Builds one attempt. Keys:
 ## steps: Array[float] segment lengths in steps (on, off, on, ..., on; 2 * beats - 1 entries);
 ## target_ms: Array[float] the same in ms; beats, step_ms, tolerance, abs_ms;
-## total_ms: target rhythm length; max_total_ms: longest rhythm that can still pass.
+## total_ms: target rhythm length; max_total_ms: longest rhythm that can still pass;
+## first_press_timeout_s. Assists from slot.assist apply after the tier formulas.
 static func make(slot: SlotDef, seed: int) -> Dictionary:
 	var p: Dictionary = params(slot.tier)
 	var c: Dictionary = Balance.cpu()
@@ -44,7 +45,7 @@ static func make(slot: SlotDef, seed: int) -> Dictionary:
 	if syncopated and not _has_half(steps):
 		steps[rng.randi_range(0, steps.size() - 1)] = halves[rng.randi_range(0, halves.size() - 1)]
 
-	var tolerance: float = p.tolerance
+	var tolerance: float = p.tolerance + slot.assist_effect("metronome")
 	var abs_ms: float = float(c.tolerance_abs_ms)
 	var target_ms: Array[float] = []
 	var total_ms: float = 0.0
@@ -60,6 +61,7 @@ static func make(slot: SlotDef, seed: int) -> Dictionary:
 		"target_ms": target_ms,
 		"total_ms": total_ms,
 		"max_total_ms": RhythmJudge.max_total_ms(target_ms, tolerance, abs_ms),
+		"first_press_timeout_s": float(c.first_press_timeout_s) * (1.0 + slot.assist_effect("time_dilation")),
 	}
 
 

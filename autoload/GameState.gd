@@ -116,6 +116,27 @@ func apply_solve(slot: SlotDef) -> Dictionary:
 	return {"stat": gain.stat, "cycles": gain.cycles, "first_solve": first, "new_tier": after if after > before else 0}
 
 
+func upgrade_level(id: String) -> int:
+	return int(upgrades.get(id, 0))
+
+
+func can_buy(id: String) -> bool:
+	var level: int = upgrade_level(id)
+	return not Economy.is_maxed(id, level) and cycles >= Economy.upgrade_cost(id, level)
+
+
+## Buys the next level of an upgrade for Cycles. Returns false if maxed or unaffordable.
+func buy_upgrade(id: String) -> bool:
+	if not can_buy(id):
+		return false
+	var level: int = upgrade_level(id)
+	cycles -= Economy.upgrade_cost(id, level)
+	upgrades[id] = level + 1
+	cycles_changed.emit()
+	upgrades_changed.emit()
+	return true
+
+
 func record_fail() -> void:
 	lifetime.fails = int(lifetime.fails) + 1
 

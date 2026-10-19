@@ -1,11 +1,12 @@
 extends Control
 ## Root scene. Holds the current screen and handles transitions (SPEC: Screens and UX flow):
-## Boot -> Overview hub -> Puzzle / Settings / debug panel (and Shop, Rebuild later).
+## Boot -> Overview hub -> Puzzle / Shop / Settings / debug panel (and Rebuild later).
 
 const BootScreen := preload("res://scenes/screens/BootScreen.gd")
 const OverviewScreen := preload("res://scenes/screens/OverviewScreen.gd")
 const PuzzleScreen := preload("res://scenes/screens/PuzzleScreen.gd")
 const SettingsScreen := preload("res://scenes/screens/SettingsScreen.gd")
+const ShopScreen := preload("res://scenes/screens/ShopScreen.gd")
 const DebugMenu := preload("res://scenes/screens/DebugMenu.gd")
 
 var screen: Control
@@ -29,6 +30,7 @@ func show_overview() -> void:
 	var overview: Control = OverviewScreen.new()
 	overview.play_requested.connect(show_puzzle)
 	overview.settings_requested.connect(show_settings)
+	overview.shop_requested.connect(show_shop)
 	overview.debug_requested.connect(show_debug)
 	_show(overview)
 
@@ -44,6 +46,12 @@ func show_settings() -> void:
 	var settings: Control = SettingsScreen.new()
 	settings.exit_requested.connect(show_overview)
 	_show(settings)
+
+
+func show_shop() -> void:
+	var shop: Control = ShopScreen.new()
+	shop.exit_requested.connect(show_overview)
+	_show(shop)
 
 
 func show_debug() -> void:

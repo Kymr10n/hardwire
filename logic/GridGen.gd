@@ -22,7 +22,7 @@ static func params(tier: int) -> Dictionary:
 ## Builds one attempt. Keys:
 ## n: grid side; pattern: Array[int] sorted lit cells shown in the watch phase;
 ## expected: Array[int] sorted cells the player must set (after Inverted / Rotated);
-## show_ms, time_limit_s.
+## show_ms, time_limit_s. Assists from slot.assist apply after the tier formulas.
 static func make(slot: SlotDef, seed: int) -> Dictionary:
 	var p: Dictionary = params(slot.tier)
 	var n: int = p.n
@@ -45,8 +45,9 @@ static func make(slot: SlotDef, seed: int) -> Dictionary:
 		"n": n,
 		"pattern": pattern,
 		"expected": expected,
-		"show_ms": p.show_ms,
-		"time_limit_s": float(r.input_s_base) + float(r.input_s_per_cell) * expected.size(),
+		"show_ms": roundi(p.show_ms * (1.0 + slot.assist_effect("longer_exposure"))),
+		"time_limit_s": (float(r.input_s_base) + float(r.input_s_per_cell) * expected.size())
+			* (1.0 + slot.assist_effect("time_dilation")),
 	}
 
 

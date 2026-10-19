@@ -93,6 +93,8 @@ func _fail() -> void:
 func _set_phase(p_phase: Phase, text: String) -> void:
 	phase = p_phase
 	_phase_t = 0.0
+	if p_phase == Phase.INPUT:
+		time_left_s = time_limit_s
 	_phase_text = text
 	_on_phase_entered(p_phase)
 	phase_changed.emit(p_phase, text)

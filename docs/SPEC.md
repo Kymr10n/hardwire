@@ -351,7 +351,7 @@ Build one milestone per session, in order. Each milestone ends with a playable b
 | M3 | RAM minigame | Toggle, Commit and timeout work; failed attempts flash the answer; Inverted and Rotated work when forced | Done (2026-10-19), awaiting play-test |
 | M4 | CPU minigame and `RhythmJudge` | Judge tests cover exact input, input within tolerance, too many presses, and one segment out of tolerance; playing a tier 1 rhythm by ear passes | Done (2026-10-19), awaiting play-test on a phone |
 | M5 | Overview, slot generation, gating, rewards, Boot and Settings screens, debug panel | Fresh save reaches tier 4 through first solves alone; locked slots show missing stats; numbers match the Sample tiers table | Done (2026-10-19), awaiting play-test |
-| M6 | Shop and upgrades | All six upgrades buy, persist and change their puzzle as specified | In progress |
+| M6 | Shop and upgrades | All six upgrades buy, persist and change their puzzle as specified | Done (2026-10-19), awaiting play-test |
 | M7 | Prestige and idle income | Rebuild becomes available after a tier 10 solve; Cores and multiplier are correct; the right fields reset; idle Cycles are offered after closing the app for over 5 minutes and respect the 8 h cap | Planned |
 | M8 | Polish and export | Synth sounds, haptics, screen transitions, first-run hints; Android APK and web build run on a real phone | Planned |
 

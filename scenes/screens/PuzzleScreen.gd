@@ -21,8 +21,10 @@ var _timer_bar: TimerBar
 var _overlay: ResultOverlay
 
 
+## Copies the current upgrade levels into the slot so assists apply (SPEC: Upgrade shop).
 func setup(p_slot: SlotDef) -> void:
 	slot = p_slot
+	slot.assist = GameState.upgrades.duplicate()
 
 
 func _ready() -> void:

@@ -23,6 +23,18 @@ static func solve_reward(slot: SlotDef, first_solve: bool, overclock_lvl: int, m
 		"cycles": roundi(slot.cycles * mult * cycle_mult),
 	}
 
-# TODO(M6): static func upgrade_cost(id: String, level: int) -> int
+
+
+## Cost of the next level when the upgrade is at `level`: round(base x growth^level).
+static func upgrade_cost(id: String, level: int) -> int:
+	var u: Dictionary = Balance.upgrade(id)
+	return roundi(float(u.base_cost) * pow(float(u.growth), level))
+
+
+## True when a capped upgrade has reached max_level (max_level < 0 means uncapped).
+static func is_maxed(id: String, level: int) -> bool:
+	var max_level: int = int(Balance.upgrade(id).max_level)
+	return max_level >= 0 and level >= max_level
+
 # TODO(M7): static func cores_for(highest_tier_solved: int) -> int
 # TODO(M7): static func idle_cycles(seconds_away: int, t_max: int, miner_lvl: int, cores: int) -> int
