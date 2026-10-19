@@ -66,9 +66,7 @@ func test_totals() -> void:
 	for t: float in a.target_ms:
 		total += t
 	assert_almost_eq(a.total_ms, total, 0.001)
-	assert_almost_eq(
-		a.max_total_ms, RhythmJudge.max_total_ms(a.target_ms, a.tolerance, a.abs_ms), 0.001
-	)
+	assert_almost_eq(a.max_total_ms, RhythmJudge.max_total_ms(a), 0.001)
 	assert_eq(a.abs_ms, 60.0)
 
 
