@@ -1,0 +1,27 @@
+# gdlint configuration (gdtoolkit). Limits are deliberately tight: small files and functions keep the code simple.
+# Changing a limit is a project decision — record it in docs/DECISIONS.md.
+class-definitions-order:
+- tools
+- classnames
+- extends
+- docstrings
+- signals
+- enums
+- consts
+- staticvars
+- exports
+- pubvars
+- prvvars
+- onreadypubvars
+- onreadyprvvars
+- others
+disable: []
+excluded_directories: !!set
+  .git: null
+  .godot: null
+  addons: null
+function-arguments-number: 5
+max-file-lines: 300
+max-line-length: 100
+max-public-methods: 12
+max-returns: 4
