@@ -2,12 +2,7 @@
 extends "res://tests/hardwire_test.gd"
 ## M8 polish: first-run hints, screen transitions, Android back navigation.
 
-const Main := preload("res://scenes/Main.tscn")
 const MainScript := preload("res://scenes/Main.gd")
-const PuzzleScreen := preload("res://scenes/screens/PuzzleScreen.gd")
-const OverviewScreen := preload("res://scenes/screens/OverviewScreen.gd")
-const SettingsScreen := preload("res://scenes/screens/SettingsScreen.gd")
-const LicensesScreen := preload("res://scenes/screens/LicensesScreen.gd")
 
 
 func _release() -> InputEventScreenTouch:
@@ -39,15 +34,8 @@ func test_hint_shown_once() -> void:
 	assert_eq(screen.puzzle.phase, PuzzleBase.Phase.COUNTDOWN)
 
 
-func _main() -> Node:
-	var main: Node = Main.instantiate()
-	main._idle_check_pending = false
-	add_child_autofree(main)
-	return main
-
-
 func test_screens_fade_in() -> void:
-	var main := _main()
+	var main := make_main()
 	main.show_settings()
 	assert_eq(main.screen.modulate.a, 0.0)
 	await wait_seconds(0.3)
@@ -55,7 +43,7 @@ func test_screens_fade_in() -> void:
 
 
 func test_back_returns_to_overview() -> void:
-	var main := _main()
+	var main := make_main()
 	main.show_shop()
 	main.go_back()
 	assert_true(main.screen is OverviewScreen)
@@ -65,7 +53,7 @@ func test_back_returns_to_overview() -> void:
 
 
 func test_back_ignored_while_dialog_open() -> void:
-	var main := _main()
+	var main := make_main()
 	main.show_settings()
 	ConfirmDialog.open(main.screen, "t", "m", "ok")
 	main.go_back()
@@ -87,7 +75,7 @@ func test_licenses_screen_shows_all_texts() -> void:
 
 
 func test_settings_opens_licenses_and_back_returns() -> void:
-	var main := _main()
+	var main := make_main()
 	main.show_settings()
 	main.screen.licenses_requested.emit()
 	assert_true(main.screen is LicensesScreen)
@@ -115,7 +103,7 @@ func test_fullscreen_only_on_steam_deck() -> void:
 
 
 func test_back_never_quits_on_pc_overview() -> void:
-	var main := _main()
+	var main := make_main()
 	main.show_overview()
 	main.go_back()
 	assert_true(main.screen is OverviewScreen, "still on the overview (tests run on PC)")
@@ -142,7 +130,7 @@ func test_modifier_display_names() -> void:
 
 
 func test_modifier_hint_lines() -> void:
-	var ram: PuzzleBase = preload("res://scenes/puzzles/RamPuzzle.gd").new()
+	var ram: PuzzleBase = RamPuzzle.new()
 	add_child_autofree(ram)
 	ram.setup(SlotDef.create(8, SlotDef.TYPE_RAM, GridGen.MOD_INVERTED), 1)
 	ram.start()
@@ -150,8 +138,88 @@ func test_modifier_hint_lines() -> void:
 	ram.setup(SlotDef.create(8, SlotDef.TYPE_RAM), 1)
 	ram.start()
 	assert_eq(ram.hint.text, "", "no hint without a modifier")
-	var cpu: PuzzleBase = preload("res://scenes/puzzles/CpuPuzzle.gd").new()
+	var cpu: PuzzleBase = CpuPuzzle.new()
 	add_child_autofree(cpu)
 	cpu.setup(SlotDef.create(8, SlotDef.TYPE_CPU, RhythmGen.MOD_SYNCOPATED), 1)
 	cpu.start()
 	assert_eq(cpu.hint.text, "Half steps")
+
+
+func test_countdown_counts_3_2_1_over_1_5_s() -> void:
+	var puzzle := make_puzzle(StoragePuzzle, 1)
+	var texts: Array[String] = []
+	puzzle.phase_changed.connect(
+		func(_phase: PuzzleBase.Phase, text: String) -> void: texts.append(text)
+	)
+	run_until(puzzle, PuzzleBase.Phase.WATCH)
+	assert_eq(texts, ["2", "1", "Watch"] as Array[String], "3 was shown at start, then 2, 1")
+	var started := make_puzzle(StoragePuzzle, 1)
+	var t: float = 0.0
+	while started.phase == PuzzleBase.Phase.COUNTDOWN:
+		started._process(FRAME)
+		t += FRAME
+	assert_almost_eq(t, 1.5, 2 * FRAME)
+
+
+func test_result_overlay_counts_up_and_notes_new_tier() -> void:
+	var overlay := ResultOverlay.new()
+	add_child_autofree(overlay)
+	overlay.show_result(
+		"Write complete",
+		Color.WHITE,
+		"STO",
+		{"stat": 4, "cycles": 10, "first_solve": true, "new_tier": 2}
+	)
+	assert_eq(overlay.gain.text, "+0 STO    +0 Cycles", "count-up starts at 0")
+	for i: int in 60:
+		overlay._process(FRAME)
+	assert_eq(overlay.gain.text, "+4 STO    +10 Cycles", "full after 0.6 s")
+	assert_string_contains(overlay.note.text, "First solve x2")
+	assert_string_contains(overlay.note.text, "Tier 2 unlocked")
+
+
+func test_slot_card_texts() -> void:
+	GameState.add_stats(8, 4, 8)
+	var locked := SlotCard.new()
+	locked.setup(SlotGenerator.make(3, SlotDef.TYPE_RAM))
+	add_child_autofree(locked)
+	assert_eq(locked.lines.text, "CPU 4 more")
+	assert_false(locked.badge_new.visible)
+	var open := SlotCard.new()
+	open.setup(SlotGenerator.make(1, SlotDef.TYPE_CPU))
+	add_child_autofree(open)
+	assert_eq(open.lines.text, "+4 CPU\n+10 Cyc", "first solve pays double")
+	assert_true(open.badge_new.visible)
+	var modifier := SlotCard.new()
+	modifier.setup(SlotDef.create(8, SlotDef.TYPE_CPU, "audio_only"))
+	add_child_autofree(modifier)
+	assert_eq(modifier.modifier_label.text, "Audio only")
+
+
+func test_idle_offer_after_resume() -> void:
+	GameState.apply_solve(SlotGenerator.make(1, SlotDef.TYPE_RAM))
+	GameState.last_seen = int(Time.get_unix_time_from_system()) - 2 * 3600
+	var main := make_main()
+	main.show_overview()
+	assert_eq(main.screen.find_children("*", "ConfirmDialog", true, false).size(), 0)
+	main.notification(Node.NOTIFICATION_APPLICATION_RESUMED)
+	assert_eq(main.screen.find_children("*", "ConfirmDialog", true, false).size(), 1)
+
+
+func test_settings_change_is_saved() -> void:
+	var settings := SettingsScreen.new()
+	add_child_autofree(settings)
+	for node: Node in settings.find_children("*", "Button", true, false):
+		if (node as Button).text.begins_with("Sound"):
+			(node as Button).pressed.emit()
+	assert_true(GameState.settings.sound, "muted by the test base, toggled back on")
+	assert_true(FileAccess.file_exists(TEST_SAVE))
+
+
+func test_synth_tone_handle_is_zero_when_sound_is_off() -> void:
+	GameState.settings.sound = false
+	assert_eq(Synth.start_tone(), 0)
+	GameState.settings.sound = true
+	var id: int = Synth.start_tone()
+	assert_gt(id, 0)
+	Synth.stop_tone(id)

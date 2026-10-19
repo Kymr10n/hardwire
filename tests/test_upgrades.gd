@@ -2,9 +2,6 @@
 extends "res://tests/hardwire_test.gd"
 ## Upgrade shop (SPEC: Upgrade shop): costs, buying, persistence and each upgrade's effect.
 
-const StoragePuzzle := preload("res://scenes/puzzles/StoragePuzzle.gd")
-const ShopScreen := preload("res://scenes/screens/ShopScreen.gd")
-
 
 func _slot(tier: int, type: String, levels: Dictionary) -> SlotDef:
 	var slot := SlotDef.create(tier, type)
@@ -87,7 +84,7 @@ func test_overclock_and_miner_boost_rewards() -> void:
 
 func test_puzzle_screen_copies_upgrade_levels() -> void:
 	GameState.upgrades.time_dilation = 3
-	var screen: Control = preload("res://scenes/screens/PuzzleScreen.gd").new()
+	var screen: Control = PuzzleScreen.new()
 	var slot: SlotDef = SlotGenerator.make(1, SlotDef.TYPE_STO)
 	screen.setup(slot)
 	assert_eq(slot.assist_level("time_dilation"), 3)
@@ -100,15 +97,14 @@ func _storage(levels: Dictionary) -> PuzzleBase:
 	add_child_autofree(puzzle)
 	puzzle.setup(_slot(5, SlotDef.TYPE_STO, levels), 9)
 	puzzle.start()
-	while puzzle.phase != PuzzleBase.Phase.INPUT:
-		puzzle._process(FRAME)
+	run_until(puzzle, PuzzleBase.Phase.INPUT)
 	return puzzle
 
 
 func test_no_replay_without_upgrade() -> void:
 	var puzzle := _storage({})
 	assert_eq(puzzle.replays_left(), 0)
-	assert_false(puzzle._replay_button.visible)
+	assert_false(puzzle.replay_button.visible)
 	puzzle.replay()
 	assert_eq(puzzle.phase, PuzzleBase.Phase.INPUT)
 
@@ -116,7 +112,7 @@ func test_no_replay_without_upgrade() -> void:
 func test_replay_buffer_replays_and_resets() -> void:
 	var puzzle := _storage({"replay_buffer": 2})
 	watch_signals(puzzle)
-	assert_true(puzzle._replay_button.visible)
+	assert_true(puzzle.replay_button.visible)
 	puzzle.tap_pad(puzzle.expected()[0])
 	for i: int in 30:
 		puzzle._process(FRAME)
@@ -124,16 +120,14 @@ func test_replay_buffer_replays_and_resets() -> void:
 	assert_eq(puzzle.phase, PuzzleBase.Phase.WATCH)
 	assert_eq(puzzle.progress(), 0)
 	assert_eq(puzzle.replays_left(), 1)
-	while puzzle.phase != PuzzleBase.Phase.INPUT:
-		puzzle._process(FRAME)
+	run_until(puzzle, PuzzleBase.Phase.INPUT)
 	assert_almost_eq(
 		puzzle.time_left_s, puzzle.time_limit_s, 0.0001, "timer restarts at full length"
 	)
 	puzzle.replay()
 	assert_eq(puzzle.replays_left(), 0)
-	while puzzle.phase != PuzzleBase.Phase.INPUT:
-		puzzle._process(FRAME)
-	assert_false(puzzle._replay_button.visible, "no uses left")
+	run_until(puzzle, PuzzleBase.Phase.INPUT)
+	assert_false(puzzle.replay_button.visible, "no uses left")
 	for pad: int in puzzle.expected():
 		puzzle.tap_pad(pad)
 	assert_signal_emitted(puzzle, "solved")
@@ -149,10 +143,10 @@ func test_shop_buy_button() -> void:
 	var by_id := {}
 	for card: UpgradeCard in cards:
 		by_id[card.id] = card
-	assert_true(by_id.overclock._buy.disabled, "100 > 60")
-	assert_false(by_id.metronome._buy.disabled)
-	by_id.metronome._buy.pressed.emit()
+	assert_true(by_id.overclock.buy_button.disabled, "100 > 60")
+	assert_false(by_id.metronome.buy_button.disabled)
+	by_id.metronome.buy_button.pressed.emit()
 	assert_eq(GameState.upgrade_level("metronome"), 1)
 	assert_eq(GameState.cycles, 30)
 	assert_true(FileAccess.file_exists(TEST_SAVE), "purchase saved")
-	assert_true(by_id.metronome._buy.disabled, "54 > 30")
+	assert_true(by_id.metronome.buy_button.disabled, "54 > 30")

@@ -2,9 +2,6 @@ extends "res://tests/hardwire_test.gd"
 ## Overview screen: visible tiers, card states, gating in the UI, reward flow from the puzzle
 ## screen.
 
-const OverviewScreen := preload("res://scenes/screens/OverviewScreen.gd")
-const PuzzleScreen := preload("res://scenes/screens/PuzzleScreen.gd")
-
 
 func _overview() -> Control:
 	var overview: Control = OverviewScreen.new()
@@ -51,14 +48,13 @@ func test_puzzle_solve_credits_and_saves() -> void:
 	add_child_autofree(screen)
 	await wait_process_frames(1)
 	var puzzle: PuzzleBase = screen.puzzle
-	while puzzle.phase != PuzzleBase.Phase.INPUT:
-		puzzle._process(FRAME)
+	run_until(puzzle, PuzzleBase.Phase.INPUT)
 	for pad: int in puzzle.expected():
 		puzzle.tap_pad(pad)
 	assert_eq(GameState.sto, 4)
 	assert_eq(GameState.cycles, 10)
 	assert_true(FileAccess.file_exists(TEST_SAVE), "saved after the solve")
-	assert_true(screen._overlay.visible)
+	assert_true(screen.overlay.visible)
 
 
 func test_five_taps_on_stat_bar_open_debug_panel() -> void:
@@ -66,7 +62,7 @@ func test_five_taps_on_stat_bar_open_debug_panel() -> void:
 	await wait_process_frames(2)
 	watch_signals(overview)
 	var bar: StatBar = overview.find_children("*", "StatBar", true, false)[0]
-	for i: int in Balance.get_int("debug", "panel_taps"):
+	for i: int in 5:
 		var touch := InputEventScreenTouch.new()
 		touch.pressed = true
 		touch.position = bar.get_global_rect().get_center()

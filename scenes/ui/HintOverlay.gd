@@ -9,21 +9,9 @@ var prompt: Label
 
 
 func _ready() -> void:
-	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	var dim := ColorRect.new()
-	dim.color = Color(get_theme_color("bg", "Hardwire"), Ui.pct(self, "hint_dim_pct"))
-	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	add_child(dim)
-	var box := VBoxContainer.new()
-	box.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	box.alignment = BoxContainer.ALIGNMENT_CENTER
-	box.add_theme_constant_override("separation", get_theme_constant("margin", "Hardwire"))
-	add_child(box)
-	var line := Label.new()
-	line.text = text
-	line.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var box: VBoxContainer = Ui.centered_column(self, Ui.pct(self, "hint_dim_pct"))
+	var line: Label = Ui.label(text, get_theme_font_size("header", "Hardwire"))
 	line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	line.add_theme_font_size_override("font_size", get_theme_font_size("header", "Hardwire"))
 	box.add_child(line)
 	prompt = Ui.dim_label("")
 	box.add_child(prompt)

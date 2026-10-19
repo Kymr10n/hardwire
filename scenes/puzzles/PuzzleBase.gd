@@ -80,6 +80,7 @@ func _succeed(result: Dictionary) -> void:
 	_succeeded = true
 	_set_phase(Phase.RESULT, "Write complete")
 	Synth.play_success()
+	Haptics.success()
 	solved.emit(result)
 
 
@@ -87,6 +88,7 @@ func _fail() -> void:
 	_succeeded = false
 	_set_phase(Phase.RESULT, "Corrupted")
 	Synth.play_fail()
+	Haptics.fail()
 	_on_fail_reveal()
 
 

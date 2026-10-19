@@ -57,3 +57,8 @@ static func create(p_tier: int, p_type: String, p_modifier: String = "") -> Slot
 
 static func modifier_name(modifier: String) -> String:
 	return MODIFIER_NAMES.get(modifier, modifier)
+
+
+## Multiplier of an assist upgrade at its level (time limits, show time).
+func assist_mult(upgrade_id: String) -> float:
+	return Economy.upgrade_mult(upgrade_id, assist_level(upgrade_id))

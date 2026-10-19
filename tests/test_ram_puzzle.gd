@@ -1,25 +1,6 @@
 extends "res://tests/hardwire_test.gd"
 ## RamPuzzle behaviour, driven by simulated frames.
 
-const RamPuzzle := preload("res://scenes/puzzles/RamPuzzle.gd")
-const PuzzleScreen := preload("res://scenes/screens/PuzzleScreen.gd")
-
-
-func _puzzle(tier: int, modifier: String = "", seed: int = 7) -> PuzzleBase:
-	var puzzle: PuzzleBase = RamPuzzle.new()
-	puzzle.size = Vector2(1000, 1400)
-	add_child_autofree(puzzle)
-	puzzle.setup(SlotDef.create(tier, SlotDef.TYPE_RAM, modifier), seed)
-	puzzle.start()
-	return puzzle
-
-
-func _run_until(puzzle: PuzzleBase, phase: PuzzleBase.Phase, max_s: float = 30.0) -> void:
-	var t: float = 0.0
-	while puzzle.phase != phase and t < max_s:
-		puzzle._process(FRAME)
-		t += FRAME
-
 
 func _enter(puzzle: PuzzleBase, cells: Array[int]) -> void:
 	for i: int in cells:
@@ -27,8 +8,8 @@ func _enter(puzzle: PuzzleBase, cells: Array[int]) -> void:
 
 
 func test_watch_shows_pattern_then_hides() -> void:
-	var puzzle := _puzzle(5)
-	_run_until(puzzle, PuzzleBase.Phase.WATCH)
+	var puzzle := make_puzzle(RamPuzzle, 5)
+	run_until(puzzle, PuzzleBase.Phase.WATCH)
 	puzzle._process(FRAME)
 	assert_eq(puzzle.grid().on_cells(), puzzle.pattern())
 	var t: float = 0.0
@@ -40,8 +21,8 @@ func test_watch_shows_pattern_then_hides() -> void:
 
 
 func test_toggle_on_and_off() -> void:
-	var puzzle := _puzzle(1)
-	_run_until(puzzle, PuzzleBase.Phase.INPUT)
+	var puzzle := make_puzzle(RamPuzzle, 1)
+	run_until(puzzle, PuzzleBase.Phase.INPUT)
 	puzzle.toggle_cell(4)
 	assert_true(puzzle.grid().is_on(4))
 	puzzle.toggle_cell(4)
@@ -49,15 +30,15 @@ func test_toggle_on_and_off() -> void:
 
 
 func test_toggle_ignored_outside_input() -> void:
-	var puzzle := _puzzle(1)
+	var puzzle := make_puzzle(RamPuzzle, 1)
 	puzzle.toggle_cell(0)
 	assert_false(puzzle.grid().is_on(0))
 
 
 func test_commit_disabled_until_count_matches() -> void:
-	var puzzle := _puzzle(1)
+	var puzzle := make_puzzle(RamPuzzle, 1)
 	watch_signals(puzzle)
-	_run_until(puzzle, PuzzleBase.Phase.INPUT)
+	run_until(puzzle, PuzzleBase.Phase.INPUT)
 	var target: Array[int] = puzzle.expected()
 	_enter(puzzle, target.slice(0, target.size() - 1))
 	assert_false(puzzle.can_commit())
@@ -68,9 +49,9 @@ func test_commit_disabled_until_count_matches() -> void:
 
 
 func test_correct_commit_solves() -> void:
-	var puzzle := _puzzle(20)
+	var puzzle := make_puzzle(RamPuzzle, 20)
 	watch_signals(puzzle)
-	_run_until(puzzle, PuzzleBase.Phase.INPUT)
+	run_until(puzzle, PuzzleBase.Phase.INPUT)
 	assert_eq(puzzle.grid().n, 6)
 	_enter(puzzle, puzzle.expected())
 	puzzle.commit()
@@ -79,9 +60,9 @@ func test_correct_commit_solves() -> void:
 
 
 func test_correction_then_commit_solves() -> void:
-	var puzzle := _puzzle(1)
+	var puzzle := make_puzzle(RamPuzzle, 1)
 	watch_signals(puzzle)
-	_run_until(puzzle, PuzzleBase.Phase.INPUT)
+	run_until(puzzle, PuzzleBase.Phase.INPUT)
 	var wrong: int = _not_in(puzzle.expected(), 9)
 	puzzle.toggle_cell(wrong)
 	puzzle.toggle_cell(wrong)
@@ -91,9 +72,9 @@ func test_correction_then_commit_solves() -> void:
 
 
 func test_wrong_commit_fails_and_flashes_answer() -> void:
-	var puzzle := _puzzle(1)
+	var puzzle := make_puzzle(RamPuzzle, 1)
 	watch_signals(puzzle)
-	_run_until(puzzle, PuzzleBase.Phase.INPUT)
+	run_until(puzzle, PuzzleBase.Phase.INPUT)
 	var target: Array[int] = puzzle.expected()
 	var cells: Array[int] = target.slice(0, target.size() - 1)
 	cells.append(_not_in(target, 9))
@@ -102,14 +83,14 @@ func test_wrong_commit_fails_and_flashes_answer() -> void:
 	assert_eq(puzzle.phase, PuzzleBase.Phase.RESULT)
 	assert_eq(puzzle.grid().on_cells(), target, "correct pattern is shown")
 	assert_signal_not_emitted(puzzle, "failed")
-	_run_until(puzzle, PuzzleBase.Phase.IDLE, 2.0)
+	run_until(puzzle, PuzzleBase.Phase.IDLE, 2.0)
 	assert_signal_emitted(puzzle, "failed")
 
 
 func test_timeout_fails_and_flashes_answer() -> void:
-	var puzzle := _puzzle(1)
+	var puzzle := make_puzzle(RamPuzzle, 1)
 	watch_signals(puzzle)
-	_run_until(puzzle, PuzzleBase.Phase.INPUT)
+	run_until(puzzle, PuzzleBase.Phase.INPUT)
 	puzzle.toggle_cell(_not_in(puzzle.expected(), 9))
 	var t: float = 0.0
 	while puzzle.phase == PuzzleBase.Phase.INPUT:
@@ -117,14 +98,14 @@ func test_timeout_fails_and_flashes_answer() -> void:
 		t += FRAME
 	assert_almost_eq(t, 6.4, 2 * FRAME, "4 s + 0.8 s x 3")
 	assert_eq(puzzle.grid().on_cells(), puzzle.expected())
-	_run_until(puzzle, PuzzleBase.Phase.IDLE, 2.0)
+	run_until(puzzle, PuzzleBase.Phase.IDLE, 2.0)
 	assert_signal_emitted(puzzle, "failed")
 
 
 func test_inverted_solves_with_dark_cells() -> void:
-	var puzzle := _puzzle(10, GridGen.MOD_INVERTED, 5)
+	var puzzle := make_puzzle(RamPuzzle, 10, GridGen.MOD_INVERTED, 5)
 	watch_signals(puzzle)
-	_run_until(puzzle, PuzzleBase.Phase.INPUT)
+	run_until(puzzle, PuzzleBase.Phase.INPUT)
 	_enter(puzzle, puzzle.pattern())
 	assert_false(puzzle.can_commit(), "the shown cells are not the answer")
 	_enter(puzzle, puzzle.pattern())
@@ -138,9 +119,9 @@ func test_inverted_solves_with_dark_cells() -> void:
 
 
 func test_rotated_rejects_unrotated_and_accepts_rotated() -> void:
-	var puzzle := _puzzle(5, GridGen.MOD_ROTATED, 2)
+	var puzzle := make_puzzle(RamPuzzle, 5, GridGen.MOD_ROTATED, 2)
 	watch_signals(puzzle)
-	_run_until(puzzle, PuzzleBase.Phase.INPUT)
+	run_until(puzzle, PuzzleBase.Phase.INPUT)
 	assert_ne(
 		puzzle.pattern(), puzzle.expected(), "seed gives a pattern that changes under rotation"
 	)
@@ -151,9 +132,9 @@ func test_rotated_rejects_unrotated_and_accepts_rotated() -> void:
 	puzzle.commit()
 	assert_signal_emitted(puzzle, "solved")
 
-	var second := _puzzle(5, GridGen.MOD_ROTATED, 2)
+	var second := make_puzzle(RamPuzzle, 5, GridGen.MOD_ROTATED, 2)
 	watch_signals(second)
-	_run_until(second, PuzzleBase.Phase.INPUT)
+	run_until(second, PuzzleBase.Phase.INPUT)
 	_enter(second, second.pattern())
 	second.commit()
 	assert_eq(second.phase, PuzzleBase.Phase.RESULT)

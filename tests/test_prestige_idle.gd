@@ -1,7 +1,6 @@
 extends "res://tests/hardwire_test.gd"
 ## Prestige ("Rebuild") and idle income (SPEC: Prestige, Idle income; M7 Done-when).
 
-const Main := preload("res://scenes/Main.tscn")
 const NOW := 1_800_000_000
 
 
@@ -68,12 +67,6 @@ func test_last_seen_survives_save_and_drives_offer() -> void:
 	)
 
 
-func _main() -> Node:
-	var main: Node = Main.instantiate()
-	add_child_autofree(main)
-	return main
-
-
 func _dialogs(node: Node) -> Array[Node]:
 	return node.find_children("*", "ConfirmDialog", true, false)
 
@@ -81,12 +74,15 @@ func _dialogs(node: Node) -> Array[Node]:
 func test_idle_dialog_collects() -> void:
 	_solve(5, SlotDef.TYPE_RAM)
 	GameState.last_seen = int(Time.get_unix_time_from_system()) - 2 * 3600
-	var main := _main()
+	var main := make_main(true)
 	main.show_overview()
 	var dialogs := _dialogs(main)
 	assert_eq(dialogs.size(), 1, "While you were away")
+	main.show_overview()
+	dialogs = _dialogs(main.screen)
+	assert_eq(dialogs.size(), 1, "still offered: the screen was re-created before collecting")
 	var before: int = GameState.cycles
-	dialogs[0]._close(true)
+	dialogs[0].confirm()
 	# t_max 5: 6 x 25 x 2 h = 300
 	assert_eq(GameState.cycles - before, 300)
 	assert_true(FileAccess.file_exists(TEST_SAVE))
@@ -96,7 +92,7 @@ func test_idle_dialog_collects() -> void:
 
 func test_no_idle_dialog_without_solve() -> void:
 	GameState.last_seen = int(Time.get_unix_time_from_system()) - 2 * 3600
-	var main := _main()
+	var main := make_main(true)
 	main.show_overview()
 	assert_eq(_dialogs(main).size(), 0)
 
@@ -104,23 +100,23 @@ func test_no_idle_dialog_without_solve() -> void:
 func test_rebuild_dialog_flow() -> void:
 	set_stats(162)
 	_solve(10, SlotDef.TYPE_RAM)
-	var main := _main()
-	main._idle_check_pending = false
+	var main := make_main(true)
 	main.show_overview()
 	assert_false(main.screen.rebuild_button.disabled)
-	main.show_rebuild_dialog()
+	main.screen.rebuild_button.pressed.emit()
 	var dialogs := _dialogs(main)
 	assert_eq(dialogs.size(), 1)
-	dialogs[0]._close(true)
+	dialogs[0].confirm()
 	assert_eq(GameState.cores, 1)
 	assert_eq(GameState.ram, 0)
-	assert_true(main.screen.rebuild_button.disabled, "fresh overview after the reset")
+	assert_true(main.screen.rebuild_button.disabled, "no tier 10 solve after the reset")
+	assert_eq(main.screen.rows().size(), 3, "surplus tier rows removed")
 
 
 func test_idle_dialog_waits_while_a_puzzle_is_open() -> void:
 	_solve(5, SlotDef.TYPE_RAM)
 	GameState.last_seen = int(Time.get_unix_time_from_system()) - 2 * 3600
-	var main := _main()
+	var main := make_main(true)
 	main.show_puzzle(SlotGenerator.make(1, SlotDef.TYPE_STO))
 	assert_eq(_dialogs(main.screen).size(), 0, "never over a running puzzle")
 	main.show_overview()

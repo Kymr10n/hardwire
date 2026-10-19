@@ -14,11 +14,11 @@ func _ready() -> void:
 	alignment = BoxContainer.ALIGNMENT_CENTER
 	add_theme_constant_override("separation", get_theme_constant("margin", "Hardwire") / 2)
 	custom_minimum_size.y = get_theme_constant("tap_min", "Hardwire")
-	for key: String in ["ram", "cpu", "sto", "cycles", "cores"]:
+	for key: String in SlotGenerator.TYPES + ["cycles", "cores"]:
 		var label := Label.new()
 		label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		label.add_theme_font_size_override("font_size", get_theme_font_size("body", "Hardwire"))
-		if key in ["ram", "cpu", "sto"]:
+		if key in SlotGenerator.TYPES:
 			label.add_theme_color_override("font_color", get_theme_color(key, "Hardwire"))
 		elif key == "cores":
 			label.add_theme_color_override("font_color", get_theme_color("text_dim", "Hardwire"))

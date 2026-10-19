@@ -67,7 +67,7 @@ The focus outline shows only for keyboard and gamepad input; when the overview o
 - No text entry, so no on-screen keyboard is needed.
 - At least 30 fps at 800p; the game caps at 60 fps (`application/run/max_fps`).
 
-**Haptics.** Phones use `Input.vibrate_handheld`; gamepads use `Input.start_joy_vibration`. Both go through the Haptics autoload and respect the setting.
+**Haptics.** Phones use `Input.vibrate_handheld`; gamepads use `Input.start_joy_vibration`. Both go through the Haptics autoload and respect the setting. Every input gives a light pulse; the CPU minigame rumbles with the rhythm (see Minigame: CPU > Haptics); results give a pulse pattern (see Result overlay). Lengths and strengths live in `balance.json` → `haptics`.
 
 ## Core loop
 
@@ -160,6 +160,8 @@ A central tile plays a rhythm of on and off phases, and the player mimics it by 
 - No off-segment before the first beat or after the last.
 
 **Watch phase.** The tile lights and plays a steady tone for each on-segment and goes dark for each off-segment. Under the tile, one marker per beat shows its length: a dot for a tap, a bar as long as its steps for a hold. Markers fill as beats play, and again as the player presses.
+
+**Haptics.** During playback the controller rumbles for each on-segment, exactly as long as the tile is lit (phones: one vibration per beat), so a tap is a short buzz and a hold a long one. Under Audio only playback does not rumble: only the tone plays. During input the controller rumbles for as long as the tile is held.
 
 **Input phase.**
 
@@ -285,6 +287,7 @@ The prototype has five screens around one hub, the overview. Every screen works 
 
 - Success: "Write complete", the stat and Cycles gained (counting up over 0.6 s), a "First solve ×2" note on a first solve and a note if a new tier unlocked, then buttons "Again" (same slot, new sequence) and "Overview".
 - Failure: "Corrupted", the correct answer shown for 1 s, then the next attempt starts automatically. The back button is always available.
+- Haptics: a success gives a short double pulse, a failure one long pulse (every minigame).
 
 **Feedback on every input:** pad or cell flash, its tone, and a light haptic pulse (phone vibration or gamepad rumble).
 

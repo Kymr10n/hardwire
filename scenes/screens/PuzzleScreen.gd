@@ -1,3 +1,4 @@
+class_name PuzzleScreen
 extends Control
 ## Puzzle screen (SPEC: Screens and UX flow): header with minigame name, tier, modifier and back
 ## button; phase label; timer bar; the minigame area; result overlay.
@@ -5,12 +6,6 @@ extends Control
 ## reward to GameState, saves and shows the overlay (puzzles never touch GameState).
 
 signal exit_requested
-
-const PUZZLES := {
-	SlotDef.TYPE_STO: preload("res://scenes/puzzles/StoragePuzzle.gd"),
-	SlotDef.TYPE_RAM: preload("res://scenes/puzzles/RamPuzzle.gd"),
-	SlotDef.TYPE_CPU: preload("res://scenes/puzzles/CpuPuzzle.gd"),
-}
 
 ## First-run instruction per minigame (SPEC: First run).
 const HINTS := {
@@ -23,10 +18,10 @@ var slot: SlotDef
 var puzzle: PuzzleBase
 var hint: HintOverlay
 
+var overlay: ResultOverlay
 var _rng := RandomNumberGenerator.new()
 var _phase_label: Label
 var _timer_bar: TimerBar
-var _overlay: ResultOverlay
 
 
 ## Copies the current upgrade levels into the slot so assists apply (SPEC: Upgrade shop).
@@ -47,16 +42,16 @@ func _ready() -> void:
 	area.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	area.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	body.add_child(area)
-	puzzle = PUZZLES[slot.type].new() as PuzzleBase
+	puzzle = _new_puzzle(slot.type)
 	puzzle.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	area.add_child(puzzle)
 	puzzle.phase_changed.connect(_on_phase_changed)
 	puzzle.solved.connect(_on_solved)
 	puzzle.failed.connect(_on_failed)
-	_overlay = ResultOverlay.new()
-	add_child(_overlay)
-	_overlay.again_pressed.connect(start_attempt)
-	_overlay.overview_pressed.connect(go_back)
+	overlay = ResultOverlay.new()
+	add_child(overlay)
+	overlay.again_pressed.connect(start_attempt)
+	overlay.overview_pressed.connect(go_back)
 	if GameState.seen_tutorials.has(slot.type):
 		start_attempt()
 	else:
@@ -96,7 +91,7 @@ func default_focus() -> Control:
 
 ## Fresh sequence (new seed), same slot and difficulty.
 func start_attempt() -> void:
-	_overlay.hide()
+	overlay.hide()
 	puzzle.setup(slot, _rng.randi())
 	puzzle.start()
 
@@ -124,7 +119,7 @@ func _on_phase_changed(phase: PuzzleBase.Phase, text: String) -> void:
 func _on_solved(_result: Dictionary) -> void:
 	var gain: Dictionary = GameState.apply_solve(slot)
 	SaveManager.save_game()
-	_overlay.show_result(
+	overlay.show_result(
 		"Write complete",
 		get_theme_color(slot.type, "Hardwire"),
 		SlotDef.STAT_NAMES[slot.type],
@@ -141,3 +136,12 @@ func _on_failed() -> void:
 func go_back() -> void:
 	puzzle.abort()
 	exit_requested.emit()
+
+
+static func _new_puzzle(type: String) -> PuzzleBase:
+	match type:
+		SlotDef.TYPE_STO:
+			return StoragePuzzle.new()
+		SlotDef.TYPE_RAM:
+			return RamPuzzle.new()
+	return CpuPuzzle.new()

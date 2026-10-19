@@ -1,3 +1,4 @@
+class_name DebugMenu
 extends Control
 ## Debug panel (debug builds only; SPEC: Technical architecture > debug panel), opened by tapping
 ## the stat bar. Sets stats, Cycles and tier, forces a minigame with an optional modifier and
@@ -7,7 +8,6 @@ signal play_requested(slot: SlotDef)
 signal exit_requested
 
 const QUICK_TIERS: Array[int] = [1, 5, 10, 20]
-const TYPES: Array[String] = [SlotDef.TYPE_STO, SlotDef.TYPE_RAM, SlotDef.TYPE_CPU]
 
 ## Kept across screen changes so returning from a puzzle keeps the picks.
 static var tier: int = 1
@@ -67,7 +67,7 @@ func _refresh() -> void:
 		% [GameState.ram, GameState.cpu, GameState.sto, GameState.cycles]
 	)
 	_tier_label.text = "T%d" % tier
-	var type: String = TYPES[type_index]
+	var type: String = SlotGenerator.TYPES[type_index]
 	_type_button.text = "Minigame: %s" % SlotDef.TYPE_NAMES[type]
 	var mod: String = _modifiers()[modifier_index]
 	_modifier_button.text = (
@@ -81,7 +81,9 @@ func _refresh() -> void:
 ## "" plus the selected minigame's modifier pool from balance.json.
 func _modifiers() -> Array[String]:
 	var mods: Array[String] = [""]
-	for m: Variant in Balance.section("modifiers").get("pools", {}).get(TYPES[type_index], []):
+	for m: Variant in Balance.section("modifiers").get("pools", {}).get(
+		SlotGenerator.TYPES[type_index], []
+	):
 		mods.append(str(m))
 	return mods
 
@@ -96,7 +98,7 @@ func _set_tier(t: int) -> void:
 
 
 func _cycle_type() -> void:
-	type_index = (type_index + 1) % TYPES.size()
+	type_index = (type_index + 1) % SlotGenerator.TYPES.size()
 	modifier_index = 0
 	_refresh()
 
@@ -119,8 +121,7 @@ func _add_stats(step: int) -> void:
 
 
 func _add_cycles() -> void:
-	GameState.cycles += Balance.get_int("debug", "cycles_step")
-	GameState.cycles_changed.emit()
+	GameState.add_cycles(Balance.get_int("debug", "cycles_step"))
 	SaveManager.save_game()
 
 
@@ -132,7 +133,7 @@ func _set_stats_for_tier() -> void:
 
 ## The tier's real slot (requirements and rewards), with the picked modifier forced.
 func _on_play() -> void:
-	var slot: SlotDef = SlotGenerator.make(tier, TYPES[type_index])
+	var slot: SlotDef = SlotGenerator.make(tier, SlotGenerator.TYPES[type_index])
 	slot.modifier = _modifiers()[modifier_index]
 	play_requested.emit(slot)
 

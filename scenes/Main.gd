@@ -1,20 +1,13 @@
 extends Control
 ## Root scene. Holds the current screen and handles transitions (SPEC: Screens and UX flow): Boot ->
-## Overview hub -> Puzzle / Shop / Settings / debug panel, plus the Rebuild dialog and the "While
-## you were away" idle income dialog (on start and after a resume, shown on the overview). Picks
+## Overview hub -> Puzzle / Shop / Settings / debug panel, plus the "While you were away" idle
+## income dialog (on start and after a resume, shown on the overview). Picks
 ## portrait or landscape from the window aspect and rebuilds the screen when it flips.
 
-const BootScreen := preload("res://scenes/screens/BootScreen.gd")
-const OverviewScreen := preload("res://scenes/screens/OverviewScreen.gd")
-const PuzzleScreen := preload("res://scenes/screens/PuzzleScreen.gd")
-const SettingsScreen := preload("res://scenes/screens/SettingsScreen.gd")
-const ShopScreen := preload("res://scenes/screens/ShopScreen.gd")
-const LicensesScreen := preload("res://scenes/screens/LicensesScreen.gd")
-const DebugMenu := preload("res://scenes/screens/DebugMenu.gd")
-
 var screen: Control
+## An idle-income offer is still due (on start and after a resume) and is made on the overview.
+var offer_idle: bool = true
 
-var _idle_check_pending: bool = true
 var _landscape: bool = false
 ## Re-creates the current screen (used when the orientation flips).
 var _rebuild: Callable
@@ -74,7 +67,7 @@ func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_GO_BACK_REQUEST:
 		go_back()
 	elif what == NOTIFICATION_APPLICATION_RESUMED:
-		_idle_check_pending = true
+		offer_idle = true
 		if screen is OverviewScreen:
 			check_idle()
 
@@ -90,16 +83,15 @@ func show_overview() -> void:
 	overview.play_requested.connect(show_puzzle)
 	overview.settings_requested.connect(show_settings)
 	overview.shop_requested.connect(show_shop)
-	overview.rebuild_requested.connect(show_rebuild_dialog)
 	overview.debug_requested.connect(show_debug)
 	_show(overview, show_overview)
-	if _idle_check_pending:
+	if offer_idle:
 		check_idle()
 
 
-## Offers idle Cycles if enough time passed since the last save (SPEC: Idle income).
+## Offers idle Cycles if enough time passed since the last save (SPEC: Idle income). The offer
+## stays due until it is collected, so a re-created screen cannot lose it.
 func check_idle() -> void:
-	_idle_check_pending = false
 	var amount: int = Progress.idle_offer(
 		GameState.last_seen,
 		int(Time.get_unix_time_from_system()),
@@ -108,37 +100,16 @@ func check_idle() -> void:
 		GameState.cores
 	)
 	if amount <= 0:
+		offer_idle = false
 		return
 	var dialog := ConfirmDialog.open(
 		screen, "While you were away", "Your rig computed %d Cycles." % amount, "Collect", ""
 	)
 	dialog.confirmed.connect(
 		func() -> void:
-			GameState.collect_idle(amount)
+			offer_idle = false
+			GameState.add_cycles(amount)
 			SaveManager.save_game()
-	)
-
-
-## Confirm dialog with Cores to gain and the new multiplier (SPEC: Prestige).
-func show_rebuild_dialog() -> void:
-	if not Progress.can_rebuild(GameState.solved_slots):
-		return
-	var gained: int = Progress.rebuild_cores(GameState.solved_slots)
-	var message: String = (
-		"Gain %d %s: rewards x%s -> x%s.\nStats, Cycles, upgrades and first solves reset."
-		% [
-			gained,
-			"Core" if gained == 1 else "Cores",
-			Economy.core_multiplier(GameState.cores),
-			Economy.core_multiplier(GameState.cores + gained)
-		]
-	)
-	var dialog := ConfirmDialog.open(screen, "Rebuild?", message, "Rebuild")
-	dialog.confirmed.connect(
-		func() -> void:
-			GameState.rebuild()
-			SaveManager.save_game()
-			show_overview()
 	)
 
 

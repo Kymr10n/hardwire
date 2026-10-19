@@ -1,22 +1,23 @@
+class_name StoragePuzzle
 extends PuzzleBase
 ## Storage minigame: repeat the color sequence. SPEC: Minigame: Storage.
 ## Pads sit in a ring; each lights for show_ms with its tone, then a gap_ms pause.
 ## A wrong pad or the timeout fails the attempt; the last correct pad solves it.
 ## With the Replay buffer upgrade a Replay button replays the sequence (progress and timer reset).
 
+var replay_button: Button
 var _attempt: Dictionary = {}
 var _pads: Array[StoragePad] = []
 var _pos: int = 0
 var _lit_item: int = -1
 var _replays_left: int = 0
-var _replay_button: Button
 
 
 func _ready() -> void:
-	_replay_button = Button.new()
-	_replay_button.pressed.connect(replay)
-	_replay_button.hide()
-	add_child(_replay_button)
+	replay_button = Button.new()
+	replay_button.pressed.connect(replay)
+	replay_button.hide()
+	add_child(replay_button)
 	resized.connect(_layout)
 
 
@@ -129,8 +130,8 @@ func _light_item(item: int) -> void:
 
 
 func _on_phase_entered(p_phase: Phase) -> void:
-	_replay_button.visible = p_phase == Phase.INPUT and _replays_left > 0
-	_replay_button.text = "Replay (%d)" % _replays_left
+	replay_button.visible = p_phase == Phase.INPUT and _replays_left > 0
+	replay_button.text = "Replay (%d)" % _replays_left
 
 
 func _on_fail_reveal() -> void:
@@ -159,10 +160,11 @@ func _ensure_pads(count: int) -> void:
 
 ## Ring around the center, first pad at the top, clockwise.
 func _layout() -> void:
-	if _replay_button:
+	if replay_button:
+		# The ring centre is empty for every pad count, so the button never overlaps a pad.
 		var tap: float = get_theme_constant("tap_min", "Hardwire")
-		_replay_button.size = Vector2(get_theme_constant("button_width", "Hardwire"), tap)
-		_replay_button.position = Vector2((size.x - _replay_button.size.x) / 2.0, size.y - tap)
+		replay_button.size = Vector2(get_theme_constant("button_width", "Hardwire"), tap)
+		replay_button.position = (size - replay_button.size) / 2.0
 	if _pads.is_empty():
 		return
 	var pad_size: float = get_theme_constant("pad_size", "Hardwire")

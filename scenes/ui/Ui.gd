@@ -127,13 +127,34 @@ static func make_focusable(control: Control) -> void:
 	control.focus_exited.connect(control.queue_redraw)
 
 
-## Fills `overlay` with a dimmed backdrop and a centered panel; returns the panel's column.
-static func modal(overlay: Control, dim_alpha: float, min_width: float = 0.0) -> VBoxContainer:
+## Fills `overlay` (dimmed by `dim_alpha`, 0 = none) with a column that centers its children;
+## returns the column.
+static func centered_column(overlay: Control, dim_alpha: float = 0.0) -> VBoxContainer:
+	_backdrop(overlay, dim_alpha)
+	var column := VBoxContainer.new()
+	column.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	column.alignment = BoxContainer.ALIGNMENT_CENTER
+	column.add_theme_constant_override(
+		"separation", overlay.get_theme_constant("margin", "Hardwire")
+	)
+	overlay.add_child(column)
+	return column
+
+
+## Full-rect overlay with an optional dim layer over what is behind it.
+static func _backdrop(overlay: Control, dim_alpha: float) -> void:
 	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	if dim_alpha <= 0.0:
+		return
 	var dim := ColorRect.new()
 	dim.color = Color(overlay.get_theme_color("bg", "Hardwire"), dim_alpha)
 	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	overlay.add_child(dim)
+
+
+## Fills `overlay` with a dimmed backdrop and a centered panel; returns the panel's column.
+static func modal(overlay: Control, dim_alpha: float, min_width: float = 0.0) -> VBoxContainer:
+	_backdrop(overlay, dim_alpha)
 	var center := CenterContainer.new()
 	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	overlay.add_child(center)

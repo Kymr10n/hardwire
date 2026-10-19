@@ -3,14 +3,13 @@ extends "res://tests/hardwire_test.gd"
 ## screen, tap targets keep the minimum size, pads and cells don't overlap (SPEC: Landscape).
 
 const SIZES: Array[Vector2i] = [Vector2i(1080, 1920), Vector2i(1920, 1080), Vector2i(1920, 1200)]
-const SCREENS := {
-	"overview": preload("res://scenes/screens/OverviewScreen.gd"),
-	"shop": preload("res://scenes/screens/ShopScreen.gd"),
-	"settings": preload("res://scenes/screens/SettingsScreen.gd"),
-	"licenses": preload("res://scenes/screens/LicensesScreen.gd"),
-	"debug": preload("res://scenes/screens/DebugMenu.gd"),
+var screens := {
+	"overview": OverviewScreen,
+	"shop": ShopScreen,
+	"settings": SettingsScreen,
+	"licenses": LicensesScreen,
+	"debug": DebugMenu,
 }
-const PuzzleScreen := preload("res://scenes/screens/PuzzleScreen.gd")
 
 
 func _open(screen: Control, size: Vector2i) -> Control:
@@ -54,8 +53,8 @@ func _assert_no_overlap(rects: Array[Rect2], label: String) -> void:
 func test_menu_screens() -> void:
 	set_stats(140)
 	for size: Vector2i in SIZES:
-		for name: String in SCREENS:
-			var screen: Control = await _open(SCREENS[name].new(), size)
+		for name: String in screens:
+			var screen: Control = await _open(screens[name].new(), size)
 			assert_eq(screen.size, Vector2(size), "%s fills the viewport" % name)
 			_check_controls(screen, "%s %s" % [name, size])
 			screen.get_parent().queue_free()
@@ -64,17 +63,20 @@ func test_menu_screens() -> void:
 func test_storage_pads_at_every_size() -> void:
 	for size: Vector2i in SIZES:
 		var screen := PuzzleScreen.new()
-		screen.setup(SlotDef.create(20, SlotDef.TYPE_STO))
+		var slot := SlotDef.create(20, SlotDef.TYPE_STO)
+		slot.assist = {"replay_buffer": 1}
+		screen.setup(slot)
 		await _open(screen, size)
+		run_until(screen.puzzle, PuzzleBase.Phase.INPUT)
 		_check_controls(screen, "storage %s" % size)
-		var rects: Array[Rect2] = []
+		var rects: Array[Rect2] = [screen.puzzle.replay_button.get_global_rect()]
 		for pad: StoragePad in screen.puzzle.pads():
 			assert_gte(pad.size.x, 160.0, "pads are at least 160 px")
 			assert_true(
 				Rect2(Vector2.ZERO, Vector2(size)).encloses(pad.get_global_rect()), "pad on screen"
 			)
 			rects.append(pad.get_global_rect())
-		assert_eq(rects.size(), 8)
+		assert_eq(rects.size(), 9, "8 pads and the Replay button")
 		_assert_no_overlap(rects, "storage %s" % size)
 		screen.get_parent().queue_free()
 
@@ -87,9 +89,9 @@ func test_ram_cells_at_every_size() -> void:
 		_check_controls(screen, "ram %s" % size)
 		var grid: RamGrid = screen.puzzle.grid()
 		assert_eq(grid.n, 6)
-		assert_gte(grid._cell_rect(0).size.x, 120.0, "cells are at least 120 px")
+		assert_gte(grid.cell_rect(0).size.x, 120.0, "cells are at least 120 px")
 		assert_eq(
-			grid.cell_at(grid.global_position + grid._cell_rect(7).get_center()), 7, "hit test"
+			grid.cell_at(grid.global_position + grid.cell_rect(7).get_center()), 7, "hit test"
 		)
 		screen.get_parent().queue_free()
 
@@ -107,9 +109,9 @@ func test_cpu_tile_at_every_size() -> void:
 
 
 func test_landscape_uses_side_panels() -> void:
-	var overview: Control = await _open(SCREENS.overview.new(), Vector2i(1920, 1080))
+	var overview: Control = await _open(screens.overview.new(), Vector2i(1920, 1080))
 	var bar: StatBar = overview.find_children("*", "StatBar", true, false)[0]
 	assert_true(bar.vertical, "stats in a sidebar")
-	var portrait: Control = await _open(SCREENS.overview.new(), Vector2i(1080, 1920))
+	var portrait: Control = await _open(screens.overview.new(), Vector2i(1080, 1920))
 	var portrait_bar: StatBar = portrait.find_children("*", "StatBar", true, false)[0]
 	assert_false(portrait_bar.vertical, "stats in a row")

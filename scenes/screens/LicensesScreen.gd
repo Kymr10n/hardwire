@@ -1,3 +1,4 @@
+class_name LicensesScreen
 extends Control
 ## Licenses: Hardwire (MIT), JetBrains Mono (OFL) and Godot with its third-party components,
 ## as required when distributing builds. Godot's texts come from the engine itself, so they

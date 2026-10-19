@@ -1,10 +1,10 @@
+class_name OverviewScreen
 extends Control
 ## Overview hub (SPEC: Screens and UX flow): stat bar, scrolling list of tier rows (every unlocked
 ## tier plus flow.locked_tiers_visible locked ones), bottom bar with Shop, Rebuild and Settings.
 
 signal play_requested(slot: SlotDef)
 signal shop_requested
-signal rebuild_requested
 signal settings_requested
 signal debug_requested
 
@@ -39,10 +39,10 @@ func _ready() -> void:
 		side.add_child(spacer)
 	body.add_child(_build_list())
 	side.add_child(_build_buttons(landscape))
-	GameState.stats_changed.connect(_rebuild_rows)
+	GameState.stats_changed.connect(_sync_rows)
 	GameState.upgrades_changed.connect(_refresh_rows)
 	GameState.cores_changed.connect(_refresh_rows)
-	_rebuild_rows()
+	_sync_rows()
 
 
 func _build_list() -> ScrollContainer:
@@ -57,7 +57,7 @@ func _build_list() -> ScrollContainer:
 func _build_buttons(vertical: bool) -> BoxContainer:
 	var bar: BoxContainer = Ui.box(vertical)
 	shop_button = Ui.button("Shop", shop_requested.emit)
-	rebuild_button = Ui.button("Rebuild", rebuild_requested.emit)
+	rebuild_button = Ui.button("Rebuild", _confirm_rebuild)
 	for button: Button in [
 		shop_button, rebuild_button, Ui.button("Settings", settings_requested.emit)
 	]:
@@ -90,7 +90,8 @@ static func visible_tiers() -> int:
 	)
 
 
-func _rebuild_rows() -> void:
+## Adds or removes tier rows until the list shows visible_tiers() of them.
+func _sync_rows() -> void:
 	var count: int = visible_tiers()
 	while _rows.size() < count:
 		var row := TierRow.new()
@@ -98,7 +99,29 @@ func _rebuild_rows() -> void:
 		row.slot_pressed.connect(play_requested.emit)
 		_list.add_child(row)
 		_rows.append(row)
+	while _rows.size() > count:
+		_rows.pop_back().queue_free()
 	_refresh_rows()
+
+
+## Confirm dialog with Cores to gain and the new multiplier, then the prestige (SPEC: Prestige).
+func _confirm_rebuild() -> void:
+	var gained: int = Progress.rebuild_cores(GameState.solved_slots)
+	var message: String = (
+		"Gain %d %s: rewards x%s -> x%s.\nStats, Cycles, upgrades and first solves reset."
+		% [
+			gained,
+			"Core" if gained == 1 else "Cores",
+			Economy.core_multiplier(GameState.cores),
+			Economy.core_multiplier(GameState.cores + gained)
+		]
+	)
+	var dialog := ConfirmDialog.open(self, "Rebuild?", message, "Rebuild")
+	dialog.confirmed.connect(
+		func() -> void:
+			GameState.rebuild()
+			SaveManager.save_game()
+	)
 
 
 func _refresh_rows() -> void:

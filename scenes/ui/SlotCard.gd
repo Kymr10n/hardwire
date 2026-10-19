@@ -24,13 +24,13 @@ const PRESSED_LIGHTEN := 0.08
 
 var slot: SlotDef
 
+var lines: Label
+var badge_new: Label
+var modifier_label: Label
 var _style := StyleBoxFlat.new()
 var _pressed_style := StyleBoxFlat.new()
 var _title: Label
 var _glyph: Label
-var _lines: Label
-var _modifier: Label
-var _new: Label
 
 
 func setup(p_slot: SlotDef) -> void:
@@ -64,13 +64,13 @@ func refresh() -> void:
 	_glyph.visible = not slot.modifier.is_empty()
 	_glyph.text = MOD_GLYPHS.get(slot.modifier, "*")
 	_badge_style(_glyph, dim if locked else accent)
-	_modifier.text = SlotDef.modifier_name(slot.modifier)
-	_lines.text = _missing_text() if locked else _reward_text(not solved)
-	_lines.add_theme_color_override(
+	modifier_label.text = SlotDef.modifier_name(slot.modifier)
+	lines.text = _missing_text() if locked else _reward_text(not solved)
+	lines.add_theme_color_override(
 		"font_color", dim if locked else get_theme_color("text", "Hardwire")
 	)
-	_new.visible = not locked and not solved
-	_badge_style(_new, accent)
+	badge_new.visible = not locked and not solved
+	_badge_style(badge_new, accent)
 
 
 ## "CPU 4 more" per missing stat.
@@ -110,13 +110,13 @@ func _build() -> void:
 	column.add_child(top)
 	_title = _add_label(top, SlotDef.TYPE_NAMES[slot.type], "card_title", true)
 	_glyph = _add_label(top, "", "small", false)
-	_lines = _add_label(column, "", "card_body", false)
-	_lines.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	lines = _add_label(column, "", "card_body", false)
+	lines.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	var bottom := HBoxContainer.new()
 	column.add_child(bottom)
-	_modifier = _add_label(bottom, "", "small", true)
-	_modifier.add_theme_color_override("font_color", get_theme_color("text_dim", "Hardwire"))
-	_new = _add_label(bottom, "NEW", "small", false)
+	modifier_label = _add_label(bottom, "", "small", true)
+	modifier_label.add_theme_color_override("font_color", get_theme_color("text_dim", "Hardwire"))
+	badge_new = _add_label(bottom, "NEW", "small", false)
 
 
 func _add_label(parent: Control, text: String, font: String, expand: bool) -> Label:

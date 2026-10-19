@@ -11,9 +11,9 @@ signal overview_pressed
 ## Guards the division by the count-up time in case it is tuned to 0.
 const MIN_COUNTUP_S := 0.001
 
+var gain: Label
+var note: Label
 var _title: Label
-var _gain: Label
-var _note: Label
 var _stat_name: String = ""
 var _stat: int = 0
 var _cycles: int = 0
@@ -25,10 +25,10 @@ func _ready() -> void:
 	var box: VBoxContainer = Ui.modal(self, Ui.pct(self, "overlay_dim_pct"))
 	_title = Ui.label("", get_theme_font_size("phase", "Hardwire"))
 	box.add_child(_title)
-	_gain = Ui.label("")
-	box.add_child(_gain)
-	_note = Ui.dim_label("")
-	box.add_child(_note)
+	gain = Ui.label("")
+	box.add_child(gain)
+	note = Ui.dim_label("")
+	box.add_child(note)
 	var buttons := HBoxContainer.new()
 	buttons.add_theme_constant_override("separation", get_theme_constant("margin", "Hardwire"))
 	box.add_child(buttons)
@@ -45,16 +45,16 @@ func show_result(title: String, accent: Color, stat_name: String, gain: Dictiona
 	_stat_name = stat_name
 	_stat = int(gain.get("stat", 0))
 	_cycles = int(gain.get("cycles", 0))
-	_gain.visible = not gain.is_empty()
+	gain.visible = not gain.is_empty()
 	var notes: Array[String] = []
 	if gain.get("first_solve", false):
 		notes.append("First solve x%s" % Balance.get_num("economy", "first_solve_mult"))
 	if int(gain.get("new_tier", 0)) > 0:
 		notes.append("Tier %d unlocked" % gain.new_tier)
-	_note.text = "\n".join(notes)
-	_note.visible = not notes.is_empty()
+	note.text = "\n".join(notes)
+	note.visible = not notes.is_empty()
 	_t = 0.0
-	_update_gain()
+	_updategain()
 	show()
 	_again.grab_focus.call_deferred(true)
 
@@ -62,11 +62,11 @@ func show_result(title: String, accent: Color, stat_name: String, gain: Dictiona
 func _process(delta: float) -> void:
 	if visible and _t < Balance.get_num("flow", "reward_countup_s"):
 		_t += delta
-		_update_gain()
+		_updategain()
 
 
-func _update_gain() -> void:
+func _updategain() -> void:
 	var f: float = clampf(
 		_t / maxf(MIN_COUNTUP_S, Balance.get_num("flow", "reward_countup_s")), 0.0, 1.0
 	)
-	_gain.text = "+%d %s    +%d Cycles" % [roundi(_stat * f), _stat_name, roundi(_cycles * f)]
+	gain.text = "+%d %s    +%d Cycles" % [roundi(_stat * f), _stat_name, roundi(_cycles * f)]

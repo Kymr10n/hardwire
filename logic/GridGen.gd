@@ -49,11 +49,11 @@ static func make(slot: SlotDef, seed: int) -> Dictionary:
 		"n": n,
 		"pattern": pattern,
 		"expected": expected,
-		"show_ms": roundi(p.show_ms * (1.0 + slot.assist_effect("longer_exposure"))),
+		"show_ms": roundi(p.show_ms * slot.assist_mult("longer_exposure")),
 		"time_limit_s":
 		(
 			(float(r.input_s_base) + float(r.input_s_per_cell) * expected.size())
-			* (1.0 + slot.assist_effect("time_dilation"))
+			* slot.assist_mult("time_dilation")
 		),
 	}
 

@@ -1,36 +1,11 @@
 # gdlint: disable=max-public-methods
-extends GutTest
+extends "res://tests/hardwire_test.gd"
 ## GameState serialization and SaveManager atomic save/load, backup on broken files.
 ## Uses its own save file and restores GameState, so the real save is never touched.
 
-const TEST_PATH := "user://test_save.json"
-
-var _orig_path: String
-var _orig_state: Dictionary
-
-
-func before_each() -> void:
-	_orig_path = SaveManager.save_path
-	_orig_state = SaveManager.to_dict()
-	SaveManager.save_path = TEST_PATH
-	_remove_test_files()
-	GameState.reset_all()
-
-
-func after_each() -> void:
-	_remove_test_files()
-	SaveManager.save_path = _orig_path
-	SaveManager.from_dict(_orig_state)
-
-
-func _remove_test_files() -> void:
-	for path: String in [SaveManager.save_path, SaveManager.tmp_path(), SaveManager.backup_path()]:
-		if FileAccess.file_exists(path):
-			DirAccess.remove_absolute(path)
-
 
 func _write(text: String) -> void:
-	var file := FileAccess.open(TEST_PATH, FileAccess.WRITE)
+	var file := FileAccess.open(TEST_SAVE, FileAccess.WRITE)
 	file.store_string(text)
 	file.close()
 
@@ -115,7 +90,7 @@ func test_save_then_load_restores_state() -> void:
 func test_save_is_atomic_and_versioned() -> void:
 	assert_true(SaveManager.save_game())
 	assert_false(FileAccess.file_exists(SaveManager.tmp_path()), "temp file should be renamed away")
-	var d: Variant = JSON.parse_string(FileAccess.get_file_as_string(TEST_PATH))
+	var d: Variant = JSON.parse_string(FileAccess.get_file_as_string(TEST_SAVE))
 	assert_eq(int(d["version"]), SaveManager.SAVE_VERSION)
 	assert_gt(int(d["last_seen"]), 0)
 
@@ -142,7 +117,7 @@ func test_corrupt_file_is_backed_up() -> void:
 	GameState.add_stats(5, 5, 5)
 	assert_false(SaveManager.load_game())
 	assert_eq(GameState.ram, 0)
-	assert_false(FileAccess.file_exists(TEST_PATH))
+	assert_false(FileAccess.file_exists(TEST_SAVE))
 	assert_eq(FileAccess.get_file_as_string(SaveManager.backup_path()), "{ not json")
 
 

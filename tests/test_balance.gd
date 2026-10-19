@@ -104,3 +104,21 @@ func test_upgrade_ids_match_spec() -> void:
 func test_get_num_reads_values() -> void:
 	assert_eq(Balance.get_num("cpu", "tolerance_start"), 0.30)
 	assert_eq(Balance.get_int("economy", "cycles_per_tier"), 5)
+
+
+## The numbers the spec states, so a balance edit cannot drift from docs/SPEC.md unnoticed.
+func test_spec_numbers() -> void:
+	var spec := {
+		"flow": {"countdown_s": 1.5, "fail_reveal_s": 1.0, "reward_countup_s": 0.6},
+		"economy": {"first_solve_mult": 2.0, "modifier_mult": 1.5, "core_bonus": 0.25},
+		"idle": {"replays_per_hour": 6, "cap_hours": 8, "min_away_minutes": 5},
+		"storage": {"gap_ms": 150, "show_ms_min": 300, "length_max": 12},
+		"ram": {"show_ms_min": 1000, "input_s_base": 4.0, "input_s_per_cell": 0.8},
+		"cpu": {"tolerance_abs_ms": 60, "end_grace_ms": 600, "first_press_timeout_s": 5.0},
+		"modifiers": {"from_tier": 8, "second_pool_from_tier": 14, "chance_max": 0.8},
+	}
+	for section: String in spec:
+		for key: String in spec[section]:
+			assert_eq(
+				Balance.get_num(section, key), float(spec[section][key]), "%s.%s" % [section, key]
+			)

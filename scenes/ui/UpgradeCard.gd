@@ -16,9 +16,9 @@ const NAMES := {
 
 var id: String = ""
 
+var buy_button: Button
 var _title: Label
 var _effect: Label
-var _buy: Button
 
 
 func setup(p_id: String) -> void:
@@ -41,9 +41,9 @@ func _ready() -> void:
 	_effect.add_theme_color_override("font_color", get_theme_color("text_dim", "Hardwire"))
 	_effect.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	text.add_child(_effect)
-	_buy = Ui.button("", func() -> void: buy_pressed.emit(id), true)
-	_buy.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	row.add_child(_buy)
+	buy_button = Ui.button("", func() -> void: buy_pressed.emit(id), true)
+	buy_button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(buy_button)
 	refresh()
 
 
@@ -56,11 +56,11 @@ func refresh() -> void:
 	)
 	if maxed:
 		_effect.text = effect_text(id, level) + "  (max)"
-		_buy.text = "Max"
+		buy_button.text = "Max"
 	else:
 		_effect.text = "%s  ->  %s" % [effect_text(id, level), effect_text(id, level + 1)]
-		_buy.text = "%d Cyc" % Economy.upgrade_cost(id, level)
-	_buy.disabled = not Economy.can_buy(id, GameState.upgrade_level(id), GameState.cycles)
+		buy_button.text = "%d Cyc" % Economy.upgrade_cost(id, level)
+	buy_button.disabled = not Economy.can_buy(id, GameState.upgrade_level(id), GameState.cycles)
 
 
 ## Human-readable total effect at a level.

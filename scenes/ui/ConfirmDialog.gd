@@ -43,8 +43,8 @@ func _ready() -> void:
 	buttons.add_theme_constant_override("separation", get_theme_constant("margin", "Hardwire"))
 	box.add_child(buttons)
 	if not _cancel_text.is_empty():
-		buttons.add_child(Ui.button(_cancel_text, _close.bind(false), true))
-	var ok: Button = Ui.button(_confirm_text, _close.bind(true), true)
+		buttons.add_child(Ui.button(_cancel_text, cancel, true))
+	var ok: Button = Ui.button(_confirm_text, confirm, true)
 	buttons.add_child(ok)
 	ok.grab_focus.call_deferred(true)
 
@@ -54,12 +54,14 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
 		get_viewport().set_input_as_handled()
 		if not _cancel_text.is_empty():
-			_close(false)
+			cancel()
 
 
-func _close(ok: bool) -> void:
-	if ok:
-		confirmed.emit()
-	else:
-		cancelled.emit()
+func confirm() -> void:
+	confirmed.emit()
+	queue_free()
+
+
+func cancel() -> void:
+	cancelled.emit()
 	queue_free()

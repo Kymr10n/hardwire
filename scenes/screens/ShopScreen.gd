@@ -1,3 +1,4 @@
+class_name ShopScreen
 extends Control
 ## Upgrade shop (SPEC: Upgrade shop): Cycles balance on top, one card per upgrade. Saves after a
 ## purchase.
@@ -39,8 +40,7 @@ func _ready() -> void:
 func _refresh() -> void:
 	_balance.text = "%d Cycles" % GameState.cycles
 	for card: UpgradeCard in cards:
-		if card.is_node_ready():
-			card.refresh()
+		card.refresh()
 
 
 func _on_buy(id: String) -> void:

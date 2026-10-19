@@ -1,3 +1,4 @@
+class_name RamPuzzle
 extends PuzzleBase
 ## RAM minigame: recreate the grid pattern. SPEC: Minigame: RAM.
 ## The pattern shows for show_ms, then the player toggles cells and presses Commit once the
@@ -19,10 +20,10 @@ const HINTS := {GridGen.MOD_INVERTED: "Set the dark cells", GridGen.MOD_ROTATED:
 
 var hint: Label
 
+var commit_button: Button
 var _attempt: Dictionary = {}
 var _grid: RamGrid
 var _counter: Label
-var _commit: Button
 var _shown: bool = false
 var _icon_center: Vector2 = Vector2.ZERO
 
@@ -38,11 +39,11 @@ func _ready() -> void:
 	_counter.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_counter.add_theme_font_size_override("font_size", get_theme_font_size("header", "Hardwire"))
 	add_child(_counter)
-	_commit = Button.new()
-	_commit.pressed.connect(commit)
-	add_child(_commit)
-	InputMode.device_changed.connect(_update_commit_text)
-	_update_commit_text()
+	commit_button = Button.new()
+	commit_button.pressed.connect(commit)
+	add_child(commit_button)
+	InputMode.device_changed.connect(_updatecommit_button_text)
+	_updatecommit_button_text()
 	resized.connect(_layout)
 	_layout()
 
@@ -60,9 +61,9 @@ func grid() -> RamGrid:
 
 
 ## "Commit", plus the key or button for it when not on touch ("Commit (Y)").
-func _update_commit_text(_device: int = 0) -> void:
+func _updatecommit_button_text(_device: int = 0) -> void:
 	var glyph: String = InputMode.glyph("commit")
-	_commit.text = "Commit" if glyph.is_empty() else "Commit (%s)" % glyph
+	commit_button.text = "Commit" if glyph.is_empty() else "Commit (%s)" % glyph
 
 
 func can_commit() -> bool:
@@ -146,8 +147,8 @@ func _on_abort() -> void:
 func _update_counter() -> void:
 	var input: bool = phase == Phase.INPUT
 	_counter.visible = input
-	_commit.visible = input or phase == Phase.RESULT
-	_commit.disabled = not can_commit()
+	commit_button.visible = input or phase == Phase.RESULT
+	commit_button.disabled = not can_commit()
 	_counter.text = "%d / %d" % [_grid.on_cells().size(), expected().size()]
 
 
@@ -171,8 +172,8 @@ func _layout() -> void:
 		_icon_center = Vector2(column_x + row_h * ICON_RADIUS, top + row_h / 2.0)
 		hint.position = Vector2(column_x, top + row_h)
 		hint.size = Vector2(commit_w, row_h * 2.0)
-		_commit.position = Vector2(column_x, top + side - row_h)
-		_counter.position = Vector2(column_x, _commit.position.y - row_h - margin / 2.0)
+		commit_button.position = Vector2(column_x, top + side - row_h)
+		_counter.position = Vector2(column_x, commit_button.position.y - row_h - margin / 2.0)
 		_counter.size = Vector2(commit_w, row_h)
 	else:
 		side = maxf(0.0, minf(size.x - 2.0 * margin, size.y - 2.0 * row_h - 2.0 * margin))
@@ -186,9 +187,9 @@ func _layout() -> void:
 		var bottom: float = top + side + margin / 2.0
 		_counter.position = Vector2(_grid.position.x, bottom)
 		_counter.size = Vector2(side / 2.0, row_h)
-		_commit.position = Vector2(_grid.position.x + side - commit_w, bottom)
+		commit_button.position = Vector2(_grid.position.x + side - commit_w, bottom)
 	_grid.size = Vector2(side, side)
-	_commit.size = Vector2(commit_w, row_h)
+	commit_button.size = Vector2(commit_w, row_h)
 	queue_redraw()
 
 

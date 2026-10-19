@@ -1,3 +1,4 @@
+class_name SettingsScreen
 extends Control
 ## Settings (SPEC: Screens and UX flow): sound on/off, haptics on/off, licenses, reset save
 ## (with confirm); on PC also Fullscreen and Quit. Saves after every change.

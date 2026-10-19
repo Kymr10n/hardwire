@@ -72,7 +72,7 @@ func cell_at(global_pos: Vector2) -> int:
 		return -1
 	var local: Vector2 = global_pos - global_position
 	for i: int in n * n:
-		if _cell_rect(i).has_point(local):
+		if cell_rect(i).has_point(local):
 			return i
 	return -1
 
@@ -117,7 +117,7 @@ func _process(delta: float) -> void:
 		queue_redraw()
 
 
-func _cell_rect(i: int) -> Rect2:
+func cell_rect(i: int) -> Rect2:
 	var gap: float = size.x * GAP
 	var cell: float = (size.x - gap * (n - 1)) / n
 	var row: int = floori(float(i) / n)
@@ -129,10 +129,10 @@ func _draw() -> void:
 	var lit: Color = get_theme_color("ram", "Hardwire")
 	var idle: Color = get_theme_color("trace", "Hardwire").darkened(IDLE_DARKEN)
 	for i: int in n * n:
-		var rect: Rect2 = _cell_rect(i)
+		var rect: Rect2 = cell_rect(i)
 		rect = rect.grow((rect.size.x * _scale[i] - rect.size.x) / 2.0)
 		_style.bg_color = lit if _on[i] else idle
 		_style.set_corner_radius_all(int(rect.size.x * CORNER))
 		draw_style_box(_style, rect)
 	if n > 0:
-		Ui.draw_focus(self, _cell_rect(cursor))
+		Ui.draw_focus(self, cell_rect(cursor))

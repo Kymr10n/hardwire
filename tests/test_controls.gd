@@ -1,10 +1,6 @@
 extends "res://tests/hardwire_test.gd"
 ## Gamepad / keyboard controls (SPEC: Controls): every minigame and the menus work without touch.
 
-const PuzzleScreen := preload("res://scenes/screens/PuzzleScreen.gd")
-const Main := preload("res://scenes/Main.tscn")
-const OverviewScreen := preload("res://scenes/screens/OverviewScreen.gd")
-const ShopScreen := preload("res://scenes/screens/ShopScreen.gd")
 const LANDSCAPE := Vector2i(1920, 1080)
 
 
@@ -79,28 +75,17 @@ func test_cpu_hold_with_controller() -> void:
 	var viewport: Viewport = screen.get_viewport()
 	var puzzle: PuzzleBase = screen.puzzle
 	assert_eq(_focus_owner(screen), puzzle.tile())
-	watch_signals(puzzle)
-	# Play the target in real time: timestamps come from Time.get_ticks_usec() in _input.
-	var target: Array[float] = puzzle.attempt().target_ms
-	for i: int in target.size():
-		press_action(viewport, "ui_accept", i % 2 == 0)
-		assert_eq(puzzle.tile().lit, i % 2 == 0)
-		await wait_seconds(target[i] / 1000.0)
+	# A press and release through the action are recorded like touch; timing itself is covered
+	# deterministically in test_cpu_puzzle.
+	press_action(viewport, "ui_accept", true)
+	assert_true(puzzle.tile().lit, "holding")
 	press_action(viewport, "ui_accept", false)
-	for i: int in 50:
-		puzzle._process(FRAME)
-	assert_signal_emitted(puzzle, "solved", "judge: %s" % puzzle.last_result())
-
-
-func _main() -> Node:
-	var main: Node = Main.instantiate()
-	main._idle_check_pending = false
-	add_child_autofree(main)
-	return main
+	assert_false(puzzle.tile().lit, "released")
+	assert_eq(puzzle.markers.filled, 1, "one beat recorded")
 
 
 func test_menus_have_focus_and_b_goes_back() -> void:
-	var main := _main()
+	var main := make_main()
 	main.show_overview()
 	await wait_process_frames(2)
 	assert_true(_focus_owner(main) is SlotCard, "overview focuses a slot card")
@@ -112,7 +97,7 @@ func test_menus_have_focus_and_b_goes_back() -> void:
 
 
 func test_dialog_focus_and_cancel() -> void:
-	var main := _main()
+	var main := make_main()
 	main.show_settings()
 	var dialog := ConfirmDialog.open(main.screen, "t", "m", "OK")
 	await wait_process_frames(2)
@@ -124,7 +109,7 @@ func test_dialog_focus_and_cancel() -> void:
 
 
 func test_boot_and_hint_start_with_a() -> void:
-	var main := _main()
+	var main := make_main()
 	main.show_boot()
 	tap_action(main.get_viewport(), "ui_accept")
 	assert_true(main.screen is OverviewScreen)

@@ -23,9 +23,7 @@ func before_each() -> void:
 	GameState.settings.sound = false
 	GameState.settings.haptics = false
 	# First-run hints hold the first attempt; tests that check hints clear this.
-	GameState.seen_tutorials = (
-		[SlotDef.TYPE_STO, SlotDef.TYPE_RAM, SlotDef.TYPE_CPU] as Array[String]
-	)
+	GameState.seen_tutorials = SlotGenerator.TYPES.duplicate()
 
 
 func after_each() -> void:
@@ -68,3 +66,41 @@ func press_action(viewport: Viewport, action: String, pressed: bool = true) -> v
 func tap_action(viewport: Viewport, action: String) -> void:
 	press_action(viewport, action, true)
 	press_action(viewport, action, false)
+
+
+## A started puzzle of `script` (StoragePuzzle, RamPuzzle or CpuPuzzle) in a phone-sized area.
+func make_puzzle(script: Script, tier: int, modifier: String = "", seed: int = 7) -> PuzzleBase:
+	var puzzle: PuzzleBase = script.new()
+	puzzle.size = Vector2(1000, 1400)
+	add_child_autofree(puzzle)
+	var type: String = {StoragePuzzle: "sto", RamPuzzle: "ram", CpuPuzzle: "cpu"}[script]
+	puzzle.setup(SlotDef.create(tier, type, modifier), seed)
+	puzzle.start()
+	return puzzle
+
+
+## Simulates frames (the puzzle and its scripted children) until `phase`, at most `max_s` seconds.
+func run_until(puzzle: PuzzleBase, phase: PuzzleBase.Phase, max_s: float = 30.0) -> void:
+	var t: float = 0.0
+	while puzzle.phase != phase and t < max_s:
+		run_for(puzzle, FRAME)
+		t += FRAME
+
+
+## Simulates `seconds` of frames.
+func run_for(puzzle: PuzzleBase, seconds: float) -> void:
+	var t: float = 0.0
+	while t < seconds:
+		puzzle._process(FRAME)
+		for child: Node in puzzle.get_children():
+			if child.has_method("_process"):
+				child._process(FRAME)
+		t += FRAME
+
+
+## The Main scene; `offer_idle` false suppresses the "While you were away" dialog.
+func make_main(offer_idle: bool = false) -> Node:
+	var main: Node = preload("res://scenes/Main.tscn").instantiate()
+	main.offer_idle = offer_idle
+	add_child_autofree(main)
+	return main

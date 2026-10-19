@@ -30,23 +30,7 @@ static func make(slot: SlotDef, seed: int) -> Dictionary:
 	var c: Dictionary = Balance.section("cpu")
 	var rng := RandomNumberGenerator.new()
 	rng.seed = seed
-	var on_choices: Array[float] = _range_steps(int(c.on_steps_min), int(c.on_steps_max))
-	var off_choices: Array[float] = _range_steps(int(c.off_steps_min), int(c.off_steps_max))
-	var syncopated: bool = slot.modifier == MOD_SYNCOPATED
-	var halves: Array[float] = []
-	for h: Variant in c.syncopated_steps:
-		halves.append(float(h))
-	if syncopated:
-		on_choices.append_array(halves)
-		off_choices.append_array(halves)
-
-	var steps: Array[float] = []
-	for i: int in p.beats * 2 - 1:
-		var choices: Array[float] = on_choices if i % 2 == 0 else off_choices
-		steps.append(choices[rng.randi_range(0, choices.size() - 1)])
-	if syncopated and not _has_half(steps):
-		steps[rng.randi_range(0, steps.size() - 1)] = halves[rng.randi_range(0, halves.size() - 1)]
-
+	var steps: Array[float] = _pick_steps(p.beats, slot.modifier == MOD_SYNCOPATED, rng)
 	var tolerance: float = p.tolerance + slot.assist_effect("metronome")
 	var abs_ms: float = float(c.tolerance_abs_ms)
 	var target_ms: Array[float] = []
@@ -62,11 +46,31 @@ static func make(slot: SlotDef, seed: int) -> Dictionary:
 		"steps": steps,
 		"target_ms": target_ms,
 		"total_ms": total_ms,
-		"first_press_timeout_s":
-		float(c.first_press_timeout_s) * (1.0 + slot.assist_effect("time_dilation")),
+		"first_press_timeout_s": float(c.first_press_timeout_s) * slot.assist_mult("time_dilation"),
 	}
 	attempt.max_total_ms = RhythmJudge.max_total_ms(attempt)
 	return attempt
+
+
+## Segment lengths in steps: on-segments and off-segments alternate; Syncopated adds half steps
+## and guarantees at least one.
+static func _pick_steps(beats: int, syncopated: bool, rng: RandomNumberGenerator) -> Array[float]:
+	var c: Dictionary = Balance.section("cpu")
+	var on_choices: Array[float] = _range_steps(int(c.on_steps_min), int(c.on_steps_max))
+	var off_choices: Array[float] = _range_steps(int(c.off_steps_min), int(c.off_steps_max))
+	var halves: Array[float] = []
+	for h: Variant in c.syncopated_steps:
+		halves.append(float(h))
+	if syncopated:
+		on_choices.append_array(halves)
+		off_choices.append_array(halves)
+	var steps: Array[float] = []
+	for i: int in beats * 2 - 1:
+		var choices: Array[float] = on_choices if i % 2 == 0 else off_choices
+		steps.append(choices[rng.randi_range(0, choices.size() - 1)])
+	if syncopated and not _has_half(steps):
+		steps[rng.randi_range(0, steps.size() - 1)] = halves[rng.randi_range(0, halves.size() - 1)]
+	return steps
 
 
 static func _range_steps(lo: int, hi: int) -> Array[float]:

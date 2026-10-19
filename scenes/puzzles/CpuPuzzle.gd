@@ -1,25 +1,22 @@
+class_name CpuPuzzle
 extends PuzzleBase
 ## CPU minigame: copy the rhythm by holding the central tile. SPEC: Minigame: CPU.
 ## Presses and releases are timestamped with Time.get_ticks_usec() inside _input, not _process;
 ## RhythmJudge compares relative intervals. Input ends 600 ms after the last beat is released,
-## or once no input could pass any more; no first press within the timeout fails.
+## or once no input could pass any more; no first press within the timeout fails. The controller
+## rumbles with the tile while it is lit or held (not during Audio only playback).
 
 ## Layout, as fractions of the available square and of tap_min.
 const TILE_FILL := 0.75
 const RESERVED_ROWS := 3.0
-## Beat markers: radius as a fraction of tap_min; gap and outline as fractions of the radius.
-const MARKER_RADIUS := 0.2
-const MARKER_GAP := 1.0
-const MARKER_RING := 0.3
 
 ## One-line modifier hints above the tile (SPEC: Modifier hints).
 const HINTS := {RhythmGen.MOD_AUDIO_ONLY: "Listen", RhythmGen.MOD_SYNCOPATED: "Half steps"}
 
 var hint: Label
+var markers: CpuMarkers
 
 var _attempt: Dictionary = {}
-var _marker_on := StyleBoxFlat.new()
-var _marker_off := StyleBoxFlat.new()
 var _tile: CpuTile
 var _presses: Array[int] = []
 var _releases: Array[int] = []
@@ -35,7 +32,8 @@ func _ready() -> void:
 	add_child(hint)
 	_tile = CpuTile.new()
 	add_child(_tile)
-	_marker_off.draw_center = false
+	markers = CpuMarkers.new()
+	add_child(markers)
 	resized.connect(_layout)
 	_layout()
 
@@ -67,8 +65,8 @@ func press_at(usec: int) -> void:
 	_holding = true
 	_tile.lit = true
 	_start_tone()
-	Haptics.pulse()
-	queue_redraw()
+	Haptics.start_hold()
+	markers.filled = _presses.size()
 
 
 ## Registers a release at `usec` (public for tests).
@@ -79,6 +77,7 @@ func release_at(usec: int) -> void:
 	_releases.append(usec)
 	_tile.lit = false
 	_stop_tone()
+	Haptics.stop_hold()
 	if _releases.size() == _attempt.beats:
 		time_left_s = minf(time_left_s, _grace_ms() / 1000.0)
 
@@ -133,7 +132,7 @@ func _build_attempt() -> void:
 	_stop_tone()
 	_tile.lit = false
 	hint.text = HINTS.get(slot.modifier, "")
-	queue_redraw()
+	markers.setup(_attempt.steps, _audio_only())
 
 
 func _watch_update(t: float) -> bool:
@@ -146,7 +145,7 @@ func _watch_update(t: float) -> bool:
 	var beat: int = floori(segment / 2.0)
 	if beat != _watch_beat:
 		_watch_beat = beat
-		queue_redraw()
+		markers.filled = 0 if _audio_only() else beat + 1
 	return false
 
 
@@ -155,15 +154,18 @@ func _set_watch_on(on: bool) -> void:
 		return
 	if on:
 		_start_tone()
+		if not _audio_only():
+			Haptics.start_hold()
 	else:
 		_stop_tone()
+		Haptics.stop_hold()
 	_tile.lit = on and not _audio_only()
 
 
 func _on_phase_entered(p_phase: Phase) -> void:
 	if p_phase != Phase.WATCH:
 		_watch_beat = -1
-	queue_redraw()
+		markers.filled = _presses.size()
 
 
 func _on_time_up() -> void:
@@ -190,6 +192,7 @@ func _on_abort() -> void:
 func _release_tile() -> void:
 	_holding = false
 	_stop_tone()
+	Haptics.stop_hold()
 	_tile.lit = false
 
 
@@ -234,56 +237,8 @@ func _layout() -> void:
 	_tile.pivot_offset = _tile.size / 2.0
 	hint.position = Vector2(0.0, _tile.position.y - row_h - margin / 2.0)
 	hint.size = Vector2(size.x, row_h)
-	queue_redraw()
-
-
-## Beat markers under the tile (SPEC: Watch phase, D-022): a dot per tap and a bar as long as its
-## steps per hold, filled per played beat while watching and per press during input. Under Audio
-## only every marker is a dot that fills only for presses.
-func _draw() -> void:
-	if _attempt.is_empty() or _tile == null:
-		return
-	var rects: Array[Rect2] = marker_rects()
-	var r: float = rects[0].size.y / 2.0
-	_marker_on.bg_color = get_theme_color("cpu", "Hardwire")
-	_marker_off.border_color = get_theme_color("text_dim", "Hardwire")
-	_marker_off.set_border_width_all(int(r * MARKER_RING))
-	for style: StyleBoxFlat in [_marker_on, _marker_off]:
-		style.set_corner_radius_all(int(r))
-	var filled: int = filled_markers()
-	for i: int in rects.size():
-		draw_style_box(_marker_on if i < filled else _marker_off, rects[i])
-
-
-## Markers laid out centered under the tile. Widths in radii: 2 per step for holds, 2 for taps
-## (and for every beat under Audio only). The radius shrinks only if the row would not fit
-## between the margins.
-func marker_rects() -> Array[Rect2]:
-	var units: Array[float] = []
-	var total: float = MARKER_GAP * (_attempt.beats - 1)
-	var steps: Array[float] = _attempt.steps
-	for i: int in range(0, steps.size(), 2):
-		var u: float = 2.0 * (1.0 if _audio_only() else maxf(1.0, steps[i]))
-		units.append(u)
-		total += u
-	var margin: float = get_theme_constant("margin", "Hardwire")
-	var tap: float = get_theme_constant("tap_min", "Hardwire")
-	var r: float = minf(tap * MARKER_RADIUS, (size.x - 2.0 * margin) / total)
-	var x: float = (size.x - total * r) / 2.0
-	var y: float = _tile.position.y + _tile.size.y + margin
-	var rects: Array[Rect2] = []
-	for u: float in units:
-		rects.append(Rect2(x, y, u * r, r * 2.0))
-		x += (u + MARKER_GAP) * r
-	return rects
-
-
-## How many markers are filled: beats played so far while watching (none under Audio only),
-## presses during input.
-func filled_markers() -> int:
-	if phase == Phase.WATCH:
-		return 0 if _audio_only() else _watch_beat + 1
-	return _presses.size()
+	markers.position = Vector2(0.0, _tile.position.y + _tile.size.y + margin)
+	markers.size = Vector2(size.x, row_h * CpuMarkers.RADIUS * 2.0)
 
 
 func _audio_only() -> bool:

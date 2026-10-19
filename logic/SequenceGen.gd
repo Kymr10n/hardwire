@@ -67,7 +67,6 @@ static func make(slot: SlotDef, seed: int) -> Dictionary:
 		"pads": pads,
 		"show_ms": p.show_ms,
 		"gap_ms": p.gap_ms,
-		"time_limit_s":
-		p.length * float(p.input_s_per_item) * (1.0 + slot.assist_effect("time_dilation")),
+		"time_limit_s": p.length * float(p.input_s_per_item) * slot.assist_mult("time_dilation"),
 		"replays": slot.assist_level("replay_buffer"),
 	}

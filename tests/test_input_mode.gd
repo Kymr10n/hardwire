@@ -1,11 +1,6 @@
 extends "res://tests/hardwire_test.gd"
 ## Glyphs for the last-used device (SPEC: Platforms and input > Glyphs, D-021).
 
-const BootScreen := preload("res://scenes/screens/BootScreen.gd")
-const RamPuzzle := preload("res://scenes/puzzles/RamPuzzle.gd")
-const Main := preload("res://scenes/Main.tscn")
-const DebugMenu := preload("res://scenes/screens/DebugMenu.gd")
-
 
 func _touch(emulated: bool) -> InputEventScreenTouch:
 	var event := InputEventScreenTouch.new()
@@ -74,15 +69,13 @@ func test_ram_commit_shows_glyph() -> void:
 	var puzzle: PuzzleBase = RamPuzzle.new()
 	add_child_autofree(puzzle)
 	_use(_pad_button(JOY_BUTTON_A))
-	assert_eq(puzzle._commit.text, "Commit (Y)")
+	assert_eq(puzzle.commit_button.text, "Commit (Y)")
 	_use(_touch(false))
-	assert_eq(puzzle._commit.text, "Commit")
+	assert_eq(puzzle.commit_button.text, "Commit")
 
 
 func test_debug_panel_action_opens_panel() -> void:
-	var main: Node = Main.instantiate()
-	main._idle_check_pending = false
-	add_child_autofree(main)
+	var main: Node = make_main()
 	main.show_overview()
 	await wait_process_frames(2)
 	tap_action(main.get_viewport(), "debug_panel")

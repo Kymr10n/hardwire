@@ -1,3 +1,4 @@
+class_name BootScreen
 extends Control
 ## Boot screen (SPEC: Screens and UX flow): title and "Tap to start". The save is loaded by the
 ## SaveManager autoload before this screen exists.
@@ -8,16 +9,8 @@ var prompt: Label
 
 
 func _ready() -> void:
-	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	var box := VBoxContainer.new()
-	box.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	box.alignment = BoxContainer.ALIGNMENT_CENTER
-	box.add_theme_constant_override("separation", get_theme_constant("margin", "Hardwire") * 2)
-	add_child(box)
-	var title := Label.new()
-	title.text = "HARDWIRE"
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.add_theme_font_size_override("font_size", get_theme_font_size("title", "Hardwire") * 2)
+	var box: VBoxContainer = Ui.centered_column(self)
+	var title: Label = Ui.label("HARDWIRE", get_theme_font_size("title", "Hardwire") * 2)
 	title.add_theme_color_override("font_color", get_theme_color("ram", "Hardwire"))
 	box.add_child(title)
 	prompt = Ui.dim_label("")

@@ -1,7 +1,9 @@
 extends Node
 ## Player progress: stats, Cycles, Cores, upgrades, solved slots (SPEC: Stats, currency and slot
-## gating). State and its mutations only; rules live in logic/ (Progress, Economy). Emits signals on
-## change; SaveManager persists it (and owns the save schema).
+## gating). State and its mutations only; rules live in logic/ (Progress, Economy). Values with
+## signals (stats, Cycles, Cores, upgrades, solved slots) change through methods here; plain data
+## without listeners (settings, seen_tutorials, last_seen) is written directly. SaveManager
+## persists it (and owns the save schema).
 
 signal stats_changed
 signal cycles_changed
@@ -60,7 +62,7 @@ func apply_solve(slot: SlotDef) -> Dictionary:
 	var first: bool = not is_solved(slot)
 	var before: int = Progress.highest_unlocked_tier(stats())
 	var gain: Dictionary = Economy.solve_reward(
-		slot, first, int(upgrades.get("overclock", 0)), int(upgrades.get("cycle_miner", 0)), cores
+		slot, first, upgrade_level("overclock"), upgrade_level("cycle_miner"), cores
 	)
 	match slot.type:
 		SlotDef.TYPE_RAM:
@@ -120,7 +122,8 @@ func rebuild() -> int:
 	return gained
 
 
-func collect_idle(amount: int) -> void:
+## Cycles from idle income or the debug panel.
+func add_cycles(amount: int) -> void:
 	cycles += amount
 	cycles_changed.emit()
 
