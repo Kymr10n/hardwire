@@ -36,7 +36,6 @@ func setup(p_slot: SlotDef, p_seed: int) -> void:
 func start() -> void:
 	_succeeded = false
 	_build_attempt()
-	time_left_s = time_limit_s
 	_set_phase(Phase.COUNTDOWN, _countdown_text(0.0))
 
 

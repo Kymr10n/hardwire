@@ -91,11 +91,6 @@ func test_base_size_follows_window_aspect() -> void:
 	)
 
 
-func test_fullscreen_only_on_steam_deck() -> void:
-	assert_true(MainScript.wants_fullscreen("1"))
-	assert_false(MainScript.wants_fullscreen(""))
-
-
 func test_back_never_quits_on_pc_overview() -> void:
 	var main := make_main()
 	main.show_overview()

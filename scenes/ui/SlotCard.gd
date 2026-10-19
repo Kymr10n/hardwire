@@ -57,20 +57,19 @@ func refresh() -> void:
 	)
 	_style.set_border_width_all(BORDER_NEW if not locked and not solved else BORDER)
 	_pressed_style.set_border_width_all(_style.border_width_left)
-	_pressed_style.set_corner_radius_all(CORNER)
 	_pressed_style.border_color = _style.border_color
 	_pressed_style.bg_color = _style.bg_color.lightened(PRESSED_LIGHTEN)
 	_title.add_theme_color_override("font_color", dim if locked else accent)
 	_glyph.visible = not slot.modifier.is_empty()
 	_glyph.text = MOD_GLYPHS.get(slot.modifier, "*")
-	_badge_style(_glyph, dim if locked else accent)
+	_badge_color(_glyph, dim if locked else accent)
 	modifier_label.text = SlotDef.modifier_name(slot.modifier)
 	lines.text = _missing_text() if locked else _reward_text(not solved)
 	lines.add_theme_color_override(
 		"font_color", dim if locked else get_theme_color("text", "Hardwire")
 	)
 	badge_new.visible = not locked and not solved
-	_badge_style(badge_new, accent)
+	_badge_color(badge_new, accent)
 
 
 ## "CPU 4 more" per missing stat.
@@ -97,6 +96,7 @@ func _reward_text(first_solve: bool) -> String:
 
 func _build() -> void:
 	_style.set_corner_radius_all(CORNER)
+	_pressed_style.set_corner_radius_all(CORNER)
 	var margin := MarginContainer.new()
 	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -110,6 +110,7 @@ func _build() -> void:
 	column.add_child(top)
 	_title = _add_label(top, SlotDef.TYPE_NAMES[slot.type], "card_title", true)
 	_glyph = _add_label(top, "", "small", false)
+	_make_badge(_glyph)
 	lines = _add_label(column, "", "card_body", false)
 	lines.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	var bottom := HBoxContainer.new()
@@ -117,6 +118,7 @@ func _build() -> void:
 	modifier_label = _add_label(bottom, "", "small", true)
 	modifier_label.add_theme_color_override("font_color", get_theme_color("text_dim", "Hardwire"))
 	badge_new = _add_label(bottom, "NEW", "small", false)
+	_make_badge(badge_new)
 
 
 func _add_label(parent: Control, text: String, font: String, expand: bool) -> Label:
@@ -131,12 +133,15 @@ func _add_label(parent: Control, text: String, font: String, expand: bool) -> La
 	return l
 
 
-## Small filled pill behind a badge label (modifier glyph, NEW).
-func _badge_style(badge: Label, color: Color) -> void:
+## Small filled pill behind a badge label (modifier glyph, NEW); _badge_color sets its color.
+func _make_badge(badge: Label) -> void:
 	var style := StyleBoxFlat.new()
-	style.bg_color = color
 	style.set_corner_radius_all(BADGE_CORNER)
 	style.content_margin_left = BADGE_PAD
 	style.content_margin_right = BADGE_PAD
 	badge.add_theme_stylebox_override("normal", style)
 	badge.add_theme_color_override("font_color", get_theme_color("bg", "Hardwire"))
+
+
+static func _badge_color(badge: Label, color: Color) -> void:
+	(badge.get_theme_stylebox("normal") as StyleBoxFlat).bg_color = color

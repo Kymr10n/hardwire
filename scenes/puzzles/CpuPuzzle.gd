@@ -22,6 +22,8 @@ var _presses: Array[int] = []
 var _releases: Array[int] = []
 var _holding: bool = false
 var _touch_index: int = -1
+## Tile is sounding (also with sound off, when _tone_id stays 0).
+var _tone_on: bool = false
 var _tone_id: int = 0
 var _watch_beat: int = -1
 var _last_result: Dictionary = {}
@@ -150,7 +152,7 @@ func _watch_update(t: float) -> bool:
 
 
 func _set_watch_on(on: bool) -> void:
-	if on == (_tone_id != 0):
+	if on == _tone_on:
 		return
 	if on:
 		_start_tone()
@@ -197,15 +199,14 @@ func _release_tile() -> void:
 
 
 func _start_tone() -> void:
-	if _tone_id == 0:
+	if not _tone_on:
+		_tone_on = true
 		_tone_id = Synth.start_tone()
-		if _tone_id == 0:
-			_tone_id = -1  # sound off: still track the on state
 
 
 func _stop_tone() -> void:
-	if _tone_id > 0:
-		Synth.stop_tone(_tone_id)
+	_tone_on = false
+	Synth.stop_tone(_tone_id)
 	_tone_id = 0
 
 

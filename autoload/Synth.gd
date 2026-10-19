@@ -5,7 +5,9 @@ extends Node
 
 enum Wave { SINE, NOISE }
 
-const MIX_RATE := 44100.0
+## Every sample is mixed in GDScript; the highest tone is about 1 kHz, so half the usual rate
+## keeps phones comfortable.
+const MIX_RATE := 22050.0
 
 var _player: AudioStreamPlayer
 var _playback: AudioStreamGeneratorPlayback

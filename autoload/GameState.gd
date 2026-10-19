@@ -10,6 +10,9 @@ signal cycles_changed
 signal cores_changed
 signal upgrades_changed
 
+const DEFAULT_SETTINGS := {"sound": true, "haptics": true}
+const DEFAULT_LIFETIME := {"solves": 0, "fails": 0, "rebuilds": 0}
+
 var ram: int = 0
 var cpu: int = 0
 var sto: int = 0
@@ -20,8 +23,8 @@ var upgrades: Dictionary = {}
 var solved_slots: Array[String] = []
 var best_tier_ever: int = 0
 var seen_tutorials: Array[String] = []
-var settings: Dictionary = {"sound": true, "haptics": true}
-var lifetime: Dictionary = {"solves": 0, "fails": 0, "rebuilds": 0}
+var settings: Dictionary = DEFAULT_SETTINGS.duplicate()
+var lifetime: Dictionary = DEFAULT_LIFETIME.duplicate()
 
 
 func _ready() -> void:
@@ -42,8 +45,8 @@ func reset_all() -> void:
 	solved_slots = []
 	best_tier_ever = 0
 	seen_tutorials = []
-	settings = {"sound": true, "haptics": true}
-	lifetime = {"solves": 0, "fails": 0, "rebuilds": 0}
+	settings = DEFAULT_SETTINGS.duplicate()
+	lifetime = DEFAULT_LIFETIME.duplicate()
 	emit_all()
 
 

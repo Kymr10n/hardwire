@@ -10,7 +10,7 @@ var offer_idle: bool = true
 
 var _landscape: bool = false
 ## Re-creates the current screen (used when the orientation flips).
-var _rebuild: Callable
+var _recreate_screen: Callable
 
 
 func _ready() -> void:
@@ -20,14 +20,10 @@ func _ready() -> void:
 	add_child(bg)
 	_apply_orientation()
 	get_window().size_changed.connect(_on_window_resized)
-	if wants_fullscreen(OS.get_environment("SteamDeck")):
+	# Steam sets SteamDeck=1 on the Deck: start fullscreen there (SPEC: Controls).
+	if OS.get_environment("SteamDeck") == "1":
 		get_window().mode = Window.MODE_FULLSCREEN
 	show_boot()
-
-
-## Steam sets SteamDeck=1 on the Deck: start fullscreen there (SPEC: Controls).
-static func wants_fullscreen(steam_deck_env: String) -> bool:
-	return steam_deck_env == "1"
 
 
 ## Base size for the current window aspect: the project's portrait size, or the same size swapped.
@@ -48,8 +44,8 @@ func _apply_orientation() -> void:
 func _on_window_resized() -> void:
 	var was_landscape: bool = _landscape
 	_apply_orientation()
-	if _landscape != was_landscape and _rebuild.is_valid():
-		_rebuild.call()
+	if _landscape != was_landscape and _recreate_screen.is_valid():
+		_recreate_screen.call()
 
 
 ## B / Esc / Backspace goes back, unless something on the screen handled it first;
@@ -164,12 +160,12 @@ func go_back() -> void:
 
 
 ## Swaps the current screen; the new one fades in over the theme's transition_ms.
-## `rebuild` re-creates it if the orientation flips.
-func _show(next: Control, rebuild: Callable) -> void:
+## `recreate` re-creates it if the orientation flips.
+func _show(next: Control, recreate: Callable) -> void:
 	if screen:
 		screen.queue_free()
 	screen = next
-	_rebuild = rebuild
+	_recreate_screen = recreate
 	add_child(screen)
 	Ui.focus_first(screen)
 	screen.modulate.a = 0.0

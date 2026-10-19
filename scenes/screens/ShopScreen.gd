@@ -25,8 +25,7 @@ func _ready() -> void:
 	list.add_theme_constant_override("v_separation", margin / 2)
 	scroll.add_child(list)
 	for id: String in Balance.upgrade_ids():
-		var card := UpgradeCard.new()
-		card.setup(id)
+		var card := UpgradeCard.new(id)
 		card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		card.buy_pressed.connect(_on_buy)
 		list.add_child(card)

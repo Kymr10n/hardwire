@@ -21,7 +21,7 @@ var _title: Label
 var _effect: Label
 
 
-func setup(p_id: String) -> void:
+func _init(p_id: String = "") -> void:
 	id = p_id
 
 

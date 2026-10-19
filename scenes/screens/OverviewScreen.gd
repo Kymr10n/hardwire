@@ -103,8 +103,7 @@ static func visible_tiers() -> int:
 func _sync_rows() -> void:
 	var count: int = visible_tiers()
 	while _rows.size() < count:
-		var row := TierRow.new()
-		row.setup(_rows.size() + 1)
+		var row := TierRow.new(_rows.size() + 1)
 		row.slot_pressed.connect(play_requested.emit)
 		_list.add_child(row)
 		_rows.append(row)

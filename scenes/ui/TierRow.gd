@@ -8,11 +8,12 @@ signal slot_pressed(slot: SlotDef)
 var tier: int = 1
 var cards: Array[SlotCard] = []
 
+## Requirement chips, one per SlotGenerator.TYPES entry, in that order.
 var _chips: Array[Label] = []
 var _header: HBoxContainer
 
 
-func setup(p_tier: int) -> void:
+func _init(p_tier: int = 1) -> void:
 	tier = p_tier
 
 
@@ -33,7 +34,6 @@ func _ready() -> void:
 		chip.text = "%s %d" % [SlotDef.STAT_NAMES[type], Balance.req(tier)]
 		chip.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		chip.add_theme_font_size_override("font_size", get_theme_font_size("small", "Hardwire"))
-		chip.set_meta("type", type)
 		_header.add_child(chip)
 		_chips.append(chip)
 
@@ -53,10 +53,10 @@ func _ready() -> void:
 
 
 func refresh() -> void:
-	for chip: Label in _chips:
-		var type: String = chip.get_meta("type")
+	for i: int in _chips.size():
+		var type: String = SlotGenerator.TYPES[i]
 		var met: bool = GameState.stats()[type] >= Balance.req(tier)
-		chip.add_theme_color_override(
+		_chips[i].add_theme_color_override(
 			"font_color",
 			get_theme_color("text_dim", "Hardwire") if met else get_theme_color(type, "Hardwire")
 		)
