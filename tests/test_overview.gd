@@ -16,16 +16,60 @@ func test_shows_unlocked_plus_two_locked_tiers() -> void:
 	assert_eq(overview.rows().size(), 7, "tiers 1-5 unlocked + 2 locked")
 
 
-func test_opens_scrolled_to_newest_tier() -> void:
+## A tall overview in a phone-sized viewport, scrolled to the newest unlocked tier.
+func _tall_overview() -> Control:
 	set_stats(100_000)
 	var overview: Control = in_viewport(OverviewScreen.new(), Vector2i(1080, 1920))
 	await wait_process_frames(2)
-	var scroll: ScrollContainer = overview.find_children("*", "ScrollContainer", true, false)[0]
-	var view: Rect2 = scroll.get_global_rect()
+	return overview
+
+
+func _scroll_of(overview: Control) -> ScrollContainer:
+	return overview.find_children("*", "ScrollContainer", true, false)[0]
+
+
+func _newest_card(overview: Control) -> SlotCard:
+	return overview.rows()[Progress.highest_unlocked_tier(GameState.stats()) - 1].cards[0]
+
+
+func test_opens_scrolled_to_newest_tier() -> void:
+	var overview: Control = await _tall_overview()
+	var view: Rect2 = _scroll_of(overview).get_global_rect()
 	var rows: Array[TierRow] = overview.rows()
 	var newest: TierRow = rows[Progress.highest_unlocked_tier(GameState.stats()) - 1]
 	assert_true(view.encloses(newest.get_global_rect()), "newest unlocked tier is in view")
 	assert_false(view.intersects(rows[0].get_global_rect()), "tier 1 scrolled out of view")
+
+
+## A swipe that starts on a slot card scrolls the list (touch arrives as emulated mouse events,
+## which a Button would otherwise swallow) and does not open the card.
+func test_swipe_over_cards_scrolls_the_list() -> void:
+	var overview: Control = await _tall_overview()
+	var scroll: ScrollContainer = _scroll_of(overview)
+	var before: int = scroll.scroll_vertical
+	watch_signals(overview)
+	drag(
+		overview.get_viewport(),
+		_newest_card(overview).get_global_rect().get_center(),
+		Vector2(0, 300)
+	)
+	assert_lt(scroll.scroll_vertical, before, "finger down moves the list down")
+	assert_signal_not_emitted(overview, "play_requested")
+
+
+## A tap with a little finger wobble is still a tap (scroll deadzone).
+func test_tap_with_small_wobble_still_opens_card() -> void:
+	var overview: Control = await _tall_overview()
+	var scroll: ScrollContainer = _scroll_of(overview)
+	var before: int = scroll.scroll_vertical
+	watch_signals(overview)
+	drag(
+		overview.get_viewport(),
+		_newest_card(overview).get_global_rect().get_center(),
+		Vector2(0, 6)
+	)
+	assert_signal_emitted(overview, "play_requested")
+	assert_eq(scroll.scroll_vertical, before, "list did not move")
 
 
 func test_card_states() -> void:

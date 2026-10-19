@@ -80,6 +80,25 @@ func tap_at(viewport: Viewport, position: Vector2) -> void:
 		viewport.push_input(touch)
 
 
+## Presses the left mouse button at `from`, moves by `delta` and releases. A finger on a
+## touchscreen reaches scroll lists as exactly these emulated mouse events.
+func drag(viewport: Viewport, from: Vector2, delta: Vector2) -> void:
+	var press := InputEventMouseButton.new()
+	press.button_index = MOUSE_BUTTON_LEFT
+	press.pressed = true
+	press.position = from
+	viewport.push_input(press)
+	var motion := InputEventMouseMotion.new()
+	motion.position = from + delta
+	motion.relative = delta
+	motion.button_mask = MOUSE_BUTTON_MASK_LEFT
+	viewport.push_input(motion)
+	var release := InputEventMouseButton.new()
+	release.button_index = MOUSE_BUTTON_LEFT
+	release.position = from + delta
+	viewport.push_input(release)
+
+
 ## A started puzzle of `script` (StoragePuzzle, RamPuzzle or CpuPuzzle) in a phone-sized area.
 ## `touchable` puts it in its own SubViewport so touches can be pushed to it (tap_at).
 func make_puzzle(

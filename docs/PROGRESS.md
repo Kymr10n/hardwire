@@ -40,4 +40,5 @@ Deferred work, each with what it needs:
 
 Add dated notes here after play-testing (what felt wrong, which numbers to tune). Turn agreed changes into `/spec-change`.
 
+- 2026-10-19, Steam Deck touchscreen: swiping the overview list did not scroll it. Cause: `ScrollContainer` drag-scrolls on (emulated) mouse events, and the slot cards, as Buttons with `MOUSE_FILTER_STOP`, swallowed them; the shop list scrolled because its cards are PanelContainers. Fixed: buttons in lists pass pointer events up (the engine cancels the press when a scroll starts) and lists have a `scroll_deadzone` (theme) so a wobbly tap is still a tap. Re-test: swipe and tap on the overview and the shop.
 - 2026-10-19, desktop with a mouse: CPU taps did not register as intended. A natural click (100–150 ms) failed because 1-step taps were timed like short holds (210–390 ms at tier 1), and holds were hard to read during playback. Fixed by D-022 (judge beats and holds, not tap length; beat-length markers). Re-test: tier 1 and tier 10 with mouse, touch and gamepad; Syncopated 1.5-step holds vs taps may still be hard to tell apart.

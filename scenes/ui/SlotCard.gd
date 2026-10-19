@@ -33,6 +33,12 @@ var _title: Label
 var _glyph: Label
 
 
+func _init() -> void:
+	# A swipe that starts on a card must reach the overview's ScrollContainer (which cancels the
+	# press when it starts scrolling); a Button would swallow it.
+	mouse_filter = Control.MOUSE_FILTER_PASS
+
+
 func setup(p_slot: SlotDef) -> void:
 	slot = p_slot
 	text = ""

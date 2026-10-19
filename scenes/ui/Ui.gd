@@ -112,6 +112,8 @@ static func button(text: String, on_pressed: Callable, wide: bool = false) -> Bu
 	var b := Button.new()
 	b.text = text
 	b.pressed.connect(on_pressed)
+	# Lets a swipe over a button in a scroll list reach the ScrollContainer (see SlotCard).
+	b.mouse_filter = Control.MOUSE_FILTER_PASS
 	var theme: Theme = ThemeDB.get_project_theme()
 	var width: float = theme.get_constant("button_width", "Hardwire") if wide else 0.0
 	b.custom_minimum_size = Vector2(width, theme.get_constant("tap_min", "Hardwire"))
@@ -199,11 +201,13 @@ static func box(vertical: bool) -> BoxContainer:
 	return b
 
 
-## A vertical scroll area that fills the space left and follows gamepad/keyboard focus.
+## A vertical scroll area that fills the space left, follows gamepad/keyboard focus and scrolls
+## with a swipe; a finger wobble within scroll_deadzone is still a tap.
 static func scroll() -> ScrollContainer:
 	var s := ScrollContainer.new()
 	s.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	s.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	s.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	s.follow_focus = true
+	s.scroll_deadzone = ThemeDB.get_project_theme().get_constant("scroll_deadzone", "Hardwire")
 	return s

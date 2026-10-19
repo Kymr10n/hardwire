@@ -132,6 +132,7 @@ Hardwire/constants/pad_idle_pct = 30
 Hardwire/constants/decoy_pct = 55
 Hardwire/constants/tap_flash_ms = 180
 Hardwire/constants/margin = 48
+Hardwire/constants/scroll_deadzone = 24
 Hardwire/constants/tap_min = 120
 Hardwire/constants/timer_bar_height = 24
 Hardwire/constants/max_column = 1200
