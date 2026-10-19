@@ -44,6 +44,5 @@ func _refresh() -> void:
 
 func _on_buy(id: String) -> void:
 	if GameState.buy_upgrade(id):
-		Haptics.pulse()
 		Synth.play_click()
 		SaveManager.save_game()

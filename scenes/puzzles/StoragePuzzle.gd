@@ -94,12 +94,14 @@ func _watch_update(t: float) -> bool:
 	return false
 
 
+## Lights one playback item (or none); the controller rumbles while a pad is lit (D-034).
 func _light_item(item: int) -> void:
 	if item == _lit_item:
 		return
 	_lit_item = item
 	for pad: StoragePad in _pads:
 		pad.set_level(0.0)
+	Haptics.stop_hold()
 	if item < 0:
 		return
 	var entry: Dictionary = _attempt.playback[item]
@@ -109,6 +111,7 @@ func _light_item(item: int) -> void:
 	else:
 		_pads[entry.pad].set_level(1.0)
 		Synth.play_note(entry.pad, _attempt.show_ms)
+	Haptics.start_hold(entry.decoy)
 
 
 func _on_phase_entered(p_phase: Phase) -> void:
@@ -125,6 +128,7 @@ func _on_fail_reveal() -> void:
 func _on_abort() -> void:
 	for pad: StoragePad in _pads:
 		pad.set_level(0.0)
+	Haptics.stop_hold()
 
 
 func _ensure_pads(count: int) -> void:

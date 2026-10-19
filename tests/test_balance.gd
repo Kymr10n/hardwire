@@ -60,6 +60,16 @@ const REQUIRED := {
 	],
 	"modifiers": ["from_tier", "second_pool_from_tier", "chance_base", "chance_step", "chance_max"],
 	"debug": ["cycles_step", "panel_taps", "panel_tap_window_s"],
+	"haptics":
+	[
+		"pulse_ms",
+		"pulse_strength",
+		"hold_strength",
+		"decoy_strength",
+		"success_pulse_ms",
+		"success_gap_ms",
+		"fail_pulse_ms"
+	],
 }
 
 const UPGRADES: Array[String] = [

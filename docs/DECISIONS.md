@@ -226,3 +226,9 @@ form, phone launcher label, repository, file names and the save folder stay `har
 a subtitle over a new name to keep the two apart in search.
 **Affects:** Overview (name); Screens and UX flow (Boot); Decisions and balancing notes (Game name);
 M10; `project.godot`; `export_presets.cfg`; `BootScreen`; README.
+
+## D-034 — 2026-10-19 — Rumble for every button and all playback
+
+**Decision:** Every button press (menus, slot cards, dialogs, Again / Overview, the Settings toggles, Replay, Commit, the debug panel), the boot tap and the hint tap give the light haptic pulse. One home: the Haptics autoload connects the `pressed` signal of every `BaseButton` that enters the tree, so screens never call it for buttons. During a Watch phase the controller rumbles for as long as playback lights something: each Storage pad while it is lit (decoys at `haptics.decoy_strength`), the RAM pattern while it shows, and the CPU tile for each on-segment as before (Audio only stays silent). Phones get one vibration per lit thing or press. Extends D-024.
+**Why:** Play-test on the Steam Deck: the owner wants full immersion; menus and the Storage and RAM playback were silent while the CPU game rumbled.
+**Affects:** Platforms and input > Haptics; Minigame: Storage and RAM (Watch phase); Screens and UX flow (Feedback on every input); `balance.json` → `haptics.decoy_strength`; `Haptics`, `StoragePuzzle`, `RamPuzzle`, `ShopScreen`, `BootScreen`, `HintOverlay`; `test_haptics`, `test_balance`.

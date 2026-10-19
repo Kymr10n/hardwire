@@ -111,13 +111,16 @@ func _build_attempt() -> void:
 	_layout()
 
 
+## The controller rumbles while the pattern shows (D-034).
 func _watch_update(t: float) -> bool:
 	if t < _attempt.show_ms / 1000.0:
 		if not _shown:
 			_shown = true
 			_grid.show_only(pattern())
+			Haptics.start_hold()
 		return false
 	_grid.show_only([] as Array[int])
+	Haptics.stop_hold()
 	return true
 
 
@@ -131,6 +134,7 @@ func _on_fail_reveal() -> void:
 
 
 func _on_abort() -> void:
+	Haptics.stop_hold()
 	_update_counter()
 
 

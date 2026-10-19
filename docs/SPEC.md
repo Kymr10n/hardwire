@@ -67,7 +67,7 @@ The focus outline shows only for keyboard and gamepad input; when the overview o
 - No text entry, so no on-screen keyboard is needed.
 - At least 30 fps at 800p; the game caps at 60 fps (`application/run/max_fps`).
 
-**Haptics.** Phones use `Input.vibrate_handheld`; gamepads use `Input.start_joy_vibration`. Both go through the Haptics autoload and respect the setting. Every input gives a light pulse; the CPU minigame rumbles with the rhythm (see Minigame: CPU > Haptics); results give a pulse pattern (see Result overlay). Lengths and strengths live in `balance.json` → `haptics`.
+**Haptics.** Phones use `Input.vibrate_handheld`; gamepads use `Input.start_joy_vibration`. Both go through the Haptics autoload and respect the setting. Every press of a button or pad gives a light pulse (also the boot and hint taps; the Haptics autoload hooks every button, so screens never ask for it). During a Watch phase the controller rumbles for as long as playback lights something: each Storage pad while it is lit (decoys weaker), the RAM pattern while it shows, the CPU tile for each on-segment (see Minigame: CPU > Haptics). During CPU input it rumbles while the tile is held. Results give a pulse pattern (see Result overlay). Phones get one vibration per lit thing or press. Lengths and strengths live in `balance.json` → `haptics`.
 
 ## Core loop
 
@@ -111,7 +111,7 @@ The game lights a sequence of colored pads, and the player taps them back in the
 
 **Layout.** Pads sit in a ring around the screen center, each at least 160 px across; on keyboard and gamepad the focus moves between them (see Platforms and input). Every pad has a distinct color, a distinct tone and a small symbol (circle, triangle, square, and so on) so the game stays playable for colorblind players.
 
-**Watch phase.** Each pad lights for `show_ms` with its tone, followed by a 150 ms gap. The same pad may appear twice in a row; the gap makes the repeat visible.
+**Watch phase.** Each pad lights for `show_ms` with its tone, followed by a 150 ms gap. The same pad may appear twice in a row; the gap makes the repeat visible. The controller rumbles while a pad is lit; a decoy rumbles weaker.
 
 **Input phase.**
 
@@ -133,7 +133,7 @@ The game briefly shows a black-and-white pattern on a square grid, then hides it
 
 **Layout.** A square grid fills the screen width minus margins. Cells are at least 120 px, which caps a phone layout at about 7 × 7.
 
-**Watch phase.** `filled` random cells light up for `show_ms`, then all cells go dark.
+**Watch phase.** `filled` random cells light up for `show_ms`, then all cells go dark. The controller rumbles while the pattern shows.
 
 **Input phase.**
 
@@ -292,7 +292,7 @@ The prototype has five screens around one hub, the overview. Every screen works 
 - Failure: "Corrupted", the correct answer shown for 1 s, then the next attempt starts automatically. The back button is always available.
 - Haptics: a success gives a short double pulse, a failure one long pulse (every minigame).
 
-**Feedback on every input:** pad or cell flash, its tone, and a light haptic pulse (phone vibration or gamepad rumble).
+**Feedback on every input:** pad or cell flash, its tone, and a light haptic pulse (phone vibration or gamepad rumble); every button gives the same pulse.
 
 **Landscape:** the same screens with one code path each; a window that changes orientation re-creates the current screen, and a running attempt restarts with a fresh sequence (no penalty). The puzzle screen puts header, phase label and timer in a side panel next to the puzzle; the overview puts the stats and the Shop / Rebuild / Settings buttons in a sidebar next to the tier list; the shop shows two columns; other screens use a centered column.
 

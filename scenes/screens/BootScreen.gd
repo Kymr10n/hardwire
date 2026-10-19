@@ -32,4 +32,5 @@ func _update_prompt(_device: int = 0) -> void:
 func _input(event: InputEvent) -> void:
 	if InputMode.is_any_press(event):
 		get_viewport().set_input_as_handled()
+		Haptics.pulse()
 		start_requested.emit()

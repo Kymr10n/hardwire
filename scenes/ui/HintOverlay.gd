@@ -33,5 +33,6 @@ func _gui_input(event: InputEvent) -> void:
 	var touch := event as InputEventScreenTouch
 	if (touch != null and not touch.pressed) or Ui.accept_event(event) == 1:
 		accept_event()
+		Haptics.pulse()
 		dismissed.emit()
 		queue_free()
