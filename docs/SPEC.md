@@ -232,7 +232,7 @@ The prototype has five screens around one hub, the overview. All layouts are por
 | Overview | Top bar with RAM, CPU, STO, Cycles and Cores; vertical scroll list of tier rows (tier 1 at the top), newest unlocked tier in view on open; each row = tier number, requirement chips and 3 slot cards (RAM, CPU, STO); bottom bar with Shop, Rebuild and Settings | Puzzle, Shop, Rebuild dialog, Settings |
 | Puzzle | Header with minigame name, tier, modifier and a back button; phase label ("Watch" / "Your turn"); timer bar; the minigame area; result overlay | Overview |
 | Shop | List of upgrade cards, Cycles balance on top | Overview |
-| Settings | Sound on or off, haptics on or off, reset save (with confirm) | Overview |
+| Settings | Sound on or off, haptics on or off, licenses (full texts of Hardwire, the font and Godot with its third-party components), reset save (with confirm) | Overview, Licenses |
 
 **Slot card states:** locked (greyed, shows missing stats), unlocked and never solved (accent border, "NEW" badge), solved (normal), modifier (icon in the corner).
 

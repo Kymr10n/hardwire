@@ -35,7 +35,7 @@ godot --headless --path . -s addons/gut/gut_cmdln.gd
 
 ## Gotchas
 
-- `data/balance.json` is not a Godot resource. Every export preset must include it via "Filters to export non-resource files": `data/*.json`.
+- `data/balance.json`, `LICENSE` and `fonts/JetBrainsMono-OFL.txt` are not Godot resources. Every export preset must include them via "Filters to export non-resource files".
 - `.godot/` is a cache; never commit or edit it.
 - Controls built in code: use `set_anchors_and_offsets_preset(PRESET_FULL_RECT)`, not `set_anchors_preset`. On a node already in the tree the latter keeps the old (often zero) rect.
 - Puzzles run on `_process` with scaled delta, never `await`, so an attempt can be aborted or freed at any time. Tests drive them by calling `_process(FRAME)` directly.

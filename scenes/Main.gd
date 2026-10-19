@@ -8,6 +8,7 @@ const OverviewScreen := preload("res://scenes/screens/OverviewScreen.gd")
 const PuzzleScreen := preload("res://scenes/screens/PuzzleScreen.gd")
 const SettingsScreen := preload("res://scenes/screens/SettingsScreen.gd")
 const ShopScreen := preload("res://scenes/screens/ShopScreen.gd")
+const LicensesScreen := preload("res://scenes/screens/LicensesScreen.gd")
 const DebugMenu := preload("res://scenes/screens/DebugMenu.gd")
 
 var screen: Control
@@ -88,7 +89,14 @@ func show_puzzle(slot: SlotDef) -> void:
 func show_settings() -> void:
 	var settings: Control = SettingsScreen.new()
 	settings.exit_requested.connect(show_overview)
+	settings.licenses_requested.connect(show_licenses)
 	_show(settings)
+
+
+func show_licenses() -> void:
+	var licenses: Control = LicensesScreen.new()
+	licenses.exit_requested.connect(show_settings)
+	_show(licenses)
 
 
 func show_shop() -> void:

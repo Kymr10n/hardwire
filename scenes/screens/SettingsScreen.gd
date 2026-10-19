@@ -1,8 +1,9 @@
 extends Control
-## Settings (SPEC: Screens and UX flow): sound on/off, haptics on/off, reset save (with confirm).
-## Saves after every change.
+## Settings (SPEC: Screens and UX flow): sound on/off, haptics on/off, licenses, reset save
+## (with confirm). Saves after every change.
 
 signal exit_requested
+signal licenses_requested
 
 var _sound: Button
 var _haptics: Button
@@ -36,6 +37,11 @@ func _ready() -> void:
 
 	_sound = _toggle(box, _toggle_setting.bind("sound"))
 	_haptics = _toggle(box, _toggle_setting.bind("haptics"))
+	var licenses := Button.new()
+	licenses.text = "Licenses"
+	licenses.custom_minimum_size.y = tap
+	licenses.pressed.connect(licenses_requested.emit)
+	box.add_child(licenses)
 	var spacer := Control.new()
 	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	box.add_child(spacer)

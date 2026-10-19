@@ -5,6 +5,7 @@ const Main := preload("res://scenes/Main.tscn")
 const PuzzleScreen := preload("res://scenes/screens/PuzzleScreen.gd")
 const OverviewScreen := preload("res://scenes/screens/OverviewScreen.gd")
 const SettingsScreen := preload("res://scenes/screens/SettingsScreen.gd")
+const LicensesScreen := preload("res://scenes/screens/LicensesScreen.gd")
 
 
 func _release() -> InputEventScreenTouch:
@@ -73,3 +74,24 @@ func test_stat_bar_short_numbers() -> void:
 	assert_eq(StatBar.short(9999), "9999")
 	assert_eq(StatBar.short(12_345), "12.3K")
 	assert_eq(StatBar.short(4_560_000), "4.56M")
+
+
+func test_licenses_screen_shows_all_texts() -> void:
+	var text: String = LicensesScreen.full_text()
+	assert_string_contains(text, "Copyright (c) 2026 kamyrion")
+	assert_string_contains(text, "SIL OPEN FONT LICENSE")
+	assert_string_contains(text, "Godot Engine contributors")
+	assert_string_contains(text, "FreeType")
+
+
+func test_settings_opens_licenses_and_back_returns() -> void:
+	var main := _main()
+	main.show_settings()
+	main.screen.licenses_requested.emit()
+	assert_true(main.screen is LicensesScreen)
+	main.go_back()
+	assert_true(main.screen is OverviewScreen)
+
+
+func test_license_reflow_joins_wrapped_lines() -> void:
+	assert_eq(LicensesScreen.reflow("a b\nc d\n\ne\n  - f\n  - g"), "a b c d\n\ne\n  - f\n  - g")
