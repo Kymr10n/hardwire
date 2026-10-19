@@ -8,8 +8,8 @@ signal exit_requested
 
 const PUZZLES := {
 	SlotDef.TYPE_STO: preload("res://scenes/puzzles/StoragePuzzle.gd"),
+	SlotDef.TYPE_RAM: preload("res://scenes/puzzles/RamPuzzle.gd"),
 }
-const NAMES := {SlotDef.TYPE_STO: "Storage", SlotDef.TYPE_RAM: "RAM", SlotDef.TYPE_CPU: "CPU"}
 
 var slot: SlotDef
 var puzzle: PuzzleBase
@@ -96,7 +96,7 @@ func _process(_delta: float) -> void:
 
 
 func _title_text() -> String:
-	var text: String = "%s  T%d" % [NAMES.get(slot.type, slot.type), slot.tier]
+	var text: String = "%s  T%d" % [SlotDef.TYPE_NAMES.get(slot.type, slot.type), slot.tier]
 	if not slot.modifier.is_empty():
 		text += "  [%s]" % slot.modifier.capitalize()
 	return text

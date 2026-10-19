@@ -337,7 +337,7 @@ Build one milestone per session, in order. Each milestone ends with a playable b
 | --- | --- | --- | --- |
 | M1 | Skeleton: project settings, autoloads, `balance.json`, save/load, GUT set up | App opens in a portrait window; a debug button adds stats and they survive a restart; tests run headless | Done (2026-10-19) |
 | M2 | Storage minigame, launched from a debug menu with a tier picker | Tiers 1, 5 and 20 play as specified; wrong tap and timeout both start a new sequence; Reverse and Decoy work when forced; generator tests pass | Done (2026-10-19), awaiting play-test |
-| M3 | RAM minigame | Toggle, Commit and timeout work; failed attempts flash the answer; Inverted and Rotated work when forced | In progress |
+| M3 | RAM minigame | Toggle, Commit and timeout work; failed attempts flash the answer; Inverted and Rotated work when forced | Done (2026-10-19), awaiting play-test |
 | M4 | CPU minigame and `RhythmJudge` | Judge tests cover exact input, input within tolerance, too many presses, and one segment out of tolerance; playing a tier 1 rhythm by ear passes | Planned |
 | M5 | Overview, slot generation, gating, rewards | Fresh save reaches tier 4 through first solves alone; locked slots show missing stats; numbers match the Sample tiers table | Planned |
 | M6 | Shop and upgrades | All six upgrades buy, persist and change their puzzle as specified | Planned |

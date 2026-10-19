@@ -6,13 +6,19 @@ signal play_requested(slot: SlotDef)
 
 const QUICK_TIERS: Array[int] = [1, 5, 10, 20]
 
+## Minigames that can be launched so far, in menu order.
+const TYPES: Array[String] = [SlotDef.TYPE_STO, SlotDef.TYPE_RAM]
+
 ## Kept across screen changes so returning from a puzzle keeps the picks.
 static var tier: int = 1
+static var type_index: int = 0
 static var modifier_index: int = 0
 
 var _stats_label: Label
 var _tier_label: Label
+var _type_button: Button
 var _modifier_button: Button
+var _play_button: Button
 
 
 func _ready() -> void:
@@ -43,11 +49,12 @@ func _ready() -> void:
 	for t: int in QUICK_TIERS:
 		quick_row.add_child(_button("T%d" % t, _set_tier.bind(t)))
 
+	_type_button = _button("", _cycle_type)
+	box.add_child(_type_button)
 	_modifier_button = _button("", _cycle_modifier)
 	box.add_child(_modifier_button)
-	var play := _button("Play Storage", _on_play.bind(SlotDef.TYPE_STO))
-	play.add_theme_color_override("font_color", get_theme_color("sto", "Hardwire"))
-	box.add_child(play)
+	_play_button = _button("Play", _on_play)
+	box.add_child(_play_button)
 
 	GameState.stats_changed.connect(_refresh)
 	GameState.cycles_changed.connect(_refresh)
@@ -57,14 +64,18 @@ func _ready() -> void:
 func _refresh() -> void:
 	_stats_label.text = "RAM %d   CPU %d   STO %d   Cycles %d" % [GameState.ram, GameState.cpu, GameState.sto, GameState.cycles]
 	_tier_label.text = "T%d" % tier
+	var type: String = TYPES[type_index]
+	_type_button.text = "Minigame: %s" % SlotDef.TYPE_NAMES[type]
 	var mod: String = _modifiers()[modifier_index]
 	_modifier_button.text = "Modifier: %s" % ("none" if mod.is_empty() else mod.capitalize())
+	_play_button.text = "Play %s" % SlotDef.TYPE_NAMES[type]
+	_play_button.add_theme_color_override("font_color", get_theme_color(type, "Hardwire"))
 
 
-## "" plus the Storage modifier pool from balance.json.
+## "" plus the selected minigame's modifier pool from balance.json.
 func _modifiers() -> Array[String]:
 	var mods: Array[String] = [""]
-	for m: Variant in Balance.modifiers().get("pools", {}).get(SlotDef.TYPE_STO, []):
+	for m: Variant in Balance.modifiers().get("pools", {}).get(TYPES[type_index], []):
 		mods.append(str(m))
 	return mods
 
@@ -75,6 +86,12 @@ func _change_tier(delta: int) -> void:
 
 func _set_tier(t: int) -> void:
 	tier = maxi(1, t)
+	_refresh()
+
+
+func _cycle_type() -> void:
+	type_index = (type_index + 1) % TYPES.size()
+	modifier_index = 0
 	_refresh()
 
 
@@ -89,8 +106,8 @@ func _on_add_stats() -> void:
 	SaveManager.save_game()
 
 
-func _on_play(type: String) -> void:
-	play_requested.emit(SlotDef.create(tier, type, _modifiers()[modifier_index]))
+func _on_play() -> void:
+	play_requested.emit(SlotDef.create(tier, TYPES[type_index], _modifiers()[modifier_index]))
 
 
 func _label(text: String, font_size: int) -> Label:
