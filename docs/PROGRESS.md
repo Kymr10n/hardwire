@@ -12,8 +12,10 @@ Status values: `todo`, `in progress`, `done`. Milestone scope and "Done when" cr
 | M5 | done | Overview, slot generation, gating, rewards, Boot, Settings, debug panel |
 | M6 | done | Shop and upgrades |
 | M7 | done | Rebuild (prestige) and idle income |
-| M8 | in progress | Polish, web and Linux builds done; Android APK waits for the Android SDK licences; real-phone test pending |
-| M9 | in progress | Steam Deck and desktop: landscape, controller, glyphs, Linux/Windows/macOS presets, `tools/deck.sh`, rumble (D-024) done; on-Deck check pending |
+| M8 | done | Polish, web and Linux builds; the Android APK and phone test are tracked in [issue #5](https://github.com/Kymr10n/hardwire/issues/5) (D-026) |
+| M9 | done | Steam Deck and desktop: landscape, controller, glyphs, Linux/Windows/macOS presets, `tools/deck.sh`, rumble; Deck play-test passed 2026-10-19 (issue #6) |
+
+**Prototype v0.1.0 released 2026-10-19 (D-026).** Next scope: the "After the prototype" sections of the spec (Steam release, Benchmark slot).
 
 ## Reviews
 
@@ -23,8 +25,7 @@ Status values: `todo`, `in progress`, `done`. Milestone scope and "Done when" cr
 
 Deferred work, each with what it needs:
 
-- **Android (M8):** accept the Android SDK licences (`sdkmanager --licenses`), then export the APK and test on a real phone. Needs the owner.
-- **Steam Deck check (M9):** deploy with `tools/deck.sh`, play every minigame once with controls only and once with touch only in Game Mode; check rumble (D-024) and glyphs. Needs the owner.
+- **Android:** [issue #5](https://github.com/Kymr10n/hardwire/issues/5): accept the SDK licences, export the APK, test on a real phone. Needs the owner.
 - **CPU re-test (M4, D-022/D-024):** tier 1 and tier 10 with mouse, touch and gamepad; Syncopated 1.5-step holds vs taps may still be hard to tell apart.
 - **Visual check of the 2026-10-19 refactors:** the Replay button in the Storage ring centre, the overview trace node, and the CPU markers as a child control were verified by tests only; the windowed harness rendered at 1 fps during the review (display throttled). Take the screenshots when the display is active.
 - **Bundle ID:** `org.hardwire.prototype` (Android and macOS presets) must become the final ID before any store release; it cannot change afterwards. Owner decision (D-021 kept the placeholder).

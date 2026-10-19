@@ -152,3 +152,9 @@ Format: `## D-NNN — YYYY-MM-DD — Title`, then **Decision**, **Why**, **Affec
 **Decision:** On PC the overview's bottom bar has a "Quit" button (Shop, Rebuild, Settings, Quit); Settings keeps only "Fullscreen". Quit saves and closes the game. Phones have no Quit button (the Android back button quits from the overview). Supersedes the Settings placement in D-019.
 **Why:** Play-testing: leaving the game through Settings was not intuitive; the main screen is where a player looks for it.
 **Affects:** Screens and UX flow (Overview row, PC note); `OverviewScreen`, `SettingsScreen`.
+
+## D-026 — 2026-10-19 — Prototype complete: v0.1.0
+
+**Decision:** Milestones M1–M9 are done and the spec is frozen as the v0.1.0 prototype. M8 closes with the Android build tracked separately (issue #5: SDK licences, APK, real-phone test); M9 closes after the Steam Deck play-test on 2026-10-19. Further changes to the spec continue through decisions; the "After the prototype" sections (Steam release, Benchmark slot) are the next scope.
+**Why:** Every "Done when" criterion that does not need the Android SDK has been met and checked on the device; a tagged release gives play-testers a fixed build to report against.
+**Affects:** Milestones; `docs/PROGRESS.md`; CHANGELOG; GitHub release v0.1.0.

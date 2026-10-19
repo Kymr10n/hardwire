@@ -4,7 +4,9 @@ All notable changes to Hardwire are documented here. The format follows [Keep a 
 
 ## [Unreleased]
 
-First playable prototype (0.1.0).
+## [0.1.0] - 2026-10-19
+
+First playable prototype: all nine milestones of the spec, played on desktop and Steam Deck.
 
 ### Added
 

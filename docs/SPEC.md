@@ -406,7 +406,7 @@ res://
 
 ## Milestones and acceptance criteria
 
-Build one milestone per session, in order. Each milestone ends with a playable build and passing tests, so the game can be play-tested at any point. Status lives in `docs/PROGRESS.md`.
+Build one milestone per session, in order. Each milestone ends with a playable build and passing tests, so the game can be play-tested at any point. Status lives in `docs/PROGRESS.md`. **M1–M9 are complete (prototype v0.1.0, 2026-10-19, D-026); the Android build is tracked in issue #5.** New work starts from the "After the prototype" sections.
 
 | # | Milestone | Done when |
 | --- | --- | --- |
