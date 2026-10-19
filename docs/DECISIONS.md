@@ -238,3 +238,13 @@ M10; `project.godot`; `export_presets.cfg`; `BootScreen`; README.
 **Decision:** The Boot screen shows the game version in its bottom-right corner as a small dim "FIRMWARE v<version>" line, read from `application/config/version` in `project.godot` (the one home of the version; the export presets already mirror it).
 **Why:** Play-testers report against builds; the version must be visible without opening a file, and a firmware line fits the boot-sequence theme.
 **Affects:** Screens and UX flow (Boot row); `BootScreen`; `test_input_mode`.
+
+## D-036 — 2026-10-19 — Louder bass; the beat builds over the first phrases
+
+**Decision:** Supersedes "the beat is fixed" in D-029. The bass is louder (volume 0.36, octave
+harmonic 0.07). The beat builds over the first three four-bar phrases of a session and then stays:
+kick on 1 and 3 with off-beat hats; from bar 5 a soft noise snare on 2 and 4; from bar 9 quiet
+ghost hats on the sixteenth before each beat. The last bar of every phrase adds a pickup kick on the "and" of 4.
+Still 72 BPM half-time, no new instruments beyond noise and the sine kick.
+**Why:** The owner wanted the bassline a bit louder and the beat more progressive but still chill.
+**Affects:** Visual and audio style (Audio); `MusicGen`; `Synth`; `balance.json` → `audio`.

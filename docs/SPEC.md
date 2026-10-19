@@ -326,9 +326,11 @@ The look is a dark, flat circuit board drawn entirely with Godot shapes and one 
   four-bar bass progression (D, C, G, A) of smooth sine tones with a faint octave harmonic, one or
   two softly enveloped upper notes and two or three short high notes (three octaves up, on
   eighth-note positions) per bar, all from the minor pentatonic of that bar's root. A soft
-  half-time beat underneath: a sine kick with a pitch drop on beats 1 and 3, a short noise hi-hat
-  on every off-beat. Seeded variation changes note choices and spacing each session; the beat is
-  fixed.
+  half-time beat underneath that builds over the first three four-bar phrases, then stays: a sine
+  kick with a pitch drop on beats 1 and 3 (plus a pickup kick on the "and" of 4 in every fourth
+  bar) and a short noise hi-hat on every off-beat; from bar 5 a soft noise snare on 2 and 4; from
+  bar 9 quiet ghost hats on the sixteenth before each beat. Seeded variation changes note choices
+  and spacing each session; the beat pattern is not random.
 - The score and all sound effects respect the Sound setting. Music tuning lives in
   `balance.json` → `audio`.
 - Storage pads: one note each from a pentatonic scale, so any sequence sounds pleasant.

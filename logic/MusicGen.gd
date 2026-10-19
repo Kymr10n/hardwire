@@ -23,7 +23,7 @@ static func make_bar(audio: Dictionary, bar_index: int, seed: int) -> Array[Dict
 	]
 	events.append_array(_make_pads(audio, root, rng))
 	events.append_array(_make_leads(audio, root, rng))
-	events.append_array(_make_beat(audio))
+	events.append_array(_make_beat(audio, bar_index))
 	events.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a.beat < b.beat)
 	return events
 
@@ -89,25 +89,35 @@ static func _make_leads(
 	return events
 
 
-## Fixed half-time pattern: the kick drops from start to end pitch, the hat is a noise tick.
-static func _make_beat(audio: Dictionary) -> Array[Dictionary]:
+## Half-time beat that builds over the first phrases (a phrase is one cycle of roots): kick on 1
+## and 3 with a pickup kick closing each phrase, off-beat hats, then a snare on 2 and 4, then
+## ghost hats on the sixteenths. The kick drops from start to end pitch; unpitched hits are noise.
+static func _make_beat(audio: Dictionary, bar_index: int) -> Array[Dictionary]:
+	var phrase_bars: int = audio.music_root_notes_midi.size()
+	var kicks: Array = audio.music_kick_beats.duplicate()
+	if posmod(bar_index, phrase_bars) == phrase_bars - 1:
+		kicks.append_array(audio.music_pickup_kick_beats)
+	var events: Array[Dictionary] = _hits(audio, "kick", kicks)
+	for event: Dictionary in events:
+		event.midi_note = int(audio.music_kick_start_midi)
+		event.end_midi_note = int(audio.music_kick_end_midi)
+	events.append_array(_hits(audio, "hat", audio.music_hat_beats))
+	var phrase: int = floori(float(bar_index) / phrase_bars)
+	if phrase >= int(audio.music_snare_from_phrase):
+		events.append_array(_hits(audio, "snare", audio.music_snare_beats))
+	if phrase >= int(audio.music_ghost_from_phrase):
+		events.append_array(_hits(audio, "ghost", audio.music_ghost_beats))
+	return events
+
+
+static func _hits(audio: Dictionary, role: String, beats: Array) -> Array[Dictionary]:
 	var events: Array[Dictionary] = []
-	for beat: Variant in audio.music_kick_beats:
+	for beat: Variant in beats:
 		events.append(
 			{
 				"beat": float(beat),
-				"midi_note": int(audio.music_kick_start_midi),
-				"end_midi_note": int(audio.music_kick_end_midi),
-				"role": "kick",
-				"duration_beats": float(audio.music_kick_duration_beats)
-			}
-		)
-	for beat: Variant in audio.music_hat_beats:
-		events.append(
-			{
-				"beat": float(beat),
-				"role": "hat",
-				"duration_beats": float(audio.music_hat_duration_beats)
+				"role": role,
+				"duration_beats": float(audio["music_%s_duration_beats" % role])
 			}
 		)
 	return events

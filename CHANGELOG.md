@@ -19,7 +19,7 @@ All notable changes to Hardwire are documented here. The format follows [Keep a 
 - The Boot screen shows the version as a "FIRMWARE v…" line in the corner.
 - Rumble on every button press and while a puzzle plays back: each Storage pad as it lights (decoys weaker) and the RAM pattern while it shows, like the CPU tile.
 - `SECURITY.md`.
-- A quiet procedural ambient score with a soft half-time beat on the overview and puzzle screens.
+- A quiet procedural ambient score on the overview and puzzle screens: sine bass, soft upper and high notes, and a half-time beat that builds over the first phrases (kick and hats, then a soft noise snare, then ghost hats).
 - `tools/steam_upload.sh`: exports Linux and Windows and uploads them to Steam with SteamPipe.
 
 ## [0.1.0] - 2026-10-19

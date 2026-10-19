@@ -227,7 +227,7 @@ func _play_music_event(event: Dictionary, beat_s: float) -> void:
 		"release_ms": audio["music_%s_release_ms" % role],
 		"music": true,
 	}
-	if role == "hat":
+	if not event.has("midi_note"):
 		_add_voice(Wave.NOISE, 0.0, duration_ms, volume, options)
 		return
 	var note_hz: float = _midi_to_hz(event.midi_note)
