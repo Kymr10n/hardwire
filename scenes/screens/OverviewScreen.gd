@@ -48,6 +48,7 @@ func _ready() -> void:
 	_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_scroll.follow_focus = true
 	body.add_child(_scroll)
 	_list = VBoxContainer.new()
 	_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -68,6 +69,18 @@ func _ready() -> void:
 	GameState.upgrades_changed.connect(_refresh_rows)
 	GameState.cores_changed.connect(_refresh_rows)
 	_rebuild_rows()
+
+
+## Gamepad focus on open: the first unsolved slot of the newest unlocked tier, else its first slot.
+func default_focus() -> Control:
+	var newest: int = GameState.highest_unlocked_tier()
+	if newest > _rows.size():
+		return null
+	var cards: Array[SlotCard] = _rows[newest - 1].cards
+	for card: SlotCard in cards:
+		if not GameState.is_solved(card.slot):
+			return card
+	return cards[0]
 
 
 func rows() -> Array[TierRow]:

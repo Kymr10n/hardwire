@@ -14,6 +14,7 @@ var _stat_name: String = ""
 var _stat: int = 0
 var _cycles: int = 0
 var _t: float = 0.0
+var _again: Button
 
 
 func _ready() -> void:
@@ -43,7 +44,8 @@ func _ready() -> void:
 	var buttons := HBoxContainer.new()
 	buttons.add_theme_constant_override("separation", get_theme_constant("margin", "Hardwire"))
 	box.add_child(buttons)
-	buttons.add_child(_button("Again", again_pressed.emit))
+	_again = _button("Again", again_pressed.emit)
+	buttons.add_child(_again)
 	buttons.add_child(_button("Overview", overview_pressed.emit))
 	hide()
 
@@ -66,6 +68,7 @@ func show_result(title: String, accent: Color, stat_name: String, gain: Dictiona
 	_t = 0.0
 	_update_gain()
 	show()
+	_again.grab_focus.call_deferred(true)
 
 
 func _process(delta: float) -> void:

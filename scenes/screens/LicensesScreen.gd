@@ -12,6 +12,8 @@ const FILES := {
 
 var text_label: RichTextLabel
 
+var _scroll: ScrollContainer
+
 
 func _ready() -> void:
 	var column: VBoxContainer = Ui.screen_root(self, get_theme_constant("max_column", "Hardwire"))
@@ -21,6 +23,7 @@ func _ready() -> void:
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	column.add_child(scroll)
+	_scroll = scroll
 	text_label = RichTextLabel.new()
 	text_label.bbcode_enabled = false
 	text_label.fit_content = true
@@ -29,6 +32,15 @@ func _ready() -> void:
 	text_label.add_theme_font_size_override("normal_font_size", get_theme_font_size("small", "Hardwire"))
 	text_label.text = full_text()
 	scroll.add_child(text_label)
+
+
+## D-pad / stick / arrows scroll the text (it has no focusable controls).
+func _unhandled_input(event: InputEvent) -> void:
+	for action: String in ["ui_up", "ui_down"]:
+		if event.is_action_pressed(action, true):
+			var step: int = get_theme_constant("tap_min", "Hardwire") * 3
+			_scroll.scroll_vertical += step if action == "ui_down" else -step
+			get_viewport().set_input_as_handled()
 
 
 ## All license texts as one document.

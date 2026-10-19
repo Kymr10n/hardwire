@@ -16,6 +16,9 @@ var _style := StyleBoxFlat.new()
 func _init(p_index: int = 0) -> void:
 	index = p_index
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	focus_mode = Control.FOCUS_ALL
+	focus_entered.connect(queue_redraw)
+	focus_exited.connect(queue_redraw)
 
 
 func _ready() -> void:
@@ -70,6 +73,7 @@ func _draw() -> void:
 	if _level <= 0.0:
 		mark = base.darkened(0.2)
 	_draw_symbol(index % Symbol.size(), size / 2.0, size.x * 0.2, mark)
+	Ui.draw_focus(self, Rect2(Vector2.ZERO, size))
 
 
 func _draw_symbol(symbol: int, c: Vector2, r: float, color: Color) -> void:

@@ -98,6 +98,10 @@ func _on_hint_dismissed() -> void:
 	start_attempt()
 
 
+func default_focus() -> Control:
+	return puzzle.default_focus()
+
+
 ## Fresh sequence (new seed), same slot and difficulty.
 func start_attempt() -> void:
 	_overlay.hide()

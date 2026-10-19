@@ -18,4 +18,4 @@ First playable prototype.
 - Local JSON save with atomic writes and backup of broken files.
 - Debug panel for balancing (debug builds only).
 - Export presets for Web, Linux / Steam Deck and Android; a GUT unit test suite.
-- Landscape support picked from the window aspect, fullscreen on the Steam Deck, Fullscreen and Quit in Settings on PC.
+- Steam Deck and desktop: landscape layouts picked from the window aspect, full gamepad and keyboard controls with a focus outline (hidden for touch), gamepad rumble, fullscreen on the Deck, Fullscreen and Quit in Settings on PC.

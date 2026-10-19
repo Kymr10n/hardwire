@@ -19,6 +19,7 @@ func _ready() -> void:
 	_hint.add_theme_color_override("font_color", get_theme_color("text_dim", "Hardwire"))
 	add_child(_hint)
 	_grid = RamGrid.new()
+	_grid.cell_activated.connect(toggle_cell)
 	add_child(_grid)
 	_counter = Label.new()
 	_counter.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
@@ -68,8 +69,16 @@ func commit() -> void:
 		_fail()
 
 
+func default_focus() -> Control:
+	return _grid
+
+
 func _input(event: InputEvent) -> void:
 	if phase != Phase.INPUT:
+		return
+	if event.is_action_pressed("commit"):
+		get_viewport().set_input_as_handled()
+		commit()
 		return
 	var touch := event as InputEventScreenTouch
 	if touch == null or not touch.pressed:

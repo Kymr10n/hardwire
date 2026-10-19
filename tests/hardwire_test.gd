@@ -50,3 +50,16 @@ func in_viewport(node: Node, size: Vector2i) -> Node:
 	add_child_autofree(viewport)
 	viewport.add_child(node)
 	return node
+
+
+## Sends an InputEventAction (gamepad/keyboard equivalent) through `viewport`'s input path.
+func press_action(viewport: Viewport, action: String, pressed: bool = true) -> void:
+	var event := InputEventAction.new()
+	event.action = action
+	event.pressed = pressed
+	viewport.push_input(event)
+
+
+func tap_action(viewport: Viewport, action: String) -> void:
+	press_action(viewport, action, true)
+	press_action(viewport, action, false)

@@ -40,7 +40,9 @@
     "fail_noise_ms": 200
   },
   "haptics": {
-    "pulse_ms": 20
+    "pulse_ms": 20,
+    "rumble_weak": 0.4,
+    "rumble_strong": 0.0
   },
   "idle": {
     "replays_per_hour": 6,

@@ -19,7 +19,7 @@ func _ready() -> void:
 	title.add_theme_color_override("font_color", get_theme_color("ram", "Hardwire"))
 	box.add_child(title)
 	var hint := Label.new()
-	hint.text = "Tap to start"
+	hint.text = "Tap or press A to start"
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	hint.add_theme_color_override("font_color", get_theme_color("text_dim", "Hardwire"))
 	box.add_child(hint)
@@ -27,6 +27,6 @@ func _ready() -> void:
 
 func _input(event: InputEvent) -> void:
 	var touch := event as InputEventScreenTouch
-	if touch != null and not touch.pressed:
+	if (touch != null and not touch.pressed) or Ui.accept_event(event) == 1:
 		get_viewport().set_input_as_handled()
 		start_requested.emit()

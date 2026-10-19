@@ -36,7 +36,7 @@ godot --headless --path . --import   # first run: import assets
 godot --path .                        # play in a 1280x800 window (Steam Deck size)
 ```
 
-Use the mouse as your finger (touch is emulated). Make the window taller than wide to get the phone layout. In debug builds, tap the stat bar 5 times to open the debug panel, where you can set stats and tiers and force a minigame or modifier.
+Use the mouse as your finger (touch is emulated), or a gamepad / keyboard: D-pad or arrows move the focus, A / Enter / Space selects (and is the CPU tile), B / Esc goes back, Y / C commits a RAM pattern. Make the window taller than wide to get the phone layout. In debug builds, tap the stat bar 5 times to open the debug panel, where you can set stats and tiers and force a minigame or modifier.
 
 ## Develop
 
@@ -78,7 +78,7 @@ CI builds the web and Linux exports on every push to `main` and attaches them as
 1. Get `hardwire.x86_64` (export it as above, or download the `hardwire-linux` artifact from a CI run).
 2. On the Deck, switch to Desktop Mode and copy the file anywhere, for example `~/Games/Hardwire/`. Make it executable: right-click → Properties → Permissions → "Is executable" (or `chmod +x hardwire.x86_64`).
 3. In Steam (Desktop Mode): Games → "Add a Non-Steam Game to My Library…" → browse to the file.
-4. Switch back to Game Mode and start Hardwire from your library. It starts fullscreen (Steam sets `SteamDeck=1`) and plays with touch or the built-in controls.
+4. Switch back to Game Mode and start Hardwire from your library. It starts fullscreen (Steam sets `SteamDeck=1`) and plays with touch or the built-in controls. In the game's Steam controller settings, pick the "Gamepad" layout if it isn't the default.
 
 ## License
 

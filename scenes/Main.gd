@@ -57,6 +57,13 @@ func _on_window_resized() -> void:
 		_rebuild.call()
 
 
+## B / Esc goes back, unless something on the screen handled it first.
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_cancel"):
+		get_viewport().set_input_as_handled()
+		go_back()
+
+
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_GO_BACK_REQUEST:
 		go_back()
@@ -168,6 +175,7 @@ func _show(next: Control, rebuild: Callable) -> void:
 	screen = next
 	_rebuild = rebuild
 	add_child(screen)
+	Ui.focus_first(screen)
 	screen.modulate.a = 0.0
 	screen.create_tween().tween_property(screen, "modulate:a", 1.0,
 		get_theme_constant("transition_ms", "Hardwire") / 1000.0)

@@ -25,7 +25,7 @@ func _ready() -> void:
 	line.add_theme_font_size_override("font_size", get_theme_font_size("header", "Hardwire"))
 	box.add_child(line)
 	var tap := Label.new()
-	tap.text = "Tap to begin"
+	tap.text = "Tap or press A to begin"
 	tap.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	tap.add_theme_color_override("font_color", get_theme_color("text_dim", "Hardwire"))
 	box.add_child(tap)
@@ -33,7 +33,7 @@ func _ready() -> void:
 
 func _input(event: InputEvent) -> void:
 	var touch := event as InputEventScreenTouch
-	if touch != null and not touch.pressed:
+	if (touch != null and not touch.pressed) or Ui.accept_event(event) == 1:
 		get_viewport().set_input_as_handled()
 		dismissed.emit()
 		queue_free()

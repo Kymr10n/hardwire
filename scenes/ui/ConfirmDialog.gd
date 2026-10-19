@@ -66,6 +66,15 @@ func _ready() -> void:
 	ok.custom_minimum_size = Vector2(tap * 2.5, tap)
 	ok.pressed.connect(_close.bind(true))
 	buttons.add_child(ok)
+	ok.grab_focus.call_deferred(true)
+
+
+## B / Esc cancels when the dialog has a cancel button.
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_cancel"):
+		get_viewport().set_input_as_handled()
+		if not _cancel_text.is_empty():
+			_close(false)
 
 
 func _close(ok: bool) -> void:

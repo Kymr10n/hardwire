@@ -70,13 +70,25 @@ func release_at(usec: int) -> void:
 		time_left_s = minf(time_left_s, _grace_ms() / 1000.0)
 
 
+func default_focus() -> Control:
+	return _tile
+
+
 func _input(event: InputEvent) -> void:
 	if phase != Phase.INPUT:
+		return
+	var now: int = Time.get_ticks_usec()
+	var accept: int = Ui.accept_event(event)
+	if accept != 0:
+		get_viewport().set_input_as_handled()
+		if accept == 1:
+			press_at(now)
+		else:
+			release_at(now)
 		return
 	var touch := event as InputEventScreenTouch
 	if touch == null:
 		return
-	var now: int = Time.get_ticks_usec()
 	if touch.pressed and not _holding and _tile.get_global_rect().has_point(touch.position):
 		_touch_index = touch.index
 		get_viewport().set_input_as_handled()

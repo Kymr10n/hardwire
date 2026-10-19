@@ -1,9 +1,16 @@
 class_name RamGrid
 extends Control
 ## Square grid of RAM cells drawn in one _draw. Each cell is on or off; on cells brighten
-## and scale to glow_scale_pct over glow_ms (SPEC: Visual style). Input is handled by RamPuzzle.
+## and scale to glow_scale_pct over glow_ms (SPEC: Visual style). Touch is handled by RamPuzzle.
+## With focus, ui_* directions move a cursor and ui_accept emits cell_activated; at an edge the
+## direction is left unhandled, so focus moves on to the next control (e.g. Commit).
+
+signal cell_activated(index: int)
+
+const DIRECTIONS := {"ui_left": Vector2i(-1, 0), "ui_right": Vector2i(1, 0), "ui_up": Vector2i(0, -1), "ui_down": Vector2i(0, 1)}
 
 var n: int = 0
+var cursor: int = 0
 
 var _on: Array[bool] = []
 var _scale: Array[float] = []
@@ -12,10 +19,14 @@ var _style := StyleBoxFlat.new()
 
 func _init() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	focus_mode = Control.FOCUS_ALL
+	focus_entered.connect(queue_redraw)
+	focus_exited.connect(queue_redraw)
 
 
 func setup(p_n: int) -> void:
 	n = p_n
+	cursor = 0
 	_on.resize(n * n)
 	_on.fill(false)
 	_scale.resize(n * n)
@@ -58,6 +69,30 @@ func cell_at(global_pos: Vector2) -> int:
 	return -1
 
 
+func _gui_input(event: InputEvent) -> void:
+	if Ui.accept_event(event) == 1:
+		accept_event()
+		_show_focus()
+		cell_activated.emit(cursor)
+		return
+	for action: String in DIRECTIONS:
+		if event.is_action_pressed(action, true):
+			var cell: Vector2i = Vector2i(cursor % n, floori(float(cursor) / n)) + DIRECTIONS[action]
+			if cell.x >= 0 and cell.x < n and cell.y >= 0 and cell.y < n:
+				cursor = cell.y * n + cell.x
+				accept_event()
+				_show_focus()
+			return
+
+
+## The grid handles its own directions, so Godot never un-hides focus that was grabbed hidden;
+## do it on the first gamepad/keyboard use.
+func _show_focus() -> void:
+	if not has_focus(true):
+		grab_focus()
+	queue_redraw()
+
+
 func _process(delta: float) -> void:
 	var glow_s: float = maxf(0.001, get_theme_constant("glow_ms", "Hardwire") / 1000.0)
 	var big: float = get_theme_constant("glow_scale_pct", "Hardwire") / 100.0
@@ -89,3 +124,5 @@ func _draw() -> void:
 		_style.bg_color = lit if _on[i] else idle
 		_style.set_corner_radius_all(int(rect.size.x * 0.14))
 		draw_style_box(_style, rect)
+	if n > 0:
+		Ui.draw_focus(self, _cell_rect(cursor))

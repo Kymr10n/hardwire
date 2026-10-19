@@ -17,7 +17,6 @@ func setup(p_slot: SlotDef) -> void:
 	slot = p_slot
 	flat = true
 	text = ""
-	focus_mode = Control.FOCUS_NONE
 	custom_minimum_size = Vector2(0, get_theme_constant("tap_min", "Hardwire") * 2.2)
 	size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	refresh()

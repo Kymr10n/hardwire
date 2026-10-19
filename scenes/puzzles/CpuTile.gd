@@ -17,6 +17,9 @@ var _style := StyleBoxFlat.new()
 
 func _init() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	focus_mode = Control.FOCUS_ALL
+	focus_entered.connect(queue_redraw)
+	focus_exited.connect(queue_redraw)
 
 
 func _ready() -> void:
@@ -38,3 +41,4 @@ func _draw() -> void:
 	_style.bg_color = accent if lit else accent.darkened(1.0 - get_theme_constant("pad_idle_pct", "Hardwire") / 100.0)
 	_style.set_corner_radius_all(int(size.x * 0.12))
 	draw_style_box(_style, Rect2(Vector2.ZERO, size))
+	Ui.draw_focus(self, Rect2(Vector2.ZERO, size))

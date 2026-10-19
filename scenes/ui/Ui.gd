@@ -53,3 +53,32 @@ static func header(parent: Control, title: String, on_back: Callable, stacked: b
 	label.add_theme_font_size_override("font_size", parent.get_theme_font_size("header", "Hardwire"))
 	row.add_child(label)
 	return label
+
+
+## 1 for a press of ui_accept (A, Enter, Space), -1 for its release, 0 otherwise. Echoes ignored.
+static func accept_event(event: InputEvent) -> int:
+	if event.is_action_pressed("ui_accept", false):
+		return 1
+	if event.is_action_released("ui_accept"):
+		return -1
+	return 0
+
+
+## Gives `screen` keyboard/gamepad focus without showing it (pointer users never see an outline):
+## its default_focus() if it has one, else the first visible, enabled button.
+static func focus_first(screen: Control) -> void:
+	var target: Control = screen.default_focus() if screen.has_method("default_focus") else null
+	if target == null:
+		for node: Node in screen.find_children("*", "BaseButton", true, false):
+			var button := node as BaseButton
+			if button.is_visible_in_tree() and not button.disabled and button.focus_mode != Control.FOCUS_NONE:
+				target = button
+				break
+	if target != null:
+		target.grab_focus.call_deferred(true)
+
+
+## Draws the theme's focus outline on a custom-drawn control while it has visible focus.
+static func draw_focus(control: Control, rect: Rect2) -> void:
+	if control.has_focus(true):
+		control.draw_style_box(control.get_theme_stylebox("focus", "Button"), rect)
