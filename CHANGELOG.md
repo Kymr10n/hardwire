@@ -16,6 +16,7 @@ All notable changes to Hardwire are documented here. The format follows [Keep a 
 
 ### Added
 
+- The Boot screen shows the version as a "FIRMWARE v…" line in the corner.
 - Rumble on every button press and while a puzzle plays back: each Storage pad as it lights (decoys weaker) and the RAM pattern while it shows, like the CPU tile.
 - `SECURITY.md`.
 - A quiet procedural ambient score with a soft half-time beat on the overview and puzzle screens.

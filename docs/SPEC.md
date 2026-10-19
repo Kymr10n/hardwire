@@ -278,7 +278,7 @@ The prototype has five screens around one hub, the overview. Every screen works 
 
 | Screen | Contents | Leads to |
 | --- | --- | --- |
-| Boot | Title "HARDWIRE" with the subtitle "BOOT SEQUENCE", "Press any button" ("Tap to start" on touch), loads the save | Overview |
+| Boot | Title "HARDWIRE" with the subtitle "BOOT SEQUENCE", "Press any button" ("Tap to start" on touch), a small dim "FIRMWARE v<version>" line in the bottom-right corner (from `application/config/version`), loads the save | Overview |
 | Overview | Top bar with RAM, CPU, STO, Cycles and Cores (compact above 9999: 12.3K, 4.56M); vertical scroll list of tier rows (tier 1 at the top), newest unlocked tier in view on open; each row = tier number, requirement chips (accent-coloured while unmet) and 3 slot cards (RAM, CPU, STO); bottom bar with Shop, Rebuild, Settings and, on PC, Quit (saves and closes) | Puzzle, Shop, Rebuild dialog, Settings |
 | Puzzle | Header with minigame name, tier, modifier and a back button; phase label ("Watch" / "Your turn"); timer bar; the minigame area; result overlay | Overview |
 | Shop | List of upgrade cards, Cycles balance on top | Overview |

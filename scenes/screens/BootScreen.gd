@@ -1,11 +1,13 @@
 class_name BootScreen
 extends Control
-## Boot screen (SPEC: Screens and UX flow): title, subtitle and "Tap to start". The save is loaded
-## by the SaveManager autoload before this screen exists.
+## Boot screen (SPEC: Screens and UX flow): title, subtitle, "Tap to start" and the version as a
+## firmware line in the corner (D-035). The save is loaded by the SaveManager autoload before this
+## screen exists.
 
 signal start_requested
 
 var prompt: Label
+var version: Label
 
 
 func _ready() -> void:
@@ -21,6 +23,16 @@ func _ready() -> void:
 	box.add_child(prompt)
 	InputMode.device_changed.connect(_update_prompt)
 	_update_prompt()
+	version = Ui.dim_label(
+		"FIRMWARE v%s" % ProjectSettings.get_setting("application/config/version")
+	)
+	version.add_theme_font_size_override("font_size", get_theme_font_size("small", "Hardwire"))
+	add_child(version)
+	version.set_anchors_and_offsets_preset(
+		Control.PRESET_BOTTOM_RIGHT,
+		Control.PRESET_MODE_MINSIZE,
+		get_theme_constant("margin", "Hardwire")
+	)
 
 
 ## "Tap to start" on touch, "Press any button" otherwise (SPEC: Boot).

@@ -65,6 +65,21 @@ func test_boot_prompt_and_any_press() -> void:
 	assert_signal_emitted(boot, "start_requested", "any gamepad button starts")
 
 
+## D-035: the version from project.godot sits in the bottom-right corner.
+func test_boot_shows_the_version_in_the_corner() -> void:
+	var boot: Control = in_viewport(BootScreen.new(), Vector2i(1080, 1920))
+	await wait_process_frames(2)
+	assert_eq(
+		boot.version.text,
+		"FIRMWARE v%s" % ProjectSettings.get_setting("application/config/version")
+	)
+	var rect: Rect2 = boot.version.get_global_rect()
+	var view: Rect2 = boot.get_viewport().get_visible_rect()
+	assert_true(view.encloses(rect), "on screen")
+	assert_gt(rect.position.x, view.size.x / 2.0, "right half")
+	assert_gt(rect.position.y, view.size.y * 0.8, "bottom")
+
+
 func test_ram_commit_shows_glyph() -> void:
 	var puzzle: PuzzleBase = RamPuzzle.new()
 	add_child_autofree(puzzle)

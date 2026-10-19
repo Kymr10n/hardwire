@@ -232,3 +232,9 @@ M10; `project.godot`; `export_presets.cfg`; `BootScreen`; README.
 **Decision:** Every button press (menus, slot cards, dialogs, Again / Overview, the Settings toggles, Replay, Commit, the debug panel), the boot tap and the hint tap give the light haptic pulse. One home: the Haptics autoload connects the `pressed` signal of every `BaseButton` that enters the tree, so screens never call it for buttons. During a Watch phase the controller rumbles for as long as playback lights something: each Storage pad while it is lit (decoys at `haptics.decoy_strength`), the RAM pattern while it shows, and the CPU tile for each on-segment as before (Audio only stays silent). Phones get one vibration per lit thing or press. Extends D-024.
 **Why:** Play-test on the Steam Deck: the owner wants full immersion; menus and the Storage and RAM playback were silent while the CPU game rumbled.
 **Affects:** Platforms and input > Haptics; Minigame: Storage and RAM (Watch phase); Screens and UX flow (Feedback on every input); `balance.json` → `haptics.decoy_strength`; `Haptics`, `StoragePuzzle`, `RamPuzzle`, `ShopScreen`, `BootScreen`, `HintOverlay`; `test_haptics`, `test_balance`.
+
+## D-035 — 2026-10-19 — Version on the Boot screen
+
+**Decision:** The Boot screen shows the game version in its bottom-right corner as a small dim "FIRMWARE v<version>" line, read from `application/config/version` in `project.godot` (the one home of the version; the export presets already mirror it).
+**Why:** Play-testers report against builds; the version must be visible without opening a file, and a firmware line fits the boot-sequence theme.
+**Affects:** Screens and UX flow (Boot row); `BootScreen`; `test_input_mode`.
