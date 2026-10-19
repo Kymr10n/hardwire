@@ -1,6 +1,7 @@
 extends Control
 ## Root scene. Holds the current screen and handles transitions (SPEC: Screens and UX flow):
-## Boot -> Overview hub -> Puzzle / Shop / Settings / debug panel (and Rebuild later).
+## Boot -> Overview hub -> Puzzle / Shop / Settings / debug panel, plus the Rebuild dialog and
+## the "While you were away" idle income dialog (on start and after a resume, shown on the overview).
 
 const BootScreen := preload("res://scenes/screens/BootScreen.gd")
 const OverviewScreen := preload("res://scenes/screens/OverviewScreen.gd")
@@ -11,6 +12,8 @@ const DebugMenu := preload("res://scenes/screens/DebugMenu.gd")
 
 var screen: Control
 
+var _idle_check_pending: bool = true
+
 
 func _ready() -> void:
 	var bg := ColorRect.new()
@@ -18,6 +21,13 @@ func _ready() -> void:
 	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(bg)
 	show_boot()
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_APPLICATION_RESUMED:
+		_idle_check_pending = true
+		if screen is OverviewScreen:
+			check_idle()
 
 
 func show_boot() -> void:
@@ -31,8 +41,39 @@ func show_overview() -> void:
 	overview.play_requested.connect(show_puzzle)
 	overview.settings_requested.connect(show_settings)
 	overview.shop_requested.connect(show_shop)
+	overview.rebuild_requested.connect(show_rebuild_dialog)
 	overview.debug_requested.connect(show_debug)
 	_show(overview)
+	if _idle_check_pending:
+		check_idle()
+
+
+## Offers idle Cycles if enough time passed since the last save (SPEC: Idle income).
+func check_idle() -> void:
+	_idle_check_pending = false
+	var amount: int = GameState.idle_offer(int(Time.get_unix_time_from_system()))
+	if amount <= 0:
+		return
+	var dialog := ConfirmDialog.open(screen, "While you were away",
+		"Your rig computed %d Cycles." % amount, "Collect", "")
+	dialog.confirmed.connect(func() -> void:
+		GameState.collect_idle(amount)
+		SaveManager.save_game())
+
+
+## Confirm dialog with Cores to gain and the new multiplier (SPEC: Prestige).
+func show_rebuild_dialog() -> void:
+	if not GameState.can_rebuild():
+		return
+	var gained: int = GameState.rebuild_cores()
+	var message: String = "Gain %d %s: rewards x%s -> x%s.\nStats, Cycles, upgrades and first solves reset." % [
+		gained, "Core" if gained == 1 else "Cores", Economy.core_multiplier(GameState.cores),
+		Economy.core_multiplier(GameState.cores + gained)]
+	var dialog := ConfirmDialog.open(screen, "Rebuild?", message, "Rebuild")
+	dialog.confirmed.connect(func() -> void:
+		GameState.rebuild()
+		SaveManager.save_game()
+		show_overview())
 
 
 func show_puzzle(slot: SlotDef) -> void:

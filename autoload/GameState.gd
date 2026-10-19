@@ -137,6 +137,54 @@ func buy_upgrade(id: String) -> bool:
 	return true
 
 
+## Rebuild is available after any slot of economy.prestige_min_tier or above is solved.
+func can_rebuild() -> bool:
+	return highest_solved_tier() >= Balance.get_int("economy", "prestige_min_tier")
+
+
+func rebuild_cores() -> int:
+	return Economy.cores_for(highest_solved_tier())
+
+
+## Prestige (SPEC: Prestige): gain Cores; reset stats, Cycles, upgrades and first-solve flags.
+## Keeps Cores, best tier ever, settings, lifetime statistics and seen hints. Returns Cores gained.
+func rebuild() -> int:
+	if not can_rebuild():
+		return 0
+	var gained: int = rebuild_cores()
+	cores += gained
+	ram = 0
+	cpu = 0
+	sto = 0
+	cycles = 0
+	for id: String in upgrades.keys():
+		upgrades[id] = 0
+	solved_slots = []
+	lifetime.rebuilds = int(lifetime.rebuilds) + 1
+	_emit_all()
+	return gained
+
+
+## Seconds since last_seen (the last save); a negative or missing value counts as zero.
+func seconds_away(now_unix: int) -> int:
+	if last_seen <= 0:
+		return 0
+	return maxi(0, now_unix - last_seen)
+
+
+## Idle Cycles waiting to be collected for the time since last_seen, or 0 if not due.
+func idle_offer(now_unix: int) -> int:
+	var away: int = seconds_away(now_unix)
+	if not Economy.idle_offer_due(away):
+		return 0
+	return Economy.idle_cycles(away, highest_solved_tier(), upgrade_level("cycle_miner"), cores)
+
+
+func collect_idle(amount: int) -> void:
+	cycles += amount
+	cycles_changed.emit()
+
+
 func record_fail() -> void:
 	lifetime.fails = int(lifetime.fails) + 1
 

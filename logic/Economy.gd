@@ -36,5 +36,23 @@ static func is_maxed(id: String, level: int) -> bool:
 	var max_level: int = int(Balance.upgrade(id).max_level)
 	return max_level >= 0 and level >= max_level
 
-# TODO(M7): static func cores_for(highest_tier_solved: int) -> int
-# TODO(M7): static func idle_cycles(seconds_away: int, t_max: int, miner_lvl: int, cores: int) -> int
+## Cores a Rebuild pays: max(0, highest_tier_solved - prestige_core_offset).
+static func cores_for(highest_tier_solved: int) -> int:
+	return maxi(0, highest_tier_solved - Balance.get_int("economy", "prestige_core_offset"))
+
+
+## Idle Cycles for time away (SPEC: Idle income): replays_per_hour x cycles(t_max) per hour,
+## capped at idle.cap_hours, boosted by Cycle miner and Cores (not Overclock). 0 before the first solve
+## or for a negative clock.
+static func idle_cycles(seconds_away: int, t_max: int, miner_lvl: int, cores: int) -> int:
+	if t_max <= 0 or seconds_away <= 0:
+		return 0
+	var hours: float = minf(seconds_away / 3600.0, Balance.get_num("idle", "cap_hours"))
+	var rate: float = Balance.get_num("idle", "replays_per_hour") * Balance.cycles(t_max)
+	var miner: float = 1.0 + float(Balance.upgrade("cycle_miner").effect_per_level) * miner_lvl
+	return roundi(rate * hours * miner * core_multiplier(cores))
+
+
+## True if the time away is long enough to offer idle income (idle.min_away_minutes).
+static func idle_offer_due(seconds_away: int) -> bool:
+	return seconds_away > Balance.get_num("idle", "min_away_minutes") * 60.0
