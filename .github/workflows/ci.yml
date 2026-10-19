@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  GODOT_VERSION: 4.7.2
+
+jobs:
+  test:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache Godot
+        uses: actions/cache@v4
+        with:
+          path: ~/godot
+          key: godot-${{ env.GODOT_VERSION }}-editor
+
+      - name: Install Godot
+        run: tools/install_godot.sh "$GODOT_VERSION" "$HOME/godot"
+
+      - name: Run tests
+        run: GODOT="$HOME/godot/godot" tools/run_tests.sh
+
+  web:
+    name: Web export
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache Godot and export templates
+        uses: actions/cache@v4
+        with:
+          path: ~/godot
+          key: godot-${{ env.GODOT_VERSION }}-templates
+
+      - name: Install Godot and export templates
+        run: tools/install_godot.sh "$GODOT_VERSION" "$HOME/godot" --templates
+
+      - name: Export web build
+        run: |
+          mkdir -p build/web
+          "$HOME/godot/godot" --headless --path . --import >/dev/null 2>&1 || true
+          "$HOME/godot/godot" --headless --path . --export-release "Web" build/web/index.html
+          test -f build/web/index.pck
+
+      - name: Upload web build
+        uses: actions/upload-artifact@v4
+        with:
+          name: hardwire-web
+          path: build/web
+          retention-days: 14

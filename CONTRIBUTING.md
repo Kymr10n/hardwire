@@ -12,7 +12,7 @@ Thanks for helping! Bug reports, balance feedback from play-testing, and pull re
 
 1. Install [Godot 4.7.2](https://godotengine.org/download) (standard build) and put `godot` on your PATH.
 2. Clone the repo and import once: `godot --headless --path . --import`.
-3. Run the game with `godot --path .` and the tests with `godot --headless --path . -s addons/gut/gut_cmdln.gd`.
+3. Run the game with `godot --path .` and the tests with `tools/run_tests.sh` (the same checks as CI).
 
 ## Conventions
 
@@ -29,7 +29,7 @@ More details and known pitfalls are in [`CLAUDE.md`](CLAUDE.md).
 ## Pull requests
 
 - Keep each pull request focused on one change, with a clear description.
-- Add or update tests for logic changes. The suite must pass with no `SCRIPT ERROR` in the output (GUT silently skips scripts that fail to parse); CI checks this.
+- Add or update tests for logic changes. `tools/run_tests.sh` must pass; it also catches test scripts that GUT silently skips because they fail to parse. CI runs the same script.
 - If you changed something players can see, describe how to play-test it.
 - By contributing, you agree that your contribution is licensed under the [MIT License](LICENSE).
 

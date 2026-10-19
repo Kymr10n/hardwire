@@ -29,8 +29,8 @@ godot --path .
 # Re-import resources / check for script errors without a window
 godot --headless --path . --import
 
-# Run all unit tests (requires the GUT addon in addons/gut)
-godot --headless --path . -s addons/gut/gut_cmdln.gd
+# Run all unit tests with the CI checks (GUT is vendored in addons/gut)
+tools/run_tests.sh
 ```
 
 ## Gotchas

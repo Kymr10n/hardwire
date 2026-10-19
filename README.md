@@ -41,11 +41,11 @@ Use the mouse as your finger (touch is emulated). In debug builds, tap the stat 
 ## Develop
 
 ```bash
-godot --headless --path . -s addons/gut/gut_cmdln.gd   # run all unit tests (GUT is vendored)
-godot -e --path .                                       # open the editor
+tools/run_tests.sh   # import + all unit tests, with the same checks as CI (GUT is vendored)
+godot -e --path .    # open the editor
 ```
 
-The suite must end with "All tests passed" and no `SCRIPT ERROR`. VS Code users get launch and task configs for running the game and the tests; install the recommended extensions when prompted.
+`tools/run_tests.sh` also fails if a test script doesn't parse, which GUT on its own reports as a pass. VS Code users get launch and task configs for running the game and the tests; install the recommended extensions when prompted.
 
 | Path | Contents |
 | --- | --- |
