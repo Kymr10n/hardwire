@@ -243,7 +243,11 @@ The prototype has five screens around one hub, the overview. All layouts are por
 
 **Feedback on every tap:** pad or cell flash, its tone, and a light haptic pulse on mobile.
 
-**First run:** each minigame shows a one-line instruction overlay the first time it opens ("Repeat the sequence", "Recreate the pattern", "Copy the rhythm by holding the tile").
+**First run:** each minigame shows a one-line instruction overlay the first time it opens ("Repeat the sequence", "Recreate the pattern", "Copy the rhythm by holding the tile"). The attempt starts when the player taps the overlay; the hint is then recorded in `seen_tutorials`.
+
+**Transitions:** each new screen fades in over 150 ms.
+
+**Back button (Android):** returns to the overview from any other screen and quits from the overview or boot screen.
 
 ## Visual and audio style
 
@@ -354,7 +358,7 @@ Build one milestone per session, in order. Each milestone ends with a playable b
 | M5 | Overview, slot generation, gating, rewards, Boot and Settings screens, debug panel | Fresh save reaches tier 4 through first solves alone; locked slots show missing stats; numbers match the Sample tiers table | Done (2026-10-19), awaiting play-test |
 | M6 | Shop and upgrades | All six upgrades buy, persist and change their puzzle as specified | Done (2026-10-19), awaiting play-test |
 | M7 | Prestige and idle income | Rebuild becomes available after a tier 10 solve; Cores and multiplier are correct; the right fields reset; idle Cycles are offered after closing the app for over 5 minutes and respect the 8 h cap | Done (2026-10-19), awaiting play-test |
-| M8 | Polish and export | Synth sounds, haptics, screen transitions, first-run hints; Android APK and web build run on a real phone | Planned |
+| M8 | Polish and export | Synth sounds, haptics, screen transitions, first-run hints; Android APK and web build run on a real phone | In progress |
 
 ## After the prototype: Benchmark slot
 
