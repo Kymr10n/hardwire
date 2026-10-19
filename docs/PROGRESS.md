@@ -19,4 +19,4 @@ Status values: `todo`, `in progress`, `done`. Milestone scope and "Done when" cr
 
 Add dated notes here after play-testing (what felt wrong, which numbers to tune). Turn agreed changes into `/spec-change`.
 
-- Pending checks (2026-10-19): Android build on a real phone (M8); Steam Deck in game mode with controls only and touch only (M9).
+- Pending checks (2026-10-19): Android build on a real phone (M8); Steam Deck in game mode with controls only and touch only (M9; deploy with `tools/deck.sh`).

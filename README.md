@@ -48,7 +48,7 @@ tools/check.sh       # the quality gate: format, lint, drift checks, script erro
 godot -e --path .    # open the editor
 ```
 
-`tools/check.sh` is the same gate CI runs. Its drift checks keep code, tests and docs consistent: every `logic/` file has a mirrored test in `tests/logic/`, no tuning numbers in game logic, no duplicated blocks, short functions, input only through InputMap actions. VS Code users get tasks for the gate and for running the game as Steam Deck or phone.
+`tools/check.sh` is the same gate CI runs. Its drift checks keep code, tests and docs consistent: every `logic/` file has a mirrored test in `tests/logic/`, no tuning numbers in game logic, no duplicated blocks, short functions, input only through InputMap actions. VS Code users get tasks for the gate, for running the game as Steam Deck or phone, and for deploying to a Steam Deck.
 
 | Path | Contents |
 | --- | --- |
@@ -61,7 +61,7 @@ godot -e --path .    # open the editor
 | `scenes/` | Main scene, screens, the three puzzles, UI components (built in code with `Ui` helpers) |
 | `theme/` | Colors, sizes and durations |
 | `tests/` | GUT tests; `tests/logic/` mirrors `logic/` |
-| `tools/` | Setup, quality gate, drift checks, exports, pinned versions |
+| `tools/` | Setup, quality gate, drift checks, exports, Steam Deck deploy, pinned versions |
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
 
@@ -92,6 +92,16 @@ godot --headless --path . --export-debug "Android" build/android/hardwire.apk
 ```
 
 CI builds the Linux, Windows and web exports on every push to `main` and attaches them as artifacts.
+
+### Steam Deck
+
+`tools/deck.sh` exports the Linux build and copies it to `~/Games/hardwire/` on the Deck over SSH (`DECK=user@host` overrides the default `deck@steamdeck`). One-time setup:
+
+1. On the Deck in desktop mode, open Konsole: `passwd` (set a password), then `sudo systemctl enable --now sshd`.
+2. On the dev PC: `ssh-copy-id deck@steamdeck` (use the Deck's IP and `DECK=deck@<ip>` if the hostname doesn't resolve).
+3. Run `tools/deck.sh` once. On the Deck in desktop mode: Steam → Add a Game → Add a Non-Steam Game → browse to `~/Games/hardwire/hardwire.x86_64`.
+
+After that the loop is: edit, `tools/deck.sh` (or the VS Code task "Deploy: Steam Deck"), press Play in game mode. Steam sets `SteamDeck=1`, so the game starts fullscreen. For log output, run the binary over `ssh` while the Deck is in desktop mode.
 
 ### Steam Deck
 
