@@ -1,4 +1,22 @@
+# Normalize text to LF everywhere (Godot and GDScript expect it).
 * text=auto eol=lf
+
+# Binary assets
 *.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
 *.ttf binary
 *.otf binary
+*.ogg binary
+*.wav binary
+*.mp3 binary
+*.wasm binary
+*.pck binary
+*.apk binary
+*.aab binary
+*.svg text
+
+# GitHub language stats: count the game, not the vendored test framework or docs.
+addons/gut/** linguist-vendored
+docs/** linguist-documentation

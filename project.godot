@@ -11,6 +11,7 @@ config_version=5
 [application]
 
 config/name="Hardwire"
+config/version="0.1.0"
 config/description="Endless memory and timing puzzle game. See docs/SPEC.md."
 run/main_scene="res://scenes/Main.tscn"
 config/features=PackedStringArray("GL Compatibility")

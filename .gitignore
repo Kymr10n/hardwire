@@ -1,8 +1,14 @@
 # Godot cache and build output
 .godot/
+.mono/
 /android/
 /build/
 *.tmp
+
+# Exported packages anywhere in the tree
+*.apk
+*.aab
+*.pck
 
 # Keep signing secrets out of git
 export_credentials.cfg
