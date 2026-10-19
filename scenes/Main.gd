@@ -2,6 +2,7 @@ extends Control
 ## Root scene. Holds the current screen and handles transitions (SPEC: Screens and UX flow):
 ## Boot -> Overview hub -> Puzzle / Shop / Settings / debug panel, plus the Rebuild dialog and
 ## the "While you were away" idle income dialog (on start and after a resume, shown on the overview).
+## Picks portrait or landscape from the window aspect and rebuilds the screen when it flips.
 
 const BootScreen := preload("res://scenes/screens/BootScreen.gd")
 const OverviewScreen := preload("res://scenes/screens/OverviewScreen.gd")
@@ -14,6 +15,9 @@ const DebugMenu := preload("res://scenes/screens/DebugMenu.gd")
 var screen: Control
 
 var _idle_check_pending: bool = true
+var _landscape: bool = false
+## Re-creates the current screen (used when the orientation flips).
+var _rebuild: Callable
 
 
 func _ready() -> void:
@@ -21,7 +25,36 @@ func _ready() -> void:
 	bg.color = get_theme_color("bg", "Hardwire")
 	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(bg)
+	_apply_orientation()
+	get_window().size_changed.connect(_on_window_resized)
+	if wants_fullscreen(OS.get_environment("SteamDeck")):
+		get_window().mode = Window.MODE_FULLSCREEN
 	show_boot()
+
+
+## Steam sets SteamDeck=1 on the Deck: start fullscreen there (SPEC: Controls).
+static func wants_fullscreen(steam_deck_env: String) -> bool:
+	return steam_deck_env == "1"
+
+
+## Base size for the current window aspect: the project's portrait size, or the same size swapped.
+static func base_size(window_size: Vector2i) -> Vector2i:
+	var portrait := Vector2i(ProjectSettings.get_setting("display/window/size/viewport_width"),
+		ProjectSettings.get_setting("display/window/size/viewport_height"))
+	return Vector2i(portrait.y, portrait.x) if window_size.x > window_size.y else portrait
+
+
+func _apply_orientation() -> void:
+	var window := get_window()
+	window.content_scale_size = base_size(window.size)
+	_landscape = window.size.x > window.size.y
+
+
+func _on_window_resized() -> void:
+	var was_landscape: bool = _landscape
+	_apply_orientation()
+	if _landscape != was_landscape and _rebuild.is_valid():
+		_rebuild.call()
 
 
 func _notification(what: int) -> void:
@@ -36,7 +69,7 @@ func _notification(what: int) -> void:
 func show_boot() -> void:
 	var boot: Control = BootScreen.new()
 	boot.start_requested.connect(show_overview)
-	_show(boot)
+	_show(boot, show_boot)
 
 
 func show_overview() -> void:
@@ -46,7 +79,7 @@ func show_overview() -> void:
 	overview.shop_requested.connect(show_shop)
 	overview.rebuild_requested.connect(show_rebuild_dialog)
 	overview.debug_requested.connect(show_debug)
-	_show(overview)
+	_show(overview, show_overview)
 	if _idle_check_pending:
 		check_idle()
 
@@ -83,43 +116,44 @@ func show_puzzle(slot: SlotDef) -> void:
 	var puzzle_screen: Control = PuzzleScreen.new()
 	puzzle_screen.setup(slot)
 	puzzle_screen.exit_requested.connect(show_overview)
-	_show(puzzle_screen)
+	_show(puzzle_screen, show_puzzle.bind(slot))
 
 
 func show_settings() -> void:
 	var settings: Control = SettingsScreen.new()
 	settings.exit_requested.connect(show_overview)
 	settings.licenses_requested.connect(show_licenses)
-	_show(settings)
+	_show(settings, show_settings)
 
 
 func show_licenses() -> void:
 	var licenses: Control = LicensesScreen.new()
 	licenses.exit_requested.connect(show_settings)
-	_show(licenses)
+	_show(licenses, show_licenses)
 
 
 func show_shop() -> void:
 	var shop: Control = ShopScreen.new()
 	shop.exit_requested.connect(show_overview)
-	_show(shop)
+	_show(shop, show_shop)
 
 
 func show_debug() -> void:
 	var menu: Control = DebugMenu.new()
 	menu.play_requested.connect(show_puzzle)
 	menu.exit_requested.connect(show_overview)
-	_show(menu)
+	_show(menu, show_debug)
 
 
-## Android back (SPEC: Back button): back to the overview, or quit from the overview / boot screen.
-## Ignored while a dialog is open.
+## Back (Android back, B, Esc; SPEC: Back button): back to the overview. From the overview or boot
+## screen it quits on phones only; on PC, Settings has Quit. Ignored while a dialog is open.
 func go_back() -> void:
 	if screen == null or not screen.find_children("*", "ConfirmDialog", true, false).is_empty():
 		return
 	if screen is OverviewScreen or screen is BootScreen:
-		SaveManager.save_game()
-		get_tree().quit()
+		if OS.has_feature("mobile"):
+			SaveManager.save_game()
+			get_tree().quit()
 	elif screen is PuzzleScreen:
 		screen.go_back()
 	else:
@@ -127,10 +161,12 @@ func go_back() -> void:
 
 
 ## Swaps the current screen; the new one fades in over the theme's transition_ms.
-func _show(next: Control) -> void:
+## `rebuild` re-creates it if the orientation flips.
+func _show(next: Control, rebuild: Callable) -> void:
 	if screen:
 		screen.queue_free()
 	screen = next
+	_rebuild = rebuild
 	add_child(screen)
 	screen.modulate.a = 0.0
 	screen.create_tween().tween_property(screen, "modulate:a", 1.0,

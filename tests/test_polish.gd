@@ -2,6 +2,7 @@ extends "res://tests/hardwire_test.gd"
 ## M8 polish: first-run hints, screen transitions, Android back navigation.
 
 const Main := preload("res://scenes/Main.tscn")
+const MainScript := preload("res://scenes/Main.gd")
 const PuzzleScreen := preload("res://scenes/screens/PuzzleScreen.gd")
 const OverviewScreen := preload("res://scenes/screens/OverviewScreen.gd")
 const SettingsScreen := preload("res://scenes/screens/SettingsScreen.gd")
@@ -95,3 +96,22 @@ func test_settings_opens_licenses_and_back_returns() -> void:
 
 func test_license_reflow_joins_wrapped_lines() -> void:
 	assert_eq(LicensesScreen.reflow("a b\nc d\n\ne\n  - f\n  - g"), "a b c d\n\ne\n  - f\n  - g")
+
+
+func test_base_size_follows_window_aspect() -> void:
+	assert_eq(MainScript.base_size(Vector2i(1280, 800)), Vector2i(1920, 1080))
+	assert_eq(MainScript.base_size(Vector2i(540, 960)), Vector2i(1080, 1920))
+	assert_eq(MainScript.base_size(Vector2i(800, 800)), Vector2i(1080, 1920), "square counts as portrait")
+
+
+func test_fullscreen_only_on_steam_deck() -> void:
+	assert_true(MainScript.wants_fullscreen("1"))
+	assert_false(MainScript.wants_fullscreen(""))
+
+
+func test_back_never_quits_on_pc_overview() -> void:
+	var main := _main()
+	main.show_overview()
+	main.go_back()
+	assert_true(main.screen is OverviewScreen, "still on the overview (tests run on PC)")
+	assert_false(get_tree().root.is_queued_for_deletion())

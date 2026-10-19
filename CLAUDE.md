@@ -23,7 +23,7 @@ Hardwire is a Godot 4 (GDScript) mobile puzzle game. **`docs/SPEC.md` is the sou
 ## Commands
 
 ```bash
-# Run the game (portrait 540x960 window)
+# Run the game (landscape 1280x800 window, like a Steam Deck; resize it taller than wide for the phone layout)
 godot --path .
 
 # Re-import resources / check for script errors without a window

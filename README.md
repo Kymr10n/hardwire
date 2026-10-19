@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Godot 4.7](https://img.shields.io/badge/Godot-4.7-478cbf.svg)](https://godotengine.org)
 
-An endless incremental puzzle game for phones. Upgrade a computer by solving three short memory and timing minigames: each one raises a stat, and higher stats unlock harder puzzle slots that pay out more. Free and open source, with no ads, purchases or tracking.
+An endless incremental puzzle game for phones and the Steam Deck. Upgrade a computer by solving three short memory and timing minigames: each one raises a stat, and higher stats unlock harder puzzle slots that pay out more. Free and open source, with no ads, purchases or tracking.
 
 | Overview | Storage | RAM | CPU |
 | :---: | :---: | :---: | :---: |
@@ -33,10 +33,10 @@ Requirements: [Godot 4.7.2](https://godotengine.org/download) (standard build, n
 git clone https://github.com/Kymr10n/hardwire.git
 cd hardwire
 godot --headless --path . --import   # first run: import assets
-godot --path .                        # play in a 540x960 portrait window
+godot --path .                        # play in a 1280x800 window (Steam Deck size)
 ```
 
-Use the mouse as your finger (touch is emulated). In debug builds, tap the stat bar 5 times to open the debug panel, where you can set stats and tiers and force a minigame or modifier.
+Use the mouse as your finger (touch is emulated). Make the window taller than wide to get the phone layout. In debug builds, tap the stat bar 5 times to open the debug panel, where you can set stats and tiers and force a minigame or modifier.
 
 ## Develop
 
@@ -61,17 +61,24 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request. The projec
 
 ## Export
 
-Presets for Web and Android are in `export_presets.cfg`. Install the Godot 4.7.2 export templates first (Editor → Manage Export Templates).
+Presets for Web, Linux and Android are in `export_presets.cfg`. Install the Godot 4.7.2 export templates first (Editor → Manage Export Templates).
 
 ```bash
-# Web (single-threaded build; serve build/web over HTTPS or localhost)
-godot --headless --path . --export-release "Web" build/web/index.html
+tools/export.sh Linux build/linux/hardwire.x86_64   # Linux / Steam Deck (single file, PCK embedded)
+tools/export.sh Web build/web/index.html            # Web (single-threaded; serve over HTTPS or localhost)
 
 # Android (needs the Android SDK and JDK 17 in Editor Settings → Export → Android)
 godot --headless --path . --export-debug "Android" build/android/hardwire.apk
 ```
 
-CI builds the web export on every push to `main` and attaches it as an artifact.
+CI builds the web and Linux exports on every push to `main` and attaches them as artifacts.
+
+### Steam Deck
+
+1. Get `hardwire.x86_64` (export it as above, or download the `hardwire-linux` artifact from a CI run).
+2. On the Deck, switch to Desktop Mode and copy the file anywhere, for example `~/Games/Hardwire/`. Make it executable: right-click → Properties → Permissions → "Is executable" (or `chmod +x hardwire.x86_64`).
+3. In Steam (Desktop Mode): Games → "Add a Non-Steam Game to My Library…" → browse to the file.
+4. Switch back to Game Mode and start Hardwire from your library. It starts fullscreen (Steam sets `SteamDeck=1`) and plays with touch or the built-in controls.
 
 ## License
 

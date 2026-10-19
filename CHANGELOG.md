@@ -17,4 +17,5 @@ First playable prototype.
 - Runtime-synthesized audio, haptic feedback, the JetBrains Mono font, and a flat circuit-board theme.
 - Local JSON save with atomic writes and backup of broken files.
 - Debug panel for balancing (debug builds only).
-- Export presets for Web and Android; a GUT unit test suite.
+- Export presets for Web, Linux / Steam Deck and Android; a GUT unit test suite.
+- Landscape support picked from the window aspect, fullscreen on the Steam Deck, Fullscreen and Quit in Settings on PC.
