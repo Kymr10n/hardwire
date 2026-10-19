@@ -95,18 +95,18 @@ CI builds the Linux, Windows and web exports on every push to `main` and attache
 
 ### Steam Deck
 
-`tools/deck.sh` exports the Linux build and copies it to `~/Games/hardwire/` on the Deck over SSH (`DECK=user@host` overrides the default `deck@steamdeck`). One-time setup:
+`tools/deck.sh` exports the Linux build and copies it to `~/Games/hardwire/` on the Deck over SSH. The target is `$DECK`, or `DECK=...` in the git-ignored `tools/deck.local.env`, default `deck@steamdeck`. `--run` also starts the game there (desktop mode); `--no-export` copies the existing build. One-time setup:
 
 1. On the Deck in desktop mode, open Konsole: `passwd` (set a password), then `sudo systemctl enable --now sshd`.
-2. On the dev PC: `ssh-copy-id deck@steamdeck` (use the Deck's IP and `DECK=deck@<ip>` if the hostname doesn't resolve).
+2. On the dev PC: `ssh-copy-id deck@steamdeck` and, if the Deck has another address, `echo 'DECK=deck@<host-or-ip>' > tools/deck.local.env`.
 3. Run `tools/deck.sh` once. On the Deck in desktop mode: Steam → Add a Game → Add a Non-Steam Game → browse to `~/Games/hardwire/hardwire.x86_64`.
 
 After that the loop is: edit, `tools/deck.sh` (or the VS Code task "Deploy: Steam Deck"), press Play in game mode. Steam sets `SteamDeck=1`, so the game starts fullscreen. For log output, run the binary over `ssh` while the Deck is in desktop mode.
 
-### Steam Deck
+Without SSH:
 
 1. Get `hardwire.x86_64` (export it as above, or download the `hardwire-linux` artifact from a CI run).
-2. On the Deck, switch to Desktop Mode and copy the file anywhere, for example `~/Games/Hardwire/`. Make it executable: right-click → Properties → Permissions → "Is executable" (or `chmod +x hardwire.x86_64`).
+2. On the Deck, switch to Desktop Mode and copy the file anywhere, for example `~/Games/hardwire/`. Make it executable: right-click → Properties → Permissions → "Is executable" (or `chmod +x hardwire.x86_64`).
 3. In Steam (Desktop Mode): Games → "Add a Non-Steam Game to My Library…" → browse to the file.
 4. Switch back to Game Mode and start Hardwire from your library. It starts fullscreen (Steam sets `SteamDeck=1`) and plays with touch or the built-in controls. In the game's Steam controller settings, pick the "Gamepad" layout if it isn't the default.
 

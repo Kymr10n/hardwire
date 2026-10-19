@@ -61,6 +61,7 @@ tools/check.sh                                   # the quality gate: format, lin
 godot --path .                                   # run (1280x800, Steam Deck size)
 godot --path . --resolution 540x960              # run in phone portrait
 tools/export.sh Linux build/linux/hardwire.x86_64   # export a preset (needs export templates 4.7.2)
+tools/deck.sh [--run]                            # export + copy to the Steam Deck over SSH ($DECK, tools/deck.local.env)
 ```
 
 ## Harness (runs automatically)

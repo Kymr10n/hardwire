@@ -13,7 +13,7 @@ Status values: `todo`, `in progress`, `done`. Milestone scope and "Done when" cr
 | M6 | done | Shop and upgrades |
 | M7 | done | Rebuild (prestige) and idle income |
 | M8 | in progress | Polish, web and Linux builds done; Android APK waits for the Android SDK licences; real-phone test pending |
-| M9 | in progress | Steam Deck and desktop: landscape, controller, Linux build done; glyphs and Windows/macOS presets (D-021); on-Deck check pending |
+| M9 | in progress | Steam Deck and desktop: landscape, controller, Linux build, glyphs, Windows/macOS presets done; `tools/deck.sh` deploys over SSH; on-Deck check pending |
 
 ## Play-test notes
 

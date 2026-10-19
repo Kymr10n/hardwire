@@ -18,7 +18,7 @@ First playable prototype.
 - Local JSON save with atomic writes and backup of broken files.
 - Debug panel for balancing (debug builds only).
 - Export presets for Linux / Steam Deck, Windows, macOS, Android and Web; a GUT unit test suite.
-- `tools/deck.sh`: export and copy the Linux build to a Steam Deck over SSH for game-mode play-tests.
+- `tools/deck.sh`: export and copy the Linux build to a Steam Deck over SSH for game-mode play-tests (`--run` starts it in desktop mode; the address can live in a git-ignored `tools/deck.local.env`).
 - Prompts show glyphs for the last-used device (touch, keyboard and mouse, gamepad); minimum font 32 px.
 - Development harness: `tools/check.sh` quality gate (gdformat, gdlint, drift checks, script errors, tests), decision log and progress file, Claude Code skills, review agents and hooks.
 - Steam Deck and desktop: landscape layouts picked from the window aspect, full gamepad and keyboard controls with a focus outline (hidden for touch), gamepad rumble, fullscreen on the Deck, Fullscreen and Quit in Settings on PC.
