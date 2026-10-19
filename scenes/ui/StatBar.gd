@@ -30,11 +30,20 @@ func _ready() -> void:
 
 
 func refresh() -> void:
-	_labels.ram.text = "RAM %d" % GameState.ram
-	_labels.cpu.text = "CPU %d" % GameState.cpu
-	_labels.sto.text = "STO %d" % GameState.sto
-	_labels.cycles.text = "Cyc %d" % GameState.cycles
-	_labels.cores.text = "Cores %d" % GameState.cores
+	_labels.ram.text = "RAM " + short(GameState.ram)
+	_labels.cpu.text = "CPU " + short(GameState.cpu)
+	_labels.sto.text = "STO " + short(GameState.sto)
+	_labels.cycles.text = "Cyc " + short(GameState.cycles)
+	_labels.cores.text = "Cores " + short(GameState.cores)
+
+
+## Compact number so the bar fits a phone width: 9999, 12.3K, 4.56M.
+static func short(n: int) -> String:
+	if n < 10_000:
+		return str(n)
+	if n < 1_000_000:
+		return "%.1fK" % (n / 1000.0)
+	return "%.2fM" % (n / 1_000_000.0)
 
 
 func _input(event: InputEvent) -> void:

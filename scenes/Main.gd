@@ -24,7 +24,9 @@ func _ready() -> void:
 
 
 func _notification(what: int) -> void:
-	if what == NOTIFICATION_APPLICATION_RESUMED:
+	if what == NOTIFICATION_WM_GO_BACK_REQUEST:
+		go_back()
+	elif what == NOTIFICATION_APPLICATION_RESUMED:
 		_idle_check_pending = true
 		if screen is OverviewScreen:
 			check_idle()
@@ -102,8 +104,26 @@ func show_debug() -> void:
 	_show(menu)
 
 
+## Android back (SPEC: Back button): back to the overview, or quit from the overview / boot screen.
+## Ignored while a dialog is open.
+func go_back() -> void:
+	if screen == null or not screen.find_children("*", "ConfirmDialog", true, false).is_empty():
+		return
+	if screen is OverviewScreen or screen is BootScreen:
+		SaveManager.save_game()
+		get_tree().quit()
+	elif screen is PuzzleScreen:
+		screen.go_back()
+	else:
+		show_overview()
+
+
+## Swaps the current screen; the new one fades in over the theme's transition_ms.
 func _show(next: Control) -> void:
 	if screen:
 		screen.queue_free()
 	screen = next
 	add_child(screen)
+	screen.modulate.a = 0.0
+	screen.create_tween().tween_property(screen, "modulate:a", 1.0,
+		get_theme_constant("transition_ms", "Hardwire") / 1000.0)

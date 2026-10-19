@@ -20,6 +20,8 @@ func before_each() -> void:
 	GameState.reset_all()
 	GameState.settings.sound = false
 	GameState.settings.haptics = false
+	# First-run hints hold the first attempt; tests that check hints clear this.
+	GameState.seen_tutorials = [SlotDef.TYPE_STO, SlotDef.TYPE_RAM, SlotDef.TYPE_CPU] as Array[String]
 
 
 func after_each() -> void:

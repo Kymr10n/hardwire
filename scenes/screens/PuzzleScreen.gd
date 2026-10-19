@@ -12,8 +12,16 @@ const PUZZLES := {
 	SlotDef.TYPE_CPU: preload("res://scenes/puzzles/CpuPuzzle.gd"),
 }
 
+## First-run instruction per minigame (SPEC: First run).
+const HINTS := {
+	SlotDef.TYPE_STO: "Repeat the sequence",
+	SlotDef.TYPE_RAM: "Recreate the pattern",
+	SlotDef.TYPE_CPU: "Copy the rhythm by holding the tile",
+}
+
 var slot: SlotDef
 var puzzle: PuzzleBase
+var hint: HintOverlay
 
 var _rng := RandomNumberGenerator.new()
 var _phase_label: Label
@@ -48,7 +56,7 @@ func _ready() -> void:
 	var back := Button.new()
 	back.text = "< Back"
 	back.custom_minimum_size = Vector2.ONE * get_theme_constant("tap_min", "Hardwire")
-	back.pressed.connect(_on_back)
+	back.pressed.connect(go_back)
 	header.add_child(back)
 	var title := Label.new()
 	title.text = _title_text()
@@ -82,8 +90,21 @@ func _ready() -> void:
 	_overlay = ResultOverlay.new()
 	add_child(_overlay)
 	_overlay.again_pressed.connect(start_attempt)
-	_overlay.overview_pressed.connect(_on_back)
+	_overlay.overview_pressed.connect(go_back)
 
+	if GameState.seen_tutorials.has(slot.type):
+		start_attempt()
+	else:
+		hint = HintOverlay.new()
+		hint.text = HINTS.get(slot.type, "")
+		hint.dismissed.connect(_on_hint_dismissed)
+		add_child(hint)
+
+
+func _on_hint_dismissed() -> void:
+	hint = null
+	GameState.seen_tutorials.append(slot.type)
+	SaveManager.save_game()
 	start_attempt()
 
 
@@ -124,6 +145,7 @@ func _on_failed() -> void:
 	start_attempt()
 
 
-func _on_back() -> void:
+## Back button (and Android back): abandon the attempt without penalty.
+func go_back() -> void:
 	puzzle.abort()
 	exit_requested.emit()

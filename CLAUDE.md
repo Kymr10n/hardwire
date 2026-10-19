@@ -39,5 +39,7 @@ godot --headless --path . -s addons/gut/gut_cmdln.gd
 - `.godot/` is a cache; never commit or edit it.
 - Controls built in code: use `set_anchors_and_offsets_preset(PRESET_FULL_RECT)`, not `set_anchors_preset`. On a node already in the tree the latter keeps the old (often zero) rect.
 - Puzzles run on `_process` with scaled delta, never `await`, so an attempt can be aborted or freed at any time. Tests drive them by calling `_process(FRAME)` directly.
+- GUT silently skips a test script with a parse error and still reports "All tests passed". Check the output for `SCRIPT ERROR` or "Ignoring script", and check that the script count is right.
+- Exports: `godot --headless --path . --export-release "Web" build/web/index.html` (needs export templates 4.7.2). Android also needs the Android SDK and JDK 17 configured in the editor settings.
 - Exit prints "1 ObjectDB instance was leaked" (`AudioStreamGeneratorPlayback` from `Synth`). This is engine teardown at quit and harmless.
 - Do not add ads, analytics or tracking SDKs (SPEC: Decisions — no monetization).

@@ -21,6 +21,8 @@ func _ready() -> void:
 	generator.buffer_length = 0.05
 	_player = AudioStreamPlayer.new()
 	_player.stream = generator
+	# Web exports default to "sample" playback, which cannot play a generator.
+	_player.playback_type = AudioServer.PLAYBACK_TYPE_STREAM
 	add_child(_player)
 	_player.play()
 	_playback = _player.get_stream_playback() as AudioStreamGeneratorPlayback

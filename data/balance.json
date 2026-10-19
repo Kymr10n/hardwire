@@ -39,6 +39,9 @@
     "success_note_ms": 90,
     "fail_noise_ms": 200
   },
+  "haptics": {
+    "pulse_ms": 20
+  },
   "idle": {
     "replays_per_hour": 6,
     "cap_hours": 8,
