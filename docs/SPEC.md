@@ -93,8 +93,8 @@ The game briefly shows a black-and-white pattern on a square grid, then hides it
 **Input phase.**
 
 - Tapping a cell toggles it on or off, so mistakes can be corrected.
-- A counter shows "cells set / cells needed".
-- A **Commit** button checks the grid. It is enabled once the set count equals `filled`.
+- A counter shows "cells set / cells needed". Cells needed is `filled`, or `n² − filled` with the Inverted modifier.
+- A **Commit** button checks the grid. It is enabled once the set count equals cells needed.
 - The attempt succeeds if the set cells match the pattern exactly. Otherwise, or on timeout, it fails and the correct pattern flashes for 1 s before the new attempt starts.
 
 **Difficulty knobs.** Grid size, number of filled cells and `show_ms`.
@@ -102,7 +102,7 @@ The game briefly shows a black-and-white pattern on a square grid, then hides it
 **Modifiers** (from tier 8):
 
 - *Inverted:* set the cells that were dark instead of the lit ones.
-- *Rotated:* enter the pattern rotated 90° clockwise; an arrow icon shows the rotation.
+- *Rotated:* enter the pattern rotated 90° clockwise; a clockwise arrow icon above the grid shows the rotation for the whole attempt.
 
 ## Minigame: CPU (rhythm)
 
@@ -157,7 +157,7 @@ First solve of a slot pays 2 × reward and 2 × Cycles. Modifier slots pay a fur
 **Minigame formulas:**
 
 - Storage: `length = min(3 + floor(T/2), 12)`; pads = 4 (T1 to 3), 5 (T4 to 7), 6 (T8 to 12), 8 (T13+); `show_ms = max(300, 700 − 25(T−1))`; `input_s_per_item = max(0.8, 1.5 − 0.03(T−1))`.
-- RAM: grid = 3 × 3 (T1 to 4), 4 × 4 (T5 to 9), 5 × 5 (T10 to 15), 6 × 6 (T16+); `filled = min(3 + floor((T−1)/2), floor(0.45 × n²))`; `show_ms = max(1000, 2500 − 100(T−1))`; input time = 4 s + 0.8 s per filled cell.
+- RAM: grid = 3 × 3 (T1 to 4), 4 × 4 (T5 to 9), 5 × 5 (T10 to 15), 6 × 6 (T16+); `filled = min(3 + floor((T−1)/2), floor(0.45 × n²))`; `show_ms = max(1000, 2500 − 100(T−1))`; input time = 4 s + 0.8 s per cell needed (equal to `filled` without the Inverted modifier).
 - CPU: `beats = min(3 + floor(T/3), 10)`; `step_ms = max(150, 300 − 8(T−1))`; `tolerance = max(0.15, 0.30 − 0.0075(T−1))`.
 
 **Sample tiers** (computed from the formulas above; use as test fixtures):
@@ -215,7 +215,7 @@ While the app is closed, the player earns Cycles (never stats), capped at 8 hour
 The prototype has five screens around one hub, the overview. All layouts are portrait, with tap targets of at least 120 px at the 1080 × 1920 reference size.
 
 | Screen | Contents | Leads to |
-| --- | --- | --- |
+| --- | --- | --- | --- |
 | Boot | Title, "Tap to start", loads the save | Overview |
 | Overview | Top bar with RAM, CPU, STO, Cycles and Cores; vertical scroll list of tier rows, newest unlocked tier in view on open; each row = tier number, requirement chips and 3 slot cards; bottom bar with Shop, Rebuild and Settings | Puzzle, Shop, Rebuild dialog, Settings |
 | Puzzle | Header with minigame name, tier, modifier and a back button; phase label ("Watch" / "Your turn"); timer bar; the minigame area; result overlay | Overview |
@@ -331,18 +331,18 @@ res://
 
 ## Milestones and acceptance criteria
 
-Build one milestone per session, in order. Each milestone ends with a playable build and passing tests, so the game can be play-tested at any point.
+Build one milestone per session, in order. Each milestone ends with a playable build and passing tests, so the game can be play-tested at any point. Update the Status column when a milestone starts and when it meets its "Done when" criteria.
 
-| # | Milestone | Done when |
-| --- | --- | --- |
-| M1 | Skeleton: project settings, autoloads, `balance.json`, save/load, GUT set up | App opens in a portrait window; a debug button adds stats and they survive a restart; tests run headless |
-| M2 | Storage minigame, launched from a debug menu with a tier picker | Tiers 1, 5 and 20 play as specified; wrong tap and timeout both start a new sequence; Reverse and Decoy work when forced; generator tests pass |
-| M3 | RAM minigame | Toggle, Commit and timeout work; failed attempts flash the answer; Inverted and Rotated work when forced |
-| M4 | CPU minigame and `RhythmJudge` | Judge tests cover exact input, input within tolerance, too many presses, and one segment out of tolerance; playing a tier 1 rhythm by ear passes |
-| M5 | Overview, slot generation, gating, rewards | Fresh save reaches tier 4 through first solves alone; locked slots show missing stats; numbers match the Sample tiers table |
-| M6 | Shop and upgrades | All six upgrades buy, persist and change their puzzle as specified |
-| M7 | Prestige and idle income | Rebuild becomes available after a tier 10 solve; Cores and multiplier are correct; the right fields reset; idle Cycles are offered after closing the app for over 5 minutes and respect the 8 h cap |
-| M8 | Polish and export | Synth sounds, haptics, screen transitions, first-run hints; Android APK and web build run on a real phone |
+| # | Milestone | Done when | Status |
+| --- | --- | --- | --- |
+| M1 | Skeleton: project settings, autoloads, `balance.json`, save/load, GUT set up | App opens in a portrait window; a debug button adds stats and they survive a restart; tests run headless | Done (2026-10-19) |
+| M2 | Storage minigame, launched from a debug menu with a tier picker | Tiers 1, 5 and 20 play as specified; wrong tap and timeout both start a new sequence; Reverse and Decoy work when forced; generator tests pass | Done (2026-10-19), awaiting play-test |
+| M3 | RAM minigame | Toggle, Commit and timeout work; failed attempts flash the answer; Inverted and Rotated work when forced | In progress |
+| M4 | CPU minigame and `RhythmJudge` | Judge tests cover exact input, input within tolerance, too many presses, and one segment out of tolerance; playing a tier 1 rhythm by ear passes | Planned |
+| M5 | Overview, slot generation, gating, rewards | Fresh save reaches tier 4 through first solves alone; locked slots show missing stats; numbers match the Sample tiers table | Planned |
+| M6 | Shop and upgrades | All six upgrades buy, persist and change their puzzle as specified | Planned |
+| M7 | Prestige and idle income | Rebuild becomes available after a tier 10 solve; Cores and multiplier are correct; the right fields reset; idle Cycles are offered after closing the app for over 5 minutes and respect the 8 h cap | Planned |
+| M8 | Polish and export | Synth sounds, haptics, screen transitions, first-run hints; Android APK and web build run on a real phone | Planned |
 
 ## After the prototype: Benchmark slot
 
