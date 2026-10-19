@@ -75,21 +75,21 @@ jobs:
           tools/export.sh Windows build/windows/hardwire.exe
 
       - name: Upload web build
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: hardwire-web
           path: build/web
           retention-days: 14
 
       - name: Upload Linux build
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: hardwire-linux
           path: build/linux
           retention-days: 14
 
       - name: Upload Windows build
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: hardwire-windows
           path: build/windows
