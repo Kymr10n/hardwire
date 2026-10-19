@@ -19,5 +19,5 @@ Status values: `todo`, `in progress`, `done`. Milestone scope and "Done when" cr
 
 Add dated notes here after play-testing (what felt wrong, which numbers to tune). Turn agreed changes into `/spec-change`.
 
-- Pending checks (2026-10-19): Android build on a real phone (M8); Steam Deck in game mode with controls only and touch only (M9).
+- Pending checks (2026-10-19): Android build on a real phone (M8); Steam Deck in game mode with controls only and touch only (M9; deploy with `tools/deck.sh`).
 - 2026-10-19, desktop with a mouse: CPU taps did not register as intended. A natural click (100–150 ms) failed because 1-step taps were timed like short holds (210–390 ms at tier 1), and holds were hard to read during playback. Fixed by D-022 (judge beats and holds, not tap length; beat-length markers). Re-test: tier 1 and tier 10 with mouse, touch and gamepad; Syncopated 1.5-step holds vs taps may still be hard to tell apart.
