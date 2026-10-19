@@ -80,7 +80,7 @@ The game lights a sequence of colored pads, and the player taps them back in the
 **Modifiers** (from tier 8, see Difficulty curve):
 
 - *Reverse:* enter the sequence back to front.
-- *Decoy:* one extra pad flashes dimly during playback and must be ignored.
+- *Decoy:* one extra pad flashes dimly, with a quieter tone, during playback and must be ignored. It appears between two real items (never first or last) and on a pad different from both neighbors.
 
 ## Minigame: RAM (pattern grid)
 
@@ -336,7 +336,7 @@ Build one milestone per session, in order. Each milestone ends with a playable b
 | # | Milestone | Done when |
 | --- | --- | --- |
 | M1 | Skeleton: project settings, autoloads, `balance.json`, save/load, GUT set up | App opens in a portrait window; a debug button adds stats and they survive a restart; tests run headless |
-| M2 | Storage minigame, launched from a debug menu with a tier picker | Tiers 1, 5 and 20 play as specified; wrong tap and timeout both start a new sequence; generator tests pass |
+| M2 | Storage minigame, launched from a debug menu with a tier picker | Tiers 1, 5 and 20 play as specified; wrong tap and timeout both start a new sequence; Reverse and Decoy work when forced; generator tests pass |
 | M3 | RAM minigame | Toggle, Commit and timeout work; failed attempts flash the answer; Inverted and Rotated work when forced |
 | M4 | CPU minigame and `RhythmJudge` | Judge tests cover exact input, input within tolerance, too many presses, and one segment out of tolerance; playing a tier 1 rhythm by ear passes |
 | M5 | Overview, slot generation, gating, rewards | Fresh save reaches tier 4 through first solves alone; locked slots show missing stats; numbers match the Sample tiers table |
