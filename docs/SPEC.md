@@ -358,7 +358,7 @@ Build one milestone per session, in order. Each milestone ends with a playable b
 | M5 | Overview, slot generation, gating, rewards, Boot and Settings screens, debug panel | Fresh save reaches tier 4 through first solves alone; locked slots show missing stats; numbers match the Sample tiers table | Done (2026-10-19), awaiting play-test |
 | M6 | Shop and upgrades | All six upgrades buy, persist and change their puzzle as specified | Done (2026-10-19), awaiting play-test |
 | M7 | Prestige and idle income | Rebuild becomes available after a tier 10 solve; Cores and multiplier are correct; the right fields reset; idle Cycles are offered after closing the app for over 5 minutes and respect the 8 h cap | Done (2026-10-19), awaiting play-test |
-| M8 | Polish and export | Synth sounds, haptics, screen transitions, first-run hints; Android APK and web build run on a real phone | In progress |
+| M8 | Polish and export | Synth sounds, haptics, screen transitions, first-run hints; Android APK and web build run on a real phone | Polish and web build done (2026-10-19); Android export and real-phone test pending (needs Android SDK) |
 
 ## After the prototype: Benchmark slot
 

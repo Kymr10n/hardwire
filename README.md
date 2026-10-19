@@ -29,3 +29,15 @@ Work one milestone per session and play-test after each.
 | `logic/` | Pure, unit-tested game rules |
 | `scenes/` | Main scene, screens, puzzles, UI components |
 | `tests/` | GUT unit tests |
+
+## Exports
+
+Presets for Web and Android are in `export_presets.cfg`; both include `data/*.json`. Godot 4.7.2 export templates must be installed (Editor → Manage Export Templates).
+
+```bash
+# Web (single-threaded; serve build/web over HTTPS or localhost)
+godot --headless --path . --export-release "Web" build/web/index.html
+
+# Android (needs Android SDK + JDK 17 set in Editor Settings → Export → Android)
+godot --headless --path . --export-debug "Android" build/android/hardwire.apk
+```
