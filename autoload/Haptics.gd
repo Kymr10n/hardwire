@@ -12,6 +12,12 @@ var active: bool = false
 var last_pulse_ms: int = 0
 
 
+func _ready() -> void:
+	# On a Steam Deck the input layer is invisible from outside; the log shows what Godot sees.
+	Input.joy_connection_changed.connect(_log_joypads.unbind(2))
+	_log_joypads()
+
+
 ## Light pulse on every input (tap, toggle, purchase).
 func pulse() -> void:
 	_pulse(Balance.get_int("haptics", "pulse_ms"), Balance.get_num("haptics", "pulse_strength"))
@@ -53,6 +59,13 @@ func fail() -> void:
 
 func _enabled() -> bool:
 	return GameState.settings.get("haptics", true)
+
+
+func _log_joypads() -> void:
+	var names: Array[String] = []
+	for device: int in Input.get_connected_joypads():
+		names.append("%d: %s" % [device, Input.get_joy_name(device)])
+	print("Haptics: joypads [%s]" % ", ".join(names))
 
 
 func _pulse(ms: int, strength: float) -> void:
