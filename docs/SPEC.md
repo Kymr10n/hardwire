@@ -208,7 +208,7 @@ Once the player has solved any tier 10 slot, they can Rebuild: reset progress in
 - **Cores earned** = `max(0, highest_tier_solved − 9)`, so tier 10 gives 1 Core and tier 20 gives 11.
 - **Effect:** every Core adds +25% to stat rewards and Cycles, additively. Total multiplier = `1 + 0.25 × total_cores`.
 - **Reset:** stats, Cycles, upgrade levels and first-solve flags.
-- **Kept:** Cores, best tier ever reached, settings and lifetime statistics.
+- **Kept:** Cores, best tier ever reached, settings, lifetime statistics and the first-run hints already seen.
 - A confirm dialog shows Cores to be gained and the new multiplier before the reset.
 
 ## Idle income
@@ -218,7 +218,8 @@ While the app is closed, the player earns Cycles (never stats), capped at 8 hour
 - **Rate:** `idle_cycles_per_hour = 6 × cycles(T_max)`, where T_max is the highest tier with at least one solved slot. That equals about 6 replays per hour, well below active play.
 - **Multipliers:** Cycle miner and Cores apply; Overclock does not, because it boosts stats only.
 - **Cap:** 8 hours of earnings. Nothing accrues before the first solve.
-- **Collection:** on app start or resume, if more than 5 minutes passed, a "While you were away" dialog shows the amount and a Collect button.
+- **Amount:** `round(rate × min(hours away, 8) × (1 + 0.10 × Cycle miner) × (1 + 0.25 × Cores))`.
+- **Collection:** on app start or resume, if more than 5 minutes passed, a "While you were away" dialog shows the amount and a Collect button. It appears on the overview, never over a running puzzle; after a resume during a puzzle it waits until the player returns to the overview.
 - **Clock:** elapsed time = now − `last_seen`, using the device's Unix time. A negative or missing value counts as zero. Clock tampering is accepted for the prototype.
 
 ## Screens and UX flow
@@ -352,7 +353,7 @@ Build one milestone per session, in order. Each milestone ends with a playable b
 | M4 | CPU minigame and `RhythmJudge` | Judge tests cover exact input, input within tolerance, too many presses, and one segment out of tolerance; playing a tier 1 rhythm by ear passes | Done (2026-10-19), awaiting play-test on a phone |
 | M5 | Overview, slot generation, gating, rewards, Boot and Settings screens, debug panel | Fresh save reaches tier 4 through first solves alone; locked slots show missing stats; numbers match the Sample tiers table | Done (2026-10-19), awaiting play-test |
 | M6 | Shop and upgrades | All six upgrades buy, persist and change their puzzle as specified | Done (2026-10-19), awaiting play-test |
-| M7 | Prestige and idle income | Rebuild becomes available after a tier 10 solve; Cores and multiplier are correct; the right fields reset; idle Cycles are offered after closing the app for over 5 minutes and respect the 8 h cap | Planned |
+| M7 | Prestige and idle income | Rebuild becomes available after a tier 10 solve; Cores and multiplier are correct; the right fields reset; idle Cycles are offered after closing the app for over 5 minutes and respect the 8 h cap | In progress |
 | M8 | Polish and export | Synth sounds, haptics, screen transitions, first-run hints; Android APK and web build run on a real phone | Planned |
 
 ## After the prototype: Benchmark slot
