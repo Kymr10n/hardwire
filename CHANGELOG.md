@@ -20,3 +20,4 @@ First playable prototype (0.1.0).
 - Steam Deck and desktop: landscape layouts picked from the window aspect, full gamepad and keyboard controls with a focus outline (hidden for touch) and glyphs for the last-used device, gamepad rumble, fullscreen on the Deck, Fullscreen and Quit in Settings on PC, 60 fps cap.
 - Builds for Linux / Steam Deck, Windows, macOS, Android and the web; `tools/deck.sh` deploys to a Steam Deck over SSH.
 - CPU rhythm judged on beats and holds, not tap length, with beat-length markers under the tile.
+- Controller rumble with the rhythm: the pad buzzes while the CPU tile is lit or held; a double pulse on success and a long pulse on failure.
