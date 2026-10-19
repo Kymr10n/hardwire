@@ -7,7 +7,7 @@ signal play_requested(slot: SlotDef)
 const QUICK_TIERS: Array[int] = [1, 5, 10, 20]
 
 ## Minigames that can be launched so far, in menu order.
-const TYPES: Array[String] = [SlotDef.TYPE_STO, SlotDef.TYPE_RAM]
+const TYPES: Array[String] = [SlotDef.TYPE_STO, SlotDef.TYPE_RAM, SlotDef.TYPE_CPU]
 
 ## Kept across screen changes so returning from a puzzle keeps the picks.
 static var tier: int = 1

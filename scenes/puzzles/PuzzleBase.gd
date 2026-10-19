@@ -69,7 +69,7 @@ func _process(delta: float) -> void:
 			time_left_s -= delta
 			if time_left_s <= 0.0:
 				time_left_s = 0.0
-				_fail()
+				_on_time_up()
 		Phase.RESULT:
 			if not _succeeded and _phase_t >= Balance.get_num("flow", "fail_reveal_s"):
 				phase = Phase.IDLE
@@ -124,6 +124,11 @@ func _watch_update(_t: float) -> bool:
 
 func _on_phase_entered(_p_phase: Phase) -> void:
 	pass
+
+
+## Input time ran out. Default: the attempt fails.
+func _on_time_up() -> void:
+	_fail()
 
 
 ## Show the correct answer; called when the attempt fails (wrong input or timeout).

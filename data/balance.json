@@ -72,6 +72,7 @@
     "on_steps_max": 3,
     "off_steps_min": 1,
     "off_steps_max": 2,
+    "syncopated_steps": [0.5, 1.5],
     "step_ms_start": 300,
     "step_ms_step": 8,
     "step_ms_min": 150,

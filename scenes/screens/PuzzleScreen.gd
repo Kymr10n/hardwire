@@ -9,6 +9,7 @@ signal exit_requested
 const PUZZLES := {
 	SlotDef.TYPE_STO: preload("res://scenes/puzzles/StoragePuzzle.gd"),
 	SlotDef.TYPE_RAM: preload("res://scenes/puzzles/RamPuzzle.gd"),
+	SlotDef.TYPE_CPU: preload("res://scenes/puzzles/CpuPuzzle.gd"),
 }
 
 var slot: SlotDef
