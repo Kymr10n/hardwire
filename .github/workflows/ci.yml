@@ -45,27 +45,13 @@ jobs:
           DRIFT_BASE: ${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || github.event.before }}
         run: GODOT="$HOME/godot/godot" tools/check.sh
 
+  # One job for all three exports: Godot and the templates are restored and installed once.
   export:
-    name: Export ${{ matrix.name }}
+    name: Export (web, linux, windows)
     needs: check
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
-    timeout-minutes: 20
-    strategy:
-      matrix:
-        include:
-          - name: web
-            preset: Web
-            dir: build/web
-            output: build/web/index.html
-          - name: linux
-            preset: Linux
-            dir: build/linux
-            output: build/linux/hardwire.x86_64
-          - name: windows
-            preset: Windows
-            dir: build/windows
-            output: build/windows/hardwire.exe
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
 
@@ -82,11 +68,29 @@ jobs:
         run: tools/install_godot.sh "$GODOT_VERSION" "$HOME/godot" --templates
 
       - name: Export
-        run: GODOT="$HOME/godot/godot" tools/export.sh "${{ matrix.preset }}" "${{ matrix.output }}"
+        run: |
+          export GODOT="$HOME/godot/godot"
+          tools/export.sh Web build/web/index.html
+          tools/export.sh Linux build/linux/hardwire.x86_64
+          tools/export.sh Windows build/windows/hardwire.exe
 
-      - name: Upload build
+      - name: Upload web build
         uses: actions/upload-artifact@v4
         with:
-          name: hardwire-${{ matrix.name }}
-          path: ${{ matrix.dir }}
+          name: hardwire-web
+          path: build/web
+          retention-days: 14
+
+      - name: Upload Linux build
+        uses: actions/upload-artifact@v4
+        with:
+          name: hardwire-linux
+          path: build/linux
+          retention-days: 14
+
+      - name: Upload Windows build
+        uses: actions/upload-artifact@v4
+        with:
+          name: hardwire-windows
+          path: build/windows
           retention-days: 14

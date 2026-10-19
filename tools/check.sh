@@ -10,6 +10,12 @@ failed=0
 
 command -v "$GODOT" >/dev/null || { echo "Godot not found: $GODOT (install Godot or set GODOT=/path/to/godot)"; exit 1; }
 
+# Godot writes user:// (the save) under XDG_DATA_HOME; give the boot and the tests a throwaway
+# one so the gate never reads or touches the developer's own save.
+XDG_DATA_HOME="$(mktemp -d)"
+export XDG_DATA_HOME
+trap 'rm -rf "$XDG_DATA_HOME"' EXIT
+
 # run <name> <command...>: prints ok/FAIL; on failure also the command's last 40 lines.
 # Lines the command prints starting with "summary:" are shown even on success.
 run() {
