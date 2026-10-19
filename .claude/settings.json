@@ -19,7 +19,6 @@
       "Bash(git commit:*)"
     ],
     "deny": [
-      "Bash(git push:*)",
       "Bash(git reset --hard:*)",
       "Bash(git clean:*)",
       "Bash(git commit --no-verify:*)"
