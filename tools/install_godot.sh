@@ -4,6 +4,7 @@
 # Usage: tools/install_godot.sh <version> <dest_dir> [--templates]
 set -euo pipefail
 
+[ $# -ge 2 ] || { echo "Usage: tools/install_godot.sh <version> <dest_dir> [--templates]" >&2; exit 2; }
 version="$1"
 dest="$2"
 base="https://github.com/godotengine/godot/releases/download/${version}-stable"

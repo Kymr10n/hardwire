@@ -5,7 +5,7 @@
 #   --no-export  copy the existing build/linux/hardwire.x86_64 instead of exporting first
 #   --run        start the game on the Deck afterwards (Desktop Mode; Game Mode starts it from Steam)
 # The Deck's address comes from $DECK or tools/deck.local.env (git-ignored), e.g.
-#   DECK=deck@steamdeck.local
+#   DECK=deck@192.168.1.50
 # Needs SSH access to the Deck (Desktop Mode: set a password with `passwd`, enable sshd).
 set -euo pipefail
 cd "$(dirname "$0")/.." || exit 1
@@ -37,4 +37,4 @@ if [ "$run" -eq 1 ]; then
 		DISPLAY=:0 SteamDeck=1 nohup ./hardwire.x86_64 >/dev/null 2>&1 &"
 	echo "Started on the Deck."
 fi
-echo "Deployed. In Steam (once): add /home/deck/$DECK_DIR/hardwire.x86_64 as a non-Steam game, then press Play in game mode."
+echo "Deployed. In Steam (once): add ~/$DECK_DIR/hardwire.x86_64 as a non-Steam game, then press Play in game mode."

@@ -6,8 +6,8 @@ PATH="$PWD/.venv/bin:$PATH"
 
 case "$file" in
 *.gd)
-	if ! command -v gdformat >/dev/null; then
-		echo "gdformat is not installed: run tools/setup.sh (installs gdtoolkit into .venv)." >&2
+	if ! command -v gdformat >/dev/null || ! command -v gdlint >/dev/null; then
+		echo "gdformat/gdlint are not installed: run tools/setup.sh (installs gdtoolkit into .venv)." >&2
 		exit 2
 	fi
 	if ! out="$(gdformat "$file" 2>&1)"; then
@@ -21,6 +21,7 @@ case "$file" in
 		exit 2
 	fi
 	;;
+.vscode/*.json) ;; # JSON with comments; not validated
 *.json)
 	if ! out="$(python3 -m json.tool "$file" 2>&1 >/dev/null)"; then
 		echo "Invalid JSON in $file: $out" >&2
@@ -28,7 +29,7 @@ case "$file" in
 	fi
 	;;
 docs/SPEC.md)
-	if ! git status --porcelain -- docs/DECISIONS.md | grep -q .; then
+	if git rev-parse --verify HEAD >/dev/null 2>&1 && ! git status --porcelain -- docs/DECISIONS.md | grep -q .; then
 		echo "docs/SPEC.md changed: add a D-NNN entry to docs/DECISIONS.md and update balance.json and tests in the same change (see /spec-change)." >&2
 		exit 2
 	fi

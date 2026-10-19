@@ -11,12 +11,13 @@ permissions:
 
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   check:
     name: Quality gate
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
         with:
@@ -37,22 +38,19 @@ jobs:
       - name: Setup (gdtoolkit)
         run: GODOT="$HOME/godot/godot" tools/setup.sh
 
+      # DRIFT_BASE makes the drift check compare the whole PR / push against its base commit
+      # (locally it looks at uncommitted changes), so a SPEC change without a decision fails.
       - name: Quality gate (format, lint, drift, script errors, tests)
+        env:
+          DRIFT_BASE: ${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || github.event.before }}
         run: GODOT="$HOME/godot/godot" tools/check.sh
-
-      - name: Spec changes carry a decision
-        if: github.event_name == 'push' && github.event.before != '0000000000000000000000000000000000000000'
-        run: |
-          changed="$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} 2>/dev/null || true)"
-          if grep -qx docs/SPEC.md <<<"$changed" && ! grep -qx docs/DECISIONS.md <<<"$changed"; then
-            echo "::error::docs/SPEC.md changed without docs/DECISIONS.md (use /spec-change)"
-            exit 1
-          fi
 
   export:
     name: Export ${{ matrix.name }}
     needs: check
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     strategy:
       matrix:
         include:
