@@ -7,6 +7,8 @@ const TYPE_STO := "sto"
 const TYPE_RAM := "ram"
 const TYPE_CPU := "cpu"
 const TYPE_NAMES := {TYPE_STO: "Storage", TYPE_RAM: "RAM", TYPE_CPU: "CPU"}
+## Stat abbreviations (the stat each minigame raises).
+const STAT_NAMES := {TYPE_STO: "STO", TYPE_RAM: "RAM", TYPE_CPU: "CPU"}
 
 var tier: int = 1
 var type: String = TYPE_STO

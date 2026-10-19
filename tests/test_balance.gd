@@ -15,7 +15,7 @@ const REQUIRED := {
 		"tolerance_start", "tolerance_step", "tolerance_min", "tolerance_abs_ms", "end_grace_ms",
 		"first_press_timeout_s"],
 	"modifiers": ["from_tier", "second_pool_from_tier", "chance_base", "chance_step", "chance_max"],
-	"debug": ["stat_step"],
+	"debug": ["cycles_step", "panel_taps", "panel_tap_window_s"],
 }
 
 const UPGRADES: Array[String] = ["replay_buffer", "longer_exposure", "metronome", "time_dilation",

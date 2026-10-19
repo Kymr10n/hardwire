@@ -44,6 +44,82 @@ func reset_all() -> void:
 	_emit_all()
 
 
+func stat(type: String) -> int:
+	match type:
+		SlotDef.TYPE_RAM:
+			return ram
+		SlotDef.TYPE_CPU:
+			return cpu
+		SlotDef.TYPE_STO:
+			return sto
+	return 0
+
+
+## SPEC gating rule: every stat meets the slot's requirement on its own.
+func is_unlocked(slot: SlotDef) -> bool:
+	return missing(slot).is_empty()
+
+
+## Stat points still missing per stat, e.g. {"cpu": 4}; empty when unlocked.
+func missing(slot: SlotDef) -> Dictionary:
+	var out := {}
+	for type: String in SlotGenerator.TYPES:
+		var gap: int = int(slot.req.get(type, 0)) - stat(type)
+		if gap > 0:
+			out[type] = gap
+	return out
+
+
+func is_solved(slot: SlotDef) -> bool:
+	return solved_slots.has(slot.id())
+
+
+## Highest tier whose slots are unlocked (all requirements are equal within a tier).
+func highest_unlocked_tier() -> int:
+	var lowest: int = mini(ram, mini(cpu, sto))
+	var tier: int = 1
+	while Balance.req(tier + 1) <= lowest:
+		tier += 1
+	return tier
+
+
+## Highest tier with at least one solved slot in this run, or 0.
+func highest_solved_tier() -> int:
+	var best: int = 0
+	for id: String in solved_slots:
+		best = maxi(best, id.get_slice(":", 0).to_int())
+	return best
+
+
+## Credits a solve: stat points to the slot's stat, Cycles to the wallet; marks first solves.
+## Returns {stat, cycles, first_solve, new_tier} for the result overlay.
+func apply_solve(slot: SlotDef) -> Dictionary:
+	var first: bool = not is_solved(slot)
+	var before: int = highest_unlocked_tier()
+	var gain: Dictionary = Economy.solve_reward(slot, first, int(upgrades.get("overclock", 0)),
+		int(upgrades.get("cycle_miner", 0)), cores)
+	match slot.type:
+		SlotDef.TYPE_RAM:
+			ram += gain.stat
+		SlotDef.TYPE_CPU:
+			cpu += gain.stat
+		SlotDef.TYPE_STO:
+			sto += gain.stat
+	cycles += gain.cycles
+	if first:
+		solved_slots.append(slot.id())
+	best_tier_ever = maxi(best_tier_ever, slot.tier)
+	lifetime.solves = int(lifetime.solves) + 1
+	stats_changed.emit()
+	cycles_changed.emit()
+	var after: int = highest_unlocked_tier()
+	return {"stat": gain.stat, "cycles": gain.cycles, "first_solve": first, "new_tier": after if after > before else 0}
+
+
+func record_fail() -> void:
+	lifetime.fails = int(lifetime.fails) + 1
+
+
 ## Debug helper: raise stats directly (SPEC M1: "a debug button adds stats").
 func add_stats(d_ram: int, d_cpu: int, d_sto: int) -> void:
 	ram += d_ram

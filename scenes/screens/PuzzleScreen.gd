@@ -1,8 +1,8 @@
 extends Control
 ## Puzzle screen (SPEC: Screens and UX flow): header with minigame name, tier, modifier and back
 ## button; phase label; timer bar; the minigame area; result overlay.
-## Owns the attempt loop: on failure it starts a fresh attempt at once; on success it shows the overlay.
-## Rewards are credited here from M5 on (puzzles never touch GameState).
+## Owns the attempt loop: on failure it starts a fresh attempt at once; on success it credits the
+## reward to GameState, saves and shows the overlay (puzzles never touch GameState).
 
 signal exit_requested
 
@@ -75,7 +75,7 @@ func _ready() -> void:
 	area.add_child(puzzle)
 	puzzle.phase_changed.connect(_on_phase_changed)
 	puzzle.solved.connect(_on_solved)
-	puzzle.failed.connect(start_attempt)
+	puzzle.failed.connect(_on_failed)
 
 	_overlay = ResultOverlay.new()
 	add_child(_overlay)
@@ -112,7 +112,14 @@ func _on_phase_changed(phase: PuzzleBase.Phase, text: String) -> void:
 
 
 func _on_solved(_result: Dictionary) -> void:
-	_overlay.show_result("Write complete", "", get_theme_color(slot.type, "Hardwire"))
+	var gain: Dictionary = GameState.apply_solve(slot)
+	SaveManager.save_game()
+	_overlay.show_result("Write complete", get_theme_color(slot.type, "Hardwire"), SlotDef.STAT_NAMES[slot.type], gain)
+
+
+func _on_failed() -> void:
+	GameState.record_fail()
+	start_attempt()
 
 
 func _on_back() -> void:

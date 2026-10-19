@@ -1,19 +1,8 @@
-extends GutTest
+extends "res://tests/hardwire_test.gd"
 ## CpuPuzzle behaviour with synthetic timestamps and simulated frames.
 
 const CpuPuzzle := preload("res://scenes/puzzles/CpuPuzzle.gd")
-const FRAME := 1.0 / 60.0
 
-var _orig_sound: bool
-
-
-func before_each() -> void:
-	_orig_sound = GameState.settings.sound
-	GameState.settings.sound = false
-
-
-func after_each() -> void:
-	GameState.settings.sound = _orig_sound
 
 
 func _puzzle(tier: int, modifier: String = "", seed: int = 7) -> PuzzleBase:

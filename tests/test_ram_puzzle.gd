@@ -1,20 +1,9 @@
-extends GutTest
+extends "res://tests/hardwire_test.gd"
 ## RamPuzzle behaviour, driven by simulated frames.
 
 const RamPuzzle := preload("res://scenes/puzzles/RamPuzzle.gd")
 const PuzzleScreen := preload("res://scenes/screens/PuzzleScreen.gd")
-const FRAME := 1.0 / 60.0
 
-var _orig_sound: bool
-
-
-func before_each() -> void:
-	_orig_sound = GameState.settings.sound
-	GameState.settings.sound = false
-
-
-func after_each() -> void:
-	GameState.settings.sound = _orig_sound
 
 
 func _puzzle(tier: int, modifier: String = "", seed: int = 7) -> PuzzleBase:
