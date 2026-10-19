@@ -16,10 +16,10 @@ concurrency:
 jobs:
   check:
     name: Quality gate
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -27,7 +27,7 @@ jobs:
         run: grep -E "^[A-Z_]+=" tools/versions.env >> "$GITHUB_ENV"
 
       - name: Cache Godot
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/godot
           key: godot-${{ env.GODOT_VERSION }}-editor
@@ -50,16 +50,16 @@ jobs:
     name: Export (web, linux, windows)
     needs: check
     if: github.event_name != 'pull_request'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Read pinned versions
         run: grep -E "^[A-Z_]+=" tools/versions.env >> "$GITHUB_ENV"
 
       - name: Cache Godot and export templates
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/godot
           key: godot-${{ env.GODOT_VERSION }}-templates
@@ -75,21 +75,21 @@ jobs:
           tools/export.sh Windows build/windows/hardwire.exe
 
       - name: Upload web build
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: hardwire-web
           path: build/web
           retention-days: 14
 
       - name: Upload Linux build
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: hardwire-linux
           path: build/linux
           retention-days: 14
 
       - name: Upload Windows build
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: hardwire-windows
           path: build/windows
