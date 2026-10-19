@@ -145,7 +145,7 @@ The judge is a pure function with unit tests, because it decides whether the min
 
 The overview is an endless list of tiers T = 1, 2, 3, …, each with one slot per minigame. Requirements grow quadratically while rewards grow linearly, so first solves alone carry the player to tier 4, and after that the shop and prestige carry the grind.
 
-**Tier generation.** Tiers are computed on demand from formulas, never stored. The overview shows every unlocked tier plus the next two locked ones. A slot's identity (tier, minigame, modifier) is deterministic from a hash of (tier, minigame), so it looks the same after a restart. Each attempt's sequence uses a fresh random seed.
+**Tier generation.** Tiers are computed on demand from formulas, never stored. The overview shows every unlocked tier plus the next two locked ones. A slot's identity (tier, minigame, modifier) is deterministic from a hash of (tier, minigame): FNV-1a (32 bit) of the text `"<tier>:<type>"`. Its low 16 bits decide whether the slot has a modifier and the high 16 bits pick which one, so slots look the same after a restart and on every platform. Each attempt's sequence uses a fresh random seed.
 
 **Economy formulas** (per stat, per slot):
 
@@ -155,7 +155,12 @@ reward(T) = T + 1
 cycles(T) = 5 × T
 ```
 
-First solve of a slot pays 2 × reward and 2 × Cycles. Modifier slots pay a further 1.5 ×. Upgrades and Cores multiply on top.
+First solve of a slot pays 2 × reward and 2 × Cycles. Modifier slots pay a further 1.5 ×. Upgrades and Cores multiply on top. All factors multiply, and the result is rounded to the nearest integer:
+
+```
+stat gain   = round(reward(T) × first × modifier × (1 + 0.10 × Overclock) × (1 + 0.25 × Cores))
+cycles gain = round(cycles(T) × first × modifier × (1 + 0.10 × Cycle miner) × (1 + 0.25 × Cores))
+```
 
 **Minigame formulas:**
 
@@ -220,7 +225,7 @@ The prototype has five screens around one hub, the overview. All layouts are por
 | Screen | Contents | Leads to |
 | --- | --- | --- | --- |
 | Boot | Title, "Tap to start", loads the save | Overview |
-| Overview | Top bar with RAM, CPU, STO, Cycles and Cores; vertical scroll list of tier rows, newest unlocked tier in view on open; each row = tier number, requirement chips and 3 slot cards; bottom bar with Shop, Rebuild and Settings | Puzzle, Shop, Rebuild dialog, Settings |
+| Overview | Top bar with RAM, CPU, STO, Cycles and Cores; vertical scroll list of tier rows (tier 1 at the top), newest unlocked tier in view on open; each row = tier number, requirement chips and 3 slot cards (RAM, CPU, STO); bottom bar with Shop, Rebuild and Settings | Puzzle, Shop, Rebuild dialog, Settings |
 | Puzzle | Header with minigame name, tier, modifier and a back button; phase label ("Watch" / "Your turn"); timer bar; the minigame area; result overlay | Overview |
 | Shop | List of upgrade cards, Cycles balance on top | Overview |
 | Settings | Sound on or off, haptics on or off, reset save (with confirm) | Overview |
@@ -330,7 +335,7 @@ res://
 - Puzzles receive a `SlotDef` and an attempt seed, and emit `solved(result)` or `failed()`; they never touch `GameState` directly.
 - Rhythm timing uses `Time.get_ticks_usec()` inside `_input`.
 - Tests run headless with the GUT addon: `godot --headless -s addons/gut/gut_cmdln.gd`.
-- A debug panel (only in debug builds, opened by tapping the stat bar 5 times) can set stats, Cycles and tier, force a minigame and change the time scale. Balancing relies on it.
+- A debug panel (only in debug builds, opened by tapping the stat bar 5 times within 3 s) can set stats, Cycles and tier, force a minigame and change the time scale. Balancing relies on it. The time scale speeds up playback and timers only; rhythm judging always uses real time.
 
 ## Milestones and acceptance criteria
 
@@ -342,7 +347,7 @@ Build one milestone per session, in order. Each milestone ends with a playable b
 | M2 | Storage minigame, launched from a debug menu with a tier picker | Tiers 1, 5 and 20 play as specified; wrong tap and timeout both start a new sequence; Reverse and Decoy work when forced; generator tests pass | Done (2026-10-19), awaiting play-test |
 | M3 | RAM minigame | Toggle, Commit and timeout work; failed attempts flash the answer; Inverted and Rotated work when forced | Done (2026-10-19), awaiting play-test |
 | M4 | CPU minigame and `RhythmJudge` | Judge tests cover exact input, input within tolerance, too many presses, and one segment out of tolerance; playing a tier 1 rhythm by ear passes | Done (2026-10-19), awaiting play-test on a phone |
-| M5 | Overview, slot generation, gating, rewards | Fresh save reaches tier 4 through first solves alone; locked slots show missing stats; numbers match the Sample tiers table | Planned |
+| M5 | Overview, slot generation, gating, rewards, Boot and Settings screens, debug panel | Fresh save reaches tier 4 through first solves alone; locked slots show missing stats; numbers match the Sample tiers table | In progress |
 | M6 | Shop and upgrades | All six upgrades buy, persist and change their puzzle as specified | Planned |
 | M7 | Prestige and idle income | Rebuild becomes available after a tier 10 solve; Cores and multiplier are correct; the right fields reset; idle Cycles are offered after closing the app for over 5 minutes and respect the 8 h cap | Planned |
 | M8 | Polish and export | Synth sounds, haptics, screen transitions, first-run hints; Android APK and web build run on a real phone | Planned |

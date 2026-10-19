@@ -1,7 +1,12 @@
 {
   "_comment": "All tuning numbers from docs/SPEC.md. Game code must read these via the Balance autoload, never hard-code them.",
   "debug": {
-    "stat_step": 1
+    "stat_step": 1,
+    "stat_steps": [10, 100],
+    "cycles_step": 1000,
+    "time_scales": [1, 2, 4],
+    "panel_taps": 5,
+    "panel_tap_window_s": 3.0
   },
   "flow": {
     "countdown_s": 1.5,
