@@ -116,6 +116,7 @@ func test_boot_and_hint_start_with_a() -> void:
 	GameState.seen_tutorials = [] as Array[String]
 	main.show_puzzle(SlotGenerator.make(1, SlotDef.TYPE_STO))
 	assert_not_null(main.screen.hint)
+	await wait_process_frames(2)  # the hint takes focus once the old screen is gone
 	tap_action(main.get_viewport(), "ui_accept")
 	assert_eq(main.screen.puzzle.phase, PuzzleBase.Phase.COUNTDOWN, "hint dismissed with A")
 

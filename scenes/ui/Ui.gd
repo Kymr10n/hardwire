@@ -118,10 +118,10 @@ static func button(text: String, on_pressed: Callable, wide: bool = false) -> Bu
 	return b
 
 
-## Lets a custom-drawn control take gamepad/keyboard focus (pointer input is handled by its
-## puzzle) and redraw its focus outline when focus changes.
+## Lets a custom-drawn control take gamepad/keyboard focus and pointer input (both arrive in its
+## _gui_input) and redraw its focus outline when focus changes.
 static func make_focusable(control: Control) -> void:
-	control.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	control.mouse_filter = Control.MOUSE_FILTER_STOP
 	control.focus_mode = Control.FOCUS_ALL
 	control.focus_entered.connect(control.queue_redraw)
 	control.focus_exited.connect(control.queue_redraw)
@@ -141,13 +141,15 @@ static func centered_column(overlay: Control, dim_alpha: float = 0.0) -> VBoxCon
 	return column
 
 
-## Full-rect overlay with an optional dim layer over what is behind it.
+## Full-rect overlay with an optional dim layer over what is behind it. Pointer input on the dim
+## layer goes to the overlay (which, as a Control, stops it from reaching what is behind).
 static func _backdrop(overlay: Control, dim_alpha: float) -> void:
 	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	if dim_alpha <= 0.0:
 		return
 	var dim := ColorRect.new()
 	dim.color = Color(overlay.get_theme_color("bg", "Hardwire"), dim_alpha)
+	dim.mouse_filter = Control.MOUSE_FILTER_PASS
 	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	overlay.add_child(dim)
 

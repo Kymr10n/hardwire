@@ -5,22 +5,16 @@ extends "res://tests/hardwire_test.gd"
 const MainScript := preload("res://scenes/Main.gd")
 
 
-func _release() -> InputEventScreenTouch:
-	var touch := InputEventScreenTouch.new()
-	touch.pressed = false
-	touch.position = Vector2(500, 900)
-	return touch
-
-
 func test_first_run_hint_holds_attempt_until_tapped() -> void:
 	GameState.seen_tutorials = [] as Array[String]
 	var screen: Control = PuzzleScreen.new()
 	screen.setup(SlotGenerator.make(1, SlotDef.TYPE_RAM))
-	add_child_autofree(screen)
+	in_viewport(screen, Vector2i(1080, 1920))
+	await wait_process_frames(2)
 	assert_not_null(screen.hint)
 	assert_eq(screen.hint.text, "Recreate the pattern")
 	assert_eq(screen.puzzle.phase, PuzzleBase.Phase.IDLE, "waits for the tap")
-	screen.hint._input(_release())
+	tap_at(screen.get_viewport(), screen.get_global_rect().get_center())
 	assert_eq(screen.puzzle.phase, PuzzleBase.Phase.COUNTDOWN)
 	assert_true(GameState.seen_tutorials.has(SlotDef.TYPE_RAM))
 	assert_true(FileAccess.file_exists(TEST_SAVE), "saved")
@@ -171,8 +165,7 @@ func test_result_overlay_counts_up_and_notes_new_tier() -> void:
 		{"stat": 4, "cycles": 10, "first_solve": true, "new_tier": 2}
 	)
 	assert_eq(overlay.gain.text, "+0 STO    +0 Cycles", "count-up starts at 0")
-	for i: int in 60:
-		overlay._process(FRAME)
+	await wait_seconds(0.7)
 	assert_eq(overlay.gain.text, "+4 STO    +10 Cycles", "full after 0.6 s")
 	assert_string_contains(overlay.note.text, "First solve x2")
 	assert_string_contains(overlay.note.text, "Tier 2 unlocked")

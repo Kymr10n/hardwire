@@ -14,7 +14,6 @@ var shop_button: Button
 var _scroll: ScrollContainer
 var _list: VBoxContainer
 var _rows: Array[TierRow] = []
-var _scroll_frames: int = 2
 
 
 func _ready() -> void:
@@ -50,6 +49,7 @@ func _build_list() -> ScrollContainer:
 	_list = VBoxContainer.new()
 	_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_list.add_theme_constant_override("separation", get_theme_constant("margin", "Hardwire"))
+	_list.sort_children.connect(_scroll_to_newest, CONNECT_ONE_SHOT)
 	_scroll.add_child(_list)
 	return _scroll
 
@@ -139,12 +139,8 @@ func _refresh_rows() -> void:
 	rebuild_button.disabled = not Progress.can_rebuild(GameState.solved_slots)
 
 
-## Brings the newest unlocked tier into view once the layout has settled.
-func _process(_delta: float) -> void:
-	if _scroll_frames <= 0:
-		return
-	_scroll_frames -= 1
-	if _scroll_frames == 0:
-		var newest: int = Progress.highest_unlocked_tier(GameState.stats())
-		if newest - 1 < _rows.size():
-			_scroll.ensure_control_visible(_rows[newest - 1])
+## Brings the newest unlocked tier into view once the list has laid out its rows.
+func _scroll_to_newest() -> void:
+	var newest: int = Progress.highest_unlocked_tier(GameState.stats())
+	if newest - 1 < _rows.size():
+		_scroll.ensure_control_visible(_rows[newest - 1])

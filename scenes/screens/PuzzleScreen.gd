@@ -83,10 +83,12 @@ func _on_hint_dismissed() -> void:
 	GameState.seen_tutorials.append(slot.type)
 	SaveManager.save_game()
 	start_attempt()
+	Ui.focus_first(self)
 
 
+## The hint while it is up (A begins), else the puzzle's control.
 func default_focus() -> Control:
-	return puzzle.default_focus()
+	return hint if hint != null else puzzle.default_focus()
 
 
 ## Fresh sequence (new seed), same slot and difficulty.
@@ -97,7 +99,7 @@ func start_attempt() -> void:
 
 
 func _process(_delta: float) -> void:
-	_timer_bar.fraction = puzzle.time_fraction()
+	_timer_bar.value = puzzle.time_fraction()
 
 
 ## Header text: minigame, tier and the modifier name (SPEC: Puzzle screen).

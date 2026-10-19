@@ -51,7 +51,7 @@ func pads() -> Array[StoragePad]:
 	return _pads
 
 
-## Handles one pad tap during the input phase (called from _input; public for tests).
+## Handles one pad tap during the input phase (from the pad's `tapped`; public for tests).
 func tap_pad(index: int) -> void:
 	if phase != Phase.INPUT or index < 0 or index >= _pads.size():
 		return
@@ -69,24 +69,6 @@ func tap_pad(index: int) -> void:
 
 func default_focus() -> Control:
 	return _pads[0] if not _pads.is_empty() else null
-
-
-func _input(event: InputEvent) -> void:
-	if phase != Phase.INPUT:
-		return
-	var focused := get_viewport().gui_get_focus_owner() as StoragePad
-	if Ui.accept_event(event) == 1 and focused != null and _pads.has(focused):
-		get_viewport().set_input_as_handled()
-		tap_pad(focused.index)
-		return
-	var touch := event as InputEventScreenTouch
-	if touch == null or not touch.pressed:
-		return
-	for pad: StoragePad in _pads:
-		if pad.get_global_rect().has_point(touch.position):
-			get_viewport().set_input_as_handled()
-			tap_pad(pad.index)
-			return
 
 
 func _build_attempt() -> void:
@@ -153,6 +135,7 @@ func _ensure_pads(count: int) -> void:
 	_pads.clear()
 	for i: int in count:
 		var pad := StoragePad.new(i)
+		pad.tapped.connect(tap_pad)
 		add_child(pad)
 		_pads.append(pad)
 	_layout()

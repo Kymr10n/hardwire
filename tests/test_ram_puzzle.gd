@@ -29,6 +29,15 @@ func test_toggle_on_and_off() -> void:
 	assert_false(puzzle.grid().is_on(4))
 
 
+func test_touch_toggles_cell() -> void:
+	var puzzle := make_puzzle(RamPuzzle, 1, "", 7, true)
+	run_until(puzzle, PuzzleBase.Phase.INPUT)
+	await wait_process_frames(1)
+	var grid: RamGrid = puzzle.grid()
+	tap_at(puzzle.get_viewport(), grid.global_position + grid.cell_rect(4).get_center())
+	assert_eq(grid.on_cells(), [4] as Array[int])
+
+
 func test_toggle_ignored_outside_input() -> void:
 	var puzzle := make_puzzle(RamPuzzle, 1)
 	puzzle.toggle_cell(0)

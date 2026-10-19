@@ -47,11 +47,9 @@ static func short(n: int) -> String:
 	return "%.2fM" % (n / 1_000_000.0)
 
 
-func _input(event: InputEvent) -> void:
+func _gui_input(event: InputEvent) -> void:
 	var touch := event as InputEventScreenTouch
 	if touch == null or not touch.pressed or not OS.is_debug_build():
-		return
-	if not get_global_rect().has_point(touch.position):
 		return
 	var now: float = Time.get_ticks_msec() / 1000.0
 	var window: float = Balance.get_num("debug", "panel_tap_window_s")

@@ -1,9 +1,9 @@
 class_name RamGrid
 extends Control
 ## Square grid of RAM cells drawn in one _draw. Each cell is on or off; on cells brighten
-## and scale to glow_scale_pct over glow_ms (SPEC: Visual style). Touch is handled by RamPuzzle.
-## With focus, ui_* directions move a cursor and ui_accept emits cell_activated; at an edge the
-## direction is left unhandled, so focus moves on to the next control (e.g. Commit).
+## and scale to glow_scale_pct over glow_ms (SPEC: Visual style). A touch on a cell emits
+## cell_activated. With focus, ui_* directions move a cursor and ui_accept emits it for the cursor;
+## at an edge the direction is left unhandled, so focus moves on to the next control (e.g. Commit).
 
 signal cell_activated(index: int)
 
@@ -66,18 +66,22 @@ func on_cells() -> Array[int]:
 	return out
 
 
-## Cell under a global (canvas) position, or -1 (including the gaps between cells).
-func cell_at(global_pos: Vector2) -> int:
-	if n == 0:
-		return -1
-	var local: Vector2 = global_pos - global_position
+## Cell under a local position, or -1 (including the gaps between cells).
+func cell_at(local_pos: Vector2) -> int:
 	for i: int in n * n:
-		if cell_rect(i).has_point(local):
+		if cell_rect(i).has_point(local_pos):
 			return i
 	return -1
 
 
 func _gui_input(event: InputEvent) -> void:
+	var touch := event as InputEventScreenTouch
+	if touch != null:
+		var i: int = cell_at(touch.position) if touch.pressed else -1
+		if i >= 0:
+			accept_event()
+			cell_activated.emit(i)
+		return
 	if Ui.accept_event(event) == 1:
 		accept_event()
 		_show_focus()

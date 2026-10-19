@@ -70,7 +70,7 @@ func can_commit() -> bool:
 	return phase == Phase.INPUT and _grid.on_cells().size() == expected().size()
 
 
-## Toggles one cell during the input phase (called from _input; public for tests).
+## Toggles one cell during the input phase (from the grid's `cell_activated`; public for tests).
 func toggle_cell(i: int) -> void:
 	if phase != Phase.INPUT or i < 0 or i >= _grid.n * _grid.n:
 		return
@@ -95,19 +95,9 @@ func default_focus() -> Control:
 
 
 func _input(event: InputEvent) -> void:
-	if phase != Phase.INPUT:
-		return
-	if event.is_action_pressed("commit"):
+	if phase == Phase.INPUT and event.is_action_pressed("commit"):
 		get_viewport().set_input_as_handled()
 		commit()
-		return
-	var touch := event as InputEventScreenTouch
-	if touch == null or not touch.pressed:
-		return
-	var i: int = _grid.cell_at(touch.position)
-	if i >= 0:
-		get_viewport().set_input_as_handled()
-		toggle_cell(i)
 
 
 func _build_attempt() -> void:

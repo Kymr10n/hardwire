@@ -16,6 +16,18 @@ func test_shows_unlocked_plus_two_locked_tiers() -> void:
 	assert_eq(overview.rows().size(), 7, "tiers 1-5 unlocked + 2 locked")
 
 
+func test_opens_scrolled_to_newest_tier() -> void:
+	set_stats(100_000)
+	var overview: Control = in_viewport(OverviewScreen.new(), Vector2i(1080, 1920))
+	await wait_process_frames(2)
+	var scroll: ScrollContainer = overview.find_children("*", "ScrollContainer", true, false)[0]
+	var view: Rect2 = scroll.get_global_rect()
+	var rows: Array[TierRow] = overview.rows()
+	var newest: TierRow = rows[Progress.highest_unlocked_tier(GameState.stats()) - 1]
+	assert_true(view.encloses(newest.get_global_rect()), "newest unlocked tier is in view")
+	assert_false(view.intersects(rows[0].get_global_rect()), "tier 1 scrolled out of view")
+
+
 func test_card_states() -> void:
 	var overview := _overview()
 	var t1: SlotCard = overview.rows()[0].cards[0]
@@ -66,7 +78,7 @@ func test_five_taps_on_stat_bar_open_debug_panel() -> void:
 		var touch := InputEventScreenTouch.new()
 		touch.pressed = true
 		touch.position = bar.get_global_rect().get_center()
-		bar._input(touch)
+		bar._gui_input(touch)
 	assert_signal_emitted(overview, "debug_requested")
 
 

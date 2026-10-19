@@ -8,16 +8,13 @@ extends Control
 signal again_pressed
 signal overview_pressed
 
-## Guards the division by the count-up time in case it is tuned to 0.
-const MIN_COUNTUP_S := 0.001
-
 var gain: Label
 var note: Label
 var _title: Label
 var _stat_name: String = ""
 var _stat: int = 0
 var _cycles: int = 0
-var _t: float = 0.0
+var _countup: Tween
 var _again: Button
 
 
@@ -53,20 +50,15 @@ func show_result(title: String, accent: Color, stat_name: String, gain: Dictiona
 		notes.append("Tier %d unlocked" % gain.new_tier)
 	note.text = "\n".join(notes)
 	note.visible = not notes.is_empty()
-	_t = 0.0
-	_updategain()
+	_set_countup(0.0)
+	if _countup:
+		_countup.kill()
+	_countup = create_tween()
+	_countup.tween_method(_set_countup, 0.0, 1.0, Balance.get_num("flow", "reward_countup_s"))
 	show()
 	_again.grab_focus.call_deferred(true)
 
 
-func _process(delta: float) -> void:
-	if visible and _t < Balance.get_num("flow", "reward_countup_s"):
-		_t += delta
-		_updategain()
-
-
-func _updategain() -> void:
-	var f: float = clampf(
-		_t / maxf(MIN_COUNTUP_S, Balance.get_num("flow", "reward_countup_s")), 0.0, 1.0
-	)
+## Shows the fraction `f` (0..1) of the reward.
+func _set_countup(f: float) -> void:
 	gain.text = "+%d %s    +%d Cycles" % [roundi(_stat * f), _stat_name, roundi(_cycles * f)]

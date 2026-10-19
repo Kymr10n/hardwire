@@ -1,8 +1,10 @@
 class_name StoragePad
 extends Control
 ## One colored pad of the Storage ring: distinct color and symbol (colorblind-safe), lit level 0..1.
-## Lit pads brighten and scale up (theme: glow_ms, glow_scale_pct). Input is handled by
-## StoragePuzzle.
+## Lit pads brighten and scale up (theme: glow_ms, glow_scale_pct). A touch on the pad or the
+## accept action while it has focus emits `tapped`; StoragePuzzle decides what it means.
+
+signal tapped(index: int)
 
 enum Symbol { CIRCLE, TRIANGLE, SQUARE, DIAMOND, STAR, PLUS, HEXAGON, RING }
 
@@ -31,7 +33,7 @@ const ARC_SEGMENTS := 32
 var index: int = 0
 
 var _level: float = 0.0
-var _flash_left: float = 0.0
+var _flash: Tween
 var _tween: Tween
 var _style := StyleBoxFlat.new()
 
@@ -51,22 +53,30 @@ func level() -> float:
 
 ## Sets the lit level (0 = idle, 1 = fully lit). Cancels a running tap flash.
 func set_level(p_level: float) -> void:
-	_flash_left = 0.0
+	_cancel_flash()
 	_apply_level(p_level)
 
 
 ## Short full-brightness flash for a tap.
 func flash() -> void:
+	_cancel_flash()
 	_apply_level(1.0)
-	_flash_left = get_theme_constant("tap_flash_ms", "Hardwire") / 1000.0
+	_flash = create_tween()
+	_flash.tween_interval(get_theme_constant("tap_flash_ms", "Hardwire") / 1000.0)
+	_flash.tween_callback(_apply_level.bind(0.0))
 
 
-func _process(delta: float) -> void:
-	if _flash_left > 0.0:
-		_flash_left -= delta
-		if _flash_left <= 0.0:
-			_flash_left = 0.0
-			_apply_level(0.0)
+func _cancel_flash() -> void:
+	if _flash:
+		_flash.kill()
+		_flash = null
+
+
+func _gui_input(event: InputEvent) -> void:
+	var touch := event as InputEventScreenTouch
+	if (touch != null and touch.pressed) or Ui.accept_event(event) == 1:
+		accept_event()
+		tapped.emit(index)
 
 
 func _apply_level(p_level: float) -> void:

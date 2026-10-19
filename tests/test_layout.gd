@@ -90,9 +90,7 @@ func test_ram_cells_at_every_size() -> void:
 		var grid: RamGrid = screen.puzzle.grid()
 		assert_eq(grid.n, 6)
 		assert_gte(grid.cell_rect(0).size.x, 120.0, "cells are at least 120 px")
-		assert_eq(
-			grid.cell_at(grid.global_position + grid.cell_rect(7).get_center()), 7, "hit test"
-		)
+		assert_eq(grid.cell_at(grid.cell_rect(7).get_center()), 7, "hit test")
 		screen.get_parent().queue_free()
 
 

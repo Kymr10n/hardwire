@@ -68,11 +68,26 @@ func tap_action(viewport: Viewport, action: String) -> void:
 	press_action(viewport, action, false)
 
 
+## Sends a touch press and release at `position` (viewport coordinates) through `viewport`.
+func tap_at(viewport: Viewport, position: Vector2) -> void:
+	for pressed: bool in [true, false]:
+		var touch := InputEventScreenTouch.new()
+		touch.position = position
+		touch.pressed = pressed
+		viewport.push_input(touch)
+
+
 ## A started puzzle of `script` (StoragePuzzle, RamPuzzle or CpuPuzzle) in a phone-sized area.
-func make_puzzle(script: Script, tier: int, modifier: String = "", seed: int = 7) -> PuzzleBase:
+## `touchable` puts it in its own SubViewport so touches can be pushed to it (tap_at).
+func make_puzzle(
+	script: Script, tier: int, modifier: String = "", seed: int = 7, touchable: bool = false
+) -> PuzzleBase:
 	var puzzle: PuzzleBase = script.new()
 	puzzle.size = Vector2(1000, 1400)
-	add_child_autofree(puzzle)
+	if touchable:
+		in_viewport(puzzle, Vector2i(puzzle.size))
+	else:
+		add_child_autofree(puzzle)
 	var type: String = {StoragePuzzle: "sto", RamPuzzle: "ram", CpuPuzzle: "cpu"}[script]
 	puzzle.setup(SlotDef.create(tier, type, modifier), seed)
 	puzzle.start()

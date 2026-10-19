@@ -40,6 +40,19 @@ func test_watch_lights_each_item() -> void:
 	assert_eq(lit_order, puzzle.expected())
 
 
+func test_touch_on_pad_taps_it() -> void:
+	var puzzle := make_puzzle(StoragePuzzle, 1, "", 7, true)
+	watch_signals(puzzle)
+	run_until(puzzle, PuzzleBase.Phase.INPUT)
+	await wait_process_frames(1)
+	var viewport: Viewport = puzzle.get_viewport()
+	tap_at(viewport, Vector2.ZERO)
+	assert_eq(puzzle.progress(), 0, "a touch between pads is not a tap")
+	for pad: int in puzzle.expected():
+		tap_at(viewport, puzzle.pads()[pad].get_global_rect().get_center())
+	assert_signal_emitted(puzzle, "solved")
+
+
 func test_correct_input_solves() -> void:
 	var puzzle := make_puzzle(StoragePuzzle, 20)
 	watch_signals(puzzle)
