@@ -79,3 +79,18 @@ func test_slot_cards_draw_their_frame() -> void:
 	assert_eq(
 		style.border_color, card.get_theme_color("ram", "Hardwire"), "new slot: accent border"
 	)
+
+
+func test_overview_has_quit_on_pc() -> void:
+	var overview := _overview()
+	assert_has(_button_texts(overview), "Quit", "tests run on PC (D-025)")
+	var settings := SettingsScreen.new()
+	add_child_autofree(settings)
+	assert_does_not_have(_button_texts(settings), "Quit", "Quit left Settings")
+
+
+func _button_texts(screen: Control) -> Array[String]:
+	var texts: Array[String] = []
+	for node: Node in screen.find_children("*", "Button", true, false):
+		texts.append((node as Button).text)
+	return texts

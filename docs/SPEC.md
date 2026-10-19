@@ -276,7 +276,7 @@ The prototype has five screens around one hub, the overview. Every screen works 
 | Screen | Contents | Leads to |
 | --- | --- | --- |
 | Boot | Title, "Press any button" ("Tap to start" on touch), loads the save | Overview |
-| Overview | Top bar with RAM, CPU, STO, Cycles and Cores (compact above 9999: 12.3K, 4.56M); vertical scroll list of tier rows (tier 1 at the top), newest unlocked tier in view on open; each row = tier number, requirement chips (accent-coloured while unmet) and 3 slot cards (RAM, CPU, STO); bottom bar with Shop, Rebuild and Settings | Puzzle, Shop, Rebuild dialog, Settings |
+| Overview | Top bar with RAM, CPU, STO, Cycles and Cores (compact above 9999: 12.3K, 4.56M); vertical scroll list of tier rows (tier 1 at the top), newest unlocked tier in view on open; each row = tier number, requirement chips (accent-coloured while unmet) and 3 slot cards (RAM, CPU, STO); bottom bar with Shop, Rebuild, Settings and, on PC, Quit (saves and closes) | Puzzle, Shop, Rebuild dialog, Settings |
 | Puzzle | Header with minigame name, tier, modifier and a back button; phase label ("Watch" / "Your turn"); timer bar; the minigame area; result overlay | Overview |
 | Shop | List of upgrade cards, Cycles balance on top | Overview |
 | Settings | Sound on or off, haptics on or off, licenses (full texts of Hardwire, the font and Godot with its third-party components; the text scrolls with the D-pad or arrows; Back returns to Settings), reset save (with confirm) | Overview, Licenses |
@@ -293,7 +293,7 @@ The prototype has five screens around one hub, the overview. Every screen works 
 
 **Landscape:** the same screens with one code path each; a window that changes orientation re-creates the current screen, and a running attempt restarts with a fresh sequence (no penalty). The puzzle screen puts header, phase label and timer in a side panel next to the puzzle; the overview puts the stats and the Shop / Rebuild / Settings buttons in a sidebar next to the tier list; the shop shows two columns; other screens use a centered column.
 
-On PC, Settings adds "Fullscreen" and "Quit"; B on the overview never quits. With the `SteamDeck=1` environment variable (set by Steam on the Deck) the game starts fullscreen.
+On PC, Settings adds "Fullscreen" and the overview adds "Quit"; B on the overview never quits. With the `SteamDeck=1` environment variable (set by Steam on the Deck) the game starts fullscreen.
 
 **First run:** each minigame shows a one-line instruction overlay the first time it opens ("Repeat the sequence", "Recreate the pattern", "Copy the rhythm by holding the tile"). The attempt starts when the player taps the overlay; the hint is then recorded in `seen_tutorials`.
 

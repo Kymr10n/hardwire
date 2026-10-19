@@ -1,7 +1,7 @@
 class_name SettingsScreen
 extends Control
 ## Settings (SPEC: Screens and UX flow): sound on/off, haptics on/off, licenses, reset save
-## (with confirm); on PC also Fullscreen and Quit. Saves after every change.
+## (with confirm); on PC also Fullscreen. Saves after every change.
 
 signal exit_requested
 signal licenses_requested
@@ -28,8 +28,6 @@ func _ready() -> void:
 	var actions: GridContainer = _grid(box)
 	var reset: Button = _add_button(actions, "Reset save", _on_reset)
 	reset.add_theme_color_override("font_color", get_theme_color("fail", "Hardwire"))
-	if OS.has_feature("pc"):
-		_add_button(actions, "Quit", _on_quit)
 	_refresh()
 
 
@@ -64,11 +62,6 @@ func _is_fullscreen() -> bool:
 func _toggle_fullscreen() -> void:
 	get_window().mode = Window.MODE_WINDOWED if _is_fullscreen() else Window.MODE_FULLSCREEN
 	_refresh()
-
-
-func _on_quit() -> void:
-	SaveManager.save_game()
-	get_tree().quit()
 
 
 func _toggle_setting(key: String) -> void:

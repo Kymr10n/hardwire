@@ -58,12 +58,21 @@ func _build_buttons(vertical: bool) -> BoxContainer:
 	var bar: BoxContainer = Ui.box(vertical)
 	shop_button = Ui.button("Shop", shop_requested.emit)
 	rebuild_button = Ui.button("Rebuild", _confirm_rebuild)
-	for button: Button in [
+	var buttons: Array[Button] = [
 		shop_button, rebuild_button, Ui.button("Settings", settings_requested.emit)
-	]:
+	]
+	if OS.has_feature("pc"):
+		buttons.append(Ui.button("Quit", _quit))
+	for button: Button in buttons:
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		bar.add_child(button)
 	return bar
+
+
+## PC only (SPEC: Overview, D-025): phones leave through the Android back button.
+func _quit() -> void:
+	SaveManager.save_game()
+	get_tree().quit()
 
 
 ## Gamepad focus on open: the first unsolved slot of the newest unlocked tier, else its first slot.

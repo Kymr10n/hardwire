@@ -146,3 +146,9 @@ Format: `## D-NNN — YYYY-MM-DD — Title`, then **Decision**, **Why**, **Affec
 **Decision:** In the CPU minigame the controller rumbles during playback for each on-segment, as long as the tile is lit (phones: one vibration per beat), and during input for as long as the tile is held; this replaces the single pulse per press. Under Audio only, playback does not rumble (only the tone plays). In every minigame a success gives a short double pulse and a failure one long pulse. Everything goes through the Haptics autoload and the haptics setting; the lengths and strengths live in `balance.json` → `haptics`.
 **Why:** Owner request after play-testing with a controller: feeling the rhythm makes holds readable and the Deck's rumble is otherwise unused. Audio only must stay an ear-only test.
 **Affects:** Platforms and input > Haptics; Minigame: CPU; Result overlay; `balance.json` → `haptics`; `Haptics`, `CpuPuzzle`, `PuzzleBase`.
+
+## D-025 — 2026-10-19 — Quit on the overview, not in Settings
+
+**Decision:** On PC the overview's bottom bar has a "Quit" button (Shop, Rebuild, Settings, Quit); Settings keeps only "Fullscreen". Quit saves and closes the game. Phones have no Quit button (the Android back button quits from the overview). Supersedes the Settings placement in D-019.
+**Why:** Play-testing: leaving the game through Settings was not intuitive; the main screen is where a player looks for it.
+**Affects:** Screens and UX flow (Overview row, PC note); `OverviewScreen`, `SettingsScreen`.
