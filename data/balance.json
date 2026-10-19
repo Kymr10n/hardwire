@@ -5,6 +5,7 @@
   },
   "flow": {
     "countdown_s": 1.5,
+    "countdown_steps": 3,
     "fail_reveal_s": 1.0,
     "reward_countup_s": 0.6,
     "locked_tiers_visible": 2
@@ -19,6 +20,20 @@
     "core_bonus": 0.25,
     "prestige_min_tier": 10,
     "prestige_core_offset": 9
+  },
+  "audio": {
+    "volume": 0.3,
+    "attack_ms": 5,
+    "release_ms": 30,
+    "pad_notes_hz": [261.63, 293.66, 329.63, 392.0, 440.0, 523.25, 587.33, 659.25],
+    "pad_note_min_ms": 150,
+    "decoy_volume": 0.35,
+    "click_hz": 1800,
+    "click_ms": 15,
+    "cpu_tone_hz": 440,
+    "success_notes_hz": [523.25, 659.25, 783.99, 1046.5],
+    "success_note_ms": 90,
+    "fail_noise_ms": 200
   },
   "idle": {
     "replays_per_hour": 6,

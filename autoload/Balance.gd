@@ -89,4 +89,17 @@ func upgrade_ids() -> Array[String]:
 	return ids
 
 
+## Looks up a [[from_tier, value], ...] table in a section: the value of the last row with from_tier <= tier.
+func tier_table(section_name: String, key: String, tier: int) -> int:
+	var table: Variant = section(section_name).get(key)
+	if not (table is Array) or table.is_empty():
+		push_error("Balance: missing tier table '%s.%s'" % [section_name, key])
+		return 0
+	var value: int = int(table[0][1])
+	for row: Variant in table:
+		if tier >= int(row[0]):
+			value = int(row[1])
+	return value
+
+
 # TODO(M5): formula functions req(tier), reward(tier), cycles(tier) — SPEC: Difficulty curve.

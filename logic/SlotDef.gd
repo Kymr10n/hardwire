@@ -17,3 +17,13 @@ var cycles: int = 0 # Cycles per replay, before multipliers
 
 func id() -> String:
 	return "%d:%s" % [tier, type]
+
+
+## Builds a bare slot for a given tier, type and (optionally forced) modifier.
+## Requirements and rewards are filled in by SlotGenerator (M5).
+static func create(p_tier: int, p_type: String, p_modifier: String = "") -> SlotDef:
+	var slot := SlotDef.new()
+	slot.tier = p_tier
+	slot.type = p_type
+	slot.modifier = p_modifier
+	return slot
