@@ -120,7 +120,10 @@ A central tile plays a rhythm of on and off phases, and the player mimics it by 
 
 - The clock starts at the player's first press. There is no count-in and no need to hit a beat grid.
 - Each press and release is timestamped with `Time.get_ticks_usec()` in `_input`, not in `_process`.
-- Input ends 600 ms after the last expected release, or on timeout (5 s with no first press).
+- Input ends 600 ms after the player's release of beat number `beats`, so extra presses are still caught.
+- It also ends once no input could still pass: when the time since the first press exceeds the longest passing rhythm (every segment at its upper tolerance) plus 600 ms. A uniformly slow but in-tolerance player is never cut off.
+- With no first press within 5 s, the attempt times out. A press beyond `beats` fails at once.
+- **Failure:** the tile replays the target rhythm silently, compressed to fit the 1 s answer reveal.
 
 **Judging.**
 
@@ -136,7 +139,7 @@ The judge is a pure function with unit tests, because it decides whether the min
 **Modifiers** (from tier 8):
 
 - *Audio only:* the tile stays dark during playback; only the tone plays.
-- *Syncopated:* segment lengths can be half steps (0.5 or 1.5 steps).
+- *Syncopated:* on- and off-segments may also be 0.5 or 1.5 steps long, and every syncopated rhythm contains at least one such half-step segment.
 
 ## Difficulty curve and slot tiers
 
@@ -338,7 +341,7 @@ Build one milestone per session, in order. Each milestone ends with a playable b
 | M1 | Skeleton: project settings, autoloads, `balance.json`, save/load, GUT set up | App opens in a portrait window; a debug button adds stats and they survive a restart; tests run headless | Done (2026-10-19) |
 | M2 | Storage minigame, launched from a debug menu with a tier picker | Tiers 1, 5 and 20 play as specified; wrong tap and timeout both start a new sequence; Reverse and Decoy work when forced; generator tests pass | Done (2026-10-19), awaiting play-test |
 | M3 | RAM minigame | Toggle, Commit and timeout work; failed attempts flash the answer; Inverted and Rotated work when forced | Done (2026-10-19), awaiting play-test |
-| M4 | CPU minigame and `RhythmJudge` | Judge tests cover exact input, input within tolerance, too many presses, and one segment out of tolerance; playing a tier 1 rhythm by ear passes | Planned |
+| M4 | CPU minigame and `RhythmJudge` | Judge tests cover exact input, input within tolerance, too many presses, and one segment out of tolerance; playing a tier 1 rhythm by ear passes | In progress |
 | M5 | Overview, slot generation, gating, rewards | Fresh save reaches tier 4 through first solves alone; locked slots show missing stats; numbers match the Sample tiers table | Planned |
 | M6 | Shop and upgrades | All six upgrades buy, persist and change their puzzle as specified | Planned |
 | M7 | Prestige and idle income | Rebuild becomes available after a tier 10 solve; Cores and multiplier are correct; the right fields reset; idle Cycles are offered after closing the app for over 5 minutes and respect the 8 h cap | Planned |
