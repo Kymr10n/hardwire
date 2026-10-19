@@ -158,3 +158,33 @@ Format: `## D-NNN — YYYY-MM-DD — Title`, then **Decision**, **Why**, **Affec
 **Decision:** Milestones M1–M9 are done and the spec is frozen as the v0.1.0 prototype. M8 closes with the Android build tracked separately (issue #5: SDK licences, APK, real-phone test); M9 closes after the Steam Deck play-test on 2026-10-19. Further changes to the spec continue through decisions; the "After the prototype" sections (Steam release, Benchmark slot) are the next scope.
 **Why:** Every "Done when" criterion that does not need the Android SDK has been met and checked on the device; a tagged release gives play-testers a fixed build to report against.
 **Affects:** Milestones; `docs/PROGRESS.md`; CHANGELOG; GitHub release v0.1.0.
+
+## D-027 — 2026-10-19 — Add a restrained procedural ambient score
+
+**Decision:** The game plays a quiet, seeded ambient score through `AudioStreamGenerator`: a slow
+four-bar minor-pentatonic progression, smooth low sine bass, faint octave harmonics, and sparse
+upper notes. Music and sound effects share the Sound setting; every musical tuning value lives in
+`balance.json` → `audio`.
+**Why:** The owner requested minimal electronic music that gently supports play, varies between
+sessions, and avoids an intrusive repeating melody or percussion.
+**Affects:** Visual and audio style; `MusicGen`; `Synth`; `balance.json` → `audio`.
+
+## D-028 — 2026-10-19 — Pause ambient music outside gameplay screens
+
+**Decision:** The ambient score runs on Overview and Puzzle screens, and pauses on Boot, Shop,
+Settings, Licenses and the debug menu. Pausing stops score voices but lets gameplay sound effects
+finish.
+**Why:** Keeping the minimal score within active gameplay avoids filling the boot and utility menus
+with background sound.
+**Affects:** Screens and UX flow; `Main`; `Synth`; ambient music tests.
+
+## D-029 — 2026-10-19 — Ambient score gets a soft beat and high notes
+
+**Decision:** Supersedes the "no percussion" part of D-027. The score adds a soft half-time beat (a
+pitch-dropping sine kick on beats 1 and 3 with the bass, a short noise hi-hat on every off-beat)
+and two or three short high notes per bar, three octaves above the bar's root, on seeded
+eighth-note positions. Upper and high notes use the minor pentatonic of the current bar's root, so
+the scale moves with the bass. The spec names the screens where the score pauses (D-028). All
+tuning stays in `balance.json` → `audio`.
+**Why:** The owner listened to the score in game and asked for high notes on top and a fitting beat.
+**Affects:** Visual and audio style; `MusicGen`; `Synth`; `balance.json` → `audio`.

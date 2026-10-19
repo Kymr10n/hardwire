@@ -21,6 +21,7 @@ Status values: `todo`, `in progress`, `done`. Milestone scope and "Done when" cr
 
 - 2026-10-19: whole-project review (tooling/process, spec audit, architecture) and its fixes. Verdicts: gameplay numbers match the spec three ways (spec ↔ `balance.json` ↔ tests); layering is clean (pure `logic/`, puzzles never touch `GameState`); the gate and hooks had four holes, now closed; two real bugs fixed (Storage Replay button overlap in landscape, idle offer lost on screen re-creation). Spec reconciled by D-023; rumble added by D-024. Items not applied are listed under Follow-ups.
 - 2026-10-19, later: the review's deferred items applied. Per-frame code replaced by Godot built-ins (Tween count-up and pad flash, `sort_children` scroll, `ProgressBar` timer, pointer input through `_gui_input` with `tapped` / `cell_activated` signals; CpuPuzzle keeps `_input` for its timestamps); the architecture nits; the tooling nits (hermetic gate, one CI export job, `SECURITY.md`, hooks block without python3). Visual check done at 1280×800 and 540×960: Replay button centred in the ring, trace line and tier nodes, CPU markers, result count-up, timer bar all as intended. Tests: 208 in 23 scripts.
+- 2026-10-19: ambient score (D-027–D-029): reviewer and spec-auditor findings fixed (test state leak, pause keeps effects tested, spec numbers in tests, scale and paused screens named in the spec); the owner listened on desktop and approved. Remaining items are under Follow-ups.
 
 ## Follow-ups
 
@@ -31,6 +32,8 @@ Deferred work, each with what it needs:
 - **Bundle ID:** `org.hardwire.prototype` (Android and macOS presets) must become the final ID before any store release; it cannot change afterwards. Owner decision (D-021 kept the placeholder).
 - **iOS preset:** none yet; waits for a Mac with current Xcode (D-008).
 - **Private vulnerability reporting:** `SECURITY.md` points at GitHub's private report form; the owner enables it under Settings → Code security (`gh api -X PUT repos/Kymr10n/hardwire/private-vulnerability-reporting`).
+- **Ambient score on devices:** listen and profile on the web export, Steam Deck and Android. The score keeps 3–4 GDScript voices mixing on the main thread (single-threaded on web); if it is too heavy, drop the bass harmonic voice first.
+- **Ambient score code (review, should-fix):** schedule each bar's notes with per-voice `delay_ms` instead of per-frame dispatch (removes frame jitter on the hi-hat and the event index); resolve attack/release defaults once in `Synth._add_voice` and store the kick glide as a per-sample step; one `_pick_positions` helper for pads and leads; seed bars with `hash([seed, bar])` and drop `music_seed_stride`; `music_bass_min_midi`/`max_midi` are test-only (move into the test or enforce); `music_kick_beats` repeats the bass beats; the debug time scale also speeds up the score.
 - **Play-test the balance:** time to tiers 5, 10 and 20 on a fresh save (targets: 10 min, 1 h, several sessions); fail rate per minigame; rhythm tolerance on a real phone.
 
 ## Play-test notes

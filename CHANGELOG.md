@@ -13,6 +13,7 @@ All notable changes to Hardwire are documented here. The format follows [Keep a 
 ### Added
 
 - `SECURITY.md`.
+- A quiet procedural ambient score with a soft half-time beat on the overview and puzzle screens.
 
 ## [0.1.0] - 2026-10-19
 

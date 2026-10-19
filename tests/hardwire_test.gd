@@ -10,6 +10,7 @@ var _orig_path: String
 var _orig_state: Dictionary
 var _orig_time_scale: float
 var _orig_device: int
+var _orig_music: bool
 
 
 func before_each() -> void:
@@ -17,6 +18,7 @@ func before_each() -> void:
 	_orig_state = SaveManager.to_dict()
 	_orig_time_scale = Engine.time_scale
 	_orig_device = InputMode.device
+	_orig_music = Synth.is_music_enabled()
 	SaveManager.save_path = TEST_SAVE
 	_remove_test_files()
 	GameState.reset_all()
@@ -32,6 +34,7 @@ func after_each() -> void:
 	SaveManager.from_dict(_orig_state)
 	Engine.time_scale = _orig_time_scale
 	InputMode.device = _orig_device as InputMode.Device
+	Synth.set_music_enabled(_orig_music)
 
 
 func _remove_test_files() -> void:

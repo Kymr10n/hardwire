@@ -1,19 +1,30 @@
 extends Node
 ## Runtime-synthesized audio via AudioStreamGenerator, no audio files (SPEC: Visual and audio
-## style). Pentatonic pad notes, RAM click, CPU sine tone, success arpeggio, fail noise burst.
-## Respects GameState.settings.sound. All frequencies and durations come from balance.json "audio".
+## style). Ambient score with a soft beat, pentatonic pad notes, RAM click, CPU sine tone,
+## success arpeggio, fail noise burst. Respects GameState.settings.sound. Tuning comes from
+## balance.json "audio".
 
 enum Wave { SINE, NOISE }
 
 ## Every sample is mixed in GDScript; the highest tone is about 1 kHz, so half the usual rate
 ## keeps phones comfortable.
 const MIX_RATE := 22050.0
+const MIDI_A4 := 69
+const MIDI_A4_HZ := 440.0
+const SEMITONES_PER_OCTAVE := 12.0
+const SECONDS_PER_MINUTE := 60.0
 
 var _player: AudioStreamPlayer
 var _playback: AudioStreamGeneratorPlayback
 var _voices: Array[Dictionary] = []
 var _rng := RandomNumberGenerator.new()
 var _next_voice_id: int = 1
+var _music_seed: int
+var _music_bar_index: int = 0
+var _music_bar_elapsed_s: float = 0.0
+var _music_events: Array[Dictionary] = []
+var _music_event_index: int = 0
+var _music_enabled: bool = false
 
 
 func _ready() -> void:
@@ -28,9 +39,12 @@ func _ready() -> void:
 	add_child(_player)
 	_player.play()
 	_playback = _player.get_stream_playback() as AudioStreamGeneratorPlayback
+	_rng.randomize()
+	_music_seed = _rng.randi()
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
+	_advance_music(delta)
 	_fill_buffer()
 
 
@@ -61,11 +75,15 @@ func stop_tone(id: int) -> void:
 			voice.length = voice.t + _ms_to_samples(Balance.get_num("audio", "release_ms"))
 
 
+func is_playing(id: int) -> bool:
+	return _voices.any(func(voice: Dictionary) -> bool: return voice.id == id)
+
+
 func play_success() -> void:
 	var note_ms: float = Balance.get_num("audio", "success_note_ms")
 	var delay_ms: float = 0.0
 	for hz: Variant in Balance.section("audio").get("success_notes_hz", []):
-		_add_voice(Wave.SINE, float(hz), note_ms, 1.0, delay_ms)
+		_add_voice(Wave.SINE, float(hz), note_ms, 1.0, {"delay_ms": delay_ms})
 		delay_ms += note_ms
 
 
@@ -82,11 +100,29 @@ func stop_all() -> void:
 	_voices.clear()
 
 
+func set_music_enabled(enabled: bool) -> void:
+	if enabled == _music_enabled:
+		return
+	_music_enabled = enabled
+	_music_bar_elapsed_s = 0.0
+	if enabled:
+		_set_music_bar()
+	else:
+		_voices = _voices.filter(func(voice: Dictionary) -> bool: return not voice.music)
+
+
+func is_music_enabled() -> bool:
+	return _music_enabled
+
+
 func _add_voice(
-	wave: Wave, hz: float, length_ms: float, volume: float, delay_ms: float = 0.0
+	wave: Wave, hz: float, length_ms: float, volume: float, options: Dictionary = {}
 ) -> int:
 	if not GameState.settings.get("sound", true):
 		return 0
+	var delay_ms: float = float(options.get("delay_ms", 0.0))
+	var attack_ms: float = float(options.get("attack_ms", -1.0))
+	var release_ms: float = float(options.get("release_ms", -1.0))
 	var id: int = _next_voice_id
 	_next_voice_id += 1
 	(
@@ -96,10 +132,14 @@ func _add_voice(
 				"id": id,
 				"wave": wave,
 				"step": TAU * hz / MIX_RATE,
+				"end_step": TAU * float(options.get("end_hz", hz)) / MIX_RATE,
 				"phase": 0.0,
 				"t": -_ms_to_samples(delay_ms),
 				"length": _ms_to_samples(length_ms) if length_ms >= 0.0 else -1,
 				"amp": volume * Balance.get_num("audio", "volume"),
+				"attack": _ms_to_samples(attack_ms) if attack_ms >= 0.0 else 0,
+				"release": _ms_to_samples(release_ms) if release_ms >= 0.0 else 0,
+				"music": options.get("music", false),
 			}
 		)
 	)
@@ -130,17 +170,73 @@ func _next_sample(voice: Dictionary, attack: int, release: int) -> float:
 	voice.t = t + 1
 	if t < 0 or (voice.length >= 0 and t >= voice.length):
 		return 0.0
-	var env: float = minf(1.0, float(t) / attack)
+	var voice_attack: int = voice.attack if voice.attack > 0 else attack
+	var voice_release: int = voice.release if voice.release > 0 else release
+	var env: float = minf(1.0, float(t) / voice_attack)
 	if voice.length >= 0:
-		env = minf(env, float(voice.length - t) / release)
+		env = minf(env, float(voice.length - t) / voice_release)
 	var raw: float
 	if voice.wave == Wave.NOISE:
 		raw = _rng.randf_range(-1.0, 1.0)
 	else:
 		raw = sin(voice.phase)
-		voice.phase = fmod(voice.phase + voice.step, TAU)
+		var step: float = voice.step
+		if voice.length > 0:
+			step = lerpf(voice.step, voice.end_step, float(t) / voice.length)
+		voice.phase = fmod(voice.phase + step, TAU)
 	return raw * env * voice.amp
 
 
 static func _ms_to_samples(ms: float) -> int:
 	return int(ms * MIX_RATE / 1000.0)
+
+
+func _advance_music(delta: float) -> void:
+	if not _music_enabled:
+		return
+	var audio: Dictionary = Balance.section("audio")
+	var beat_s: float = SECONDS_PER_MINUTE / float(audio.music_bpm)
+	var bar_s: float = beat_s * float(audio.music_beats_per_bar)
+	_music_bar_elapsed_s += delta
+	if _music_bar_elapsed_s >= bar_s:
+		var bars_passed: int = floori(_music_bar_elapsed_s / bar_s)
+		_music_bar_elapsed_s = fmod(_music_bar_elapsed_s, bar_s)
+		_music_bar_index += bars_passed
+		_set_music_bar()
+	while _music_event_index < _music_events.size():
+		var event: Dictionary = _music_events[_music_event_index]
+		if float(event.beat) * beat_s > _music_bar_elapsed_s:
+			return
+		_play_music_event(event, beat_s)
+		_music_event_index += 1
+
+
+func _set_music_bar() -> void:
+	_music_events = MusicGen.make_bar(Balance.section("audio"), _music_bar_index, _music_seed)
+	_music_event_index = 0
+
+
+## Each role's envelope and volume come from balance.json "audio" → music_<role>_*.
+func _play_music_event(event: Dictionary, beat_s: float) -> void:
+	var audio: Dictionary = Balance.section("audio")
+	var role: String = event.role
+	var duration_ms: float = float(event.duration_beats) * beat_s * 1000.0
+	var volume: float = audio["music_%s_volume" % role]
+	var options := {
+		"attack_ms": audio["music_%s_attack_ms" % role],
+		"release_ms": audio["music_%s_release_ms" % role],
+		"music": true,
+	}
+	if role == "hat":
+		_add_voice(Wave.NOISE, 0.0, duration_ms, volume, options)
+		return
+	var note_hz: float = _midi_to_hz(event.midi_note)
+	if event.has("end_midi_note"):
+		options.end_hz = _midi_to_hz(event.end_midi_note)
+	_add_voice(Wave.SINE, note_hz, duration_ms, volume, options)
+	if role == "bass":
+		_add_voice(Wave.SINE, note_hz * 2.0, duration_ms, audio.music_harmonic_volume, options)
+
+
+static func _midi_to_hz(note: int) -> float:
+	return MIDI_A4_HZ * pow(2.0, float(note - MIDI_A4) / SEMITONES_PER_OCTAVE)

@@ -101,6 +101,19 @@ func test_overview_has_quit_on_pc() -> void:
 	assert_does_not_have(_button_texts(settings), "Quit", "Quit left Settings")
 
 
+func test_ambient_score_only_runs_on_gameplay_screens() -> void:
+	var main: Control = load("res://scenes/Main.gd").new()
+	add_child_autofree(main)
+	main.show_boot()
+	assert_false(Synth.is_music_enabled())
+	main.show_overview()
+	assert_true(Synth.is_music_enabled())
+	main.show_settings()
+	assert_false(Synth.is_music_enabled())
+	main.show_puzzle(SlotGenerator.make(1, SlotDef.TYPE_STO))
+	assert_true(Synth.is_music_enabled())
+
+
 func _button_texts(screen: Control) -> Array[String]:
 	var texts: Array[String] = []
 	for node: Node in screen.find_children("*", "Button", true, false):

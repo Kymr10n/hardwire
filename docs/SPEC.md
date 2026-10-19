@@ -318,6 +318,16 @@ The look is a dark, flat circuit board drawn entirely with Godot shapes and one 
 
 **Audio** (generated with `AudioStreamGenerator`, no files):
 
+- A quiet ambient score runs on the Overview and Puzzle screens (dialogs and results on them
+  included) and pauses on Boot, Shop, Settings, Licenses and the debug menu. It is a slow
+  four-bar bass progression (D, C, G, A) of smooth sine tones with a faint octave harmonic, one or
+  two softly enveloped upper notes and two or three short high notes (three octaves up, on
+  eighth-note positions) per bar, all from the minor pentatonic of that bar's root. A soft
+  half-time beat underneath: a sine kick with a pitch drop on beats 1 and 3, a short noise hi-hat
+  on every off-beat. Seeded variation changes note choices and spacing each session; the beat is
+  fixed.
+- The score and all sound effects respect the Sound setting. Music tuning lives in
+  `balance.json` → `audio`.
 - Storage pads: one note each from a pentatonic scale, so any sequence sounds pleasant.
 - RAM: a soft click on toggle.
 - CPU tile: a steady sine tone while lit or held.

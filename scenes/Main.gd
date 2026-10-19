@@ -165,6 +165,7 @@ func _show(next: Control, recreate: Callable) -> void:
 	if screen:
 		screen.queue_free()
 	screen = next
+	Synth.set_music_enabled(next is OverviewScreen or next is PuzzleScreen)
 	_recreate_screen = recreate
 	add_child(screen)
 	Ui.focus_first(screen)
