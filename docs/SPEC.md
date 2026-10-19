@@ -171,7 +171,7 @@ First solve of a slot pays 2 × reward and 2 × Cycles. Modifier slots pay a fur
 | 10 | 162 | 22 / 11 | 100 / 50 | 8 · 6 · 475 | 5×5 · 7 · 1600 | 6 · 228 · 23.25% |
 | 20 | 722 | 42 / 21 | 200 / 100 | 12 · 8 · 300 | 6×6 · 12 · 1000 | 9 · 150 · 15.75% |
 
-Without upgrades, reaching tier 10 takes about 6 replays per minigame at tier 9, and tier 20 about 15 replays at tier 19.
+Without upgrades or modifiers, reaching tier 10 takes about 8 replays per minigame in total (1 to 2 per tier from tier 4), and tier 20 about 24.
 
 **Modifiers.** From tier 8 a slot may carry one modifier. The chance is `min(0.8, 0.3 + 0.025(T−8))`, decided by the slot's hash. Tiers 8 to 13 draw from the first modifier of each minigame (Reverse, Inverted, Audio only); tier 14 onward adds the second (Decoy, Rotated, Syncopated). A modifier slot shows its icon and name on the overview.
 
