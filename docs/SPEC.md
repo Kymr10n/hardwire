@@ -185,7 +185,7 @@ Without upgrades or modifiers, reaching tier 10 takes about 8 replays per miniga
 
 ## Upgrade shop
 
-The shop sells leveled upgrades for Cycles. Assist upgrades make puzzles easier and are capped; economy upgrades boost rewards and are uncapped. Cost of the next level = `base × growth^level`.
+The shop sells leveled upgrades for Cycles. Assist upgrades make puzzles easier and are capped; economy upgrades boost rewards and are uncapped. Cost of the next level = `round(base × growth^level)` Cycles, where `level` is the current level.
 
 | Upgrade | Effect per level | Max level | Base cost | Growth |
 | --- | --- | --- | --- | --- |
@@ -196,7 +196,10 @@ The shop sells leveled upgrades for Cycles. Assist upgrades make puzzles easier 
 | Overclock | All: +10% stat rewards | none | 100 | 2.2 |
 | Cycle miner | All: +10% Cycles | none | 80 | 2.0 |
 
-Assist upgrades are applied when an attempt is built, after the tier formulas. The shop shows each upgrade's current level, next effect and cost, and greys out what the player cannot afford.
+Assist upgrades are applied when an attempt is built, after the tier formulas (and after their floors and caps). The puzzle screen copies the upgrade levels into the `SlotDef`, so puzzles still never read `GameState`. The shop shows each upgrade's current level, next effect and cost, and greys out what the player cannot afford.
+
+- *Replay buffer:* during the Storage input phase a "Replay" button shows the uses left. A replay plays the sequence again, resets the entered progress to zero and restarts the timer at its full length.
+- *Time dilation* multiplies the Storage and RAM time limits. CPU has no fixed input limit, so there it multiplies the first-press timeout.
 
 ## Prestige ("Rebuild")
 
@@ -348,7 +351,7 @@ Build one milestone per session, in order. Each milestone ends with a playable b
 | M3 | RAM minigame | Toggle, Commit and timeout work; failed attempts flash the answer; Inverted and Rotated work when forced | Done (2026-10-19), awaiting play-test |
 | M4 | CPU minigame and `RhythmJudge` | Judge tests cover exact input, input within tolerance, too many presses, and one segment out of tolerance; playing a tier 1 rhythm by ear passes | Done (2026-10-19), awaiting play-test on a phone |
 | M5 | Overview, slot generation, gating, rewards, Boot and Settings screens, debug panel | Fresh save reaches tier 4 through first solves alone; locked slots show missing stats; numbers match the Sample tiers table | Done (2026-10-19), awaiting play-test |
-| M6 | Shop and upgrades | All six upgrades buy, persist and change their puzzle as specified | Planned |
+| M6 | Shop and upgrades | All six upgrades buy, persist and change their puzzle as specified | In progress |
 | M7 | Prestige and idle income | Rebuild becomes available after a tier 10 solve; Cores and multiplier are correct; the right fields reset; idle Cycles are offered after closing the app for over 5 minutes and respect the 8 h cap | Planned |
 | M8 | Polish and export | Synth sounds, haptics, screen transitions, first-run hints; Android APK and web build run on a real phone | Planned |
 
