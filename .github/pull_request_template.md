@@ -8,6 +8,7 @@
 
 ## Checklist
 
-- [ ] `tools/run_tests.sh` passes locally
+- [ ] `tools/check.sh` passes locally
 - [ ] New tuning numbers are in `data/balance.json`, not in code
-- [ ] `docs/SPEC.md` is updated if behaviour or numbers changed
+- [ ] `docs/SPEC.md` and a new `docs/DECISIONS.md` entry if behaviour or numbers changed
+- [ ] Works with touch, mouse, keyboard and gamepad, in portrait and landscape

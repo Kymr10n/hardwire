@@ -4,15 +4,15 @@ Thanks for helping! Bug reports, balance feedback from play-testing, and pull re
 
 ## Before you start
 
-- Read [`docs/SPEC.md`](docs/SPEC.md). It is the source of truth for how the game works. If your change alters behaviour or a number, update the spec in the same pull request and say why.
+- Read [`docs/SPEC.md`](docs/SPEC.md). It is the source of truth for how the game works. If your change alters behaviour or a number, update the spec in the same pull request and add a new entry to [`docs/DECISIONS.md`](docs/DECISIONS.md) saying why (CI enforces this; old entries are never edited).
 - For anything bigger than a bug fix, open an issue first so we can agree on the approach.
 - Hardwire has no ads, analytics, tracking or purchases, and won't accept them.
 
 ## Setup
 
-1. Install [Godot 4.7.2](https://godotengine.org/download) (standard build) and put `godot` on your PATH.
-2. Clone the repo and import once: `godot --headless --path . --import`.
-3. Run the game with `godot --path .` and the tests with `tools/run_tests.sh` (the same checks as CI).
+1. Install [Godot 4.7.2](https://godotengine.org/download) (standard build) and put `godot` on your PATH, plus Python 3.
+2. Clone the repo and run `tools/setup.sh` (installs the pinned gdformat/gdlint into `.venv`).
+3. Run the game with `godot --path .` and the quality gate with `tools/check.sh` (the same checks as CI).
 
 ## Conventions
 
@@ -30,7 +30,7 @@ More details and known pitfalls are in [`CLAUDE.md`](CLAUDE.md).
 ## Pull requests
 
 - Keep each pull request focused on one change, with a clear description.
-- Add or update tests for logic changes. `tools/run_tests.sh` must pass; it also catches test scripts that GUT silently skips because they fail to parse. CI runs the same script.
+- Add or update tests for logic changes; `logic/X.gd` is tested in `tests/logic/test_x.gd`. `tools/check.sh` must pass: format, lint, drift checks (no tuning numbers in logic, no duplicated blocks, functions ≤ 40 lines, input only through InputMap actions), script errors and tests. Never weaken a test or a limit to get green.
 - If you changed something players can see, describe how to play-test it.
 - By contributing, you agree that your contribution is licensed under the [MIT License](LICENSE).
 

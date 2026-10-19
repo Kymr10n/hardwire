@@ -1,13 +1,15 @@
 {
-  // Path to the Godot 4 binary; "godot" works if it is on your PATH.
+  // Path to the Godot 4.7.2 binary; "godot" works if it is on your PATH.
   "godotTools.editorPath.godot4": "godot",
   "files.eol": "\n",
   "files.exclude": {
-    "**/.godot": true
+    "**/.godot": true,
+    "**/__pycache__": true
   },
   "search.exclude": {
     "**/.godot": true,
-    "addons/**": true
+    "addons/**": true,
+    ".venv/**": true
   },
   "[gdscript]": {
     "editor.insertSpaces": false,

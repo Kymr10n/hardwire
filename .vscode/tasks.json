@@ -2,16 +2,29 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Run game",
+      "label": "Check (quality gate)",
       "type": "shell",
-      "command": "godot --path .",
+      "command": "tools/check.sh",
+      "group": { "kind": "test", "isDefault": true },
       "problemMatcher": []
     },
     {
-      "label": "Run tests",
+      "label": "Run: Steam Deck / PC (1280x800)",
       "type": "shell",
-      "command": "tools/run_tests.sh",
-      "group": { "kind": "test", "isDefault": true },
+      "command": "godot --path . --resolution 1280x800",
+      "group": { "kind": "build", "isDefault": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "Run: phone portrait (540x960)",
+      "type": "shell",
+      "command": "godot --path . --resolution 540x960",
+      "problemMatcher": []
+    },
+    {
+      "label": "Setup",
+      "type": "shell",
+      "command": "tools/setup.sh",
       "problemMatcher": []
     },
     {

@@ -17,5 +17,7 @@ First playable prototype.
 - Runtime-synthesized audio, haptic feedback, the JetBrains Mono font, and a flat circuit-board theme.
 - Local JSON save with atomic writes and backup of broken files.
 - Debug panel for balancing (debug builds only).
-- Export presets for Web, Linux / Steam Deck and Android; a GUT unit test suite.
+- Export presets for Linux / Steam Deck, Windows, macOS, Android and Web; a GUT unit test suite.
+- Prompts show glyphs for the last-used device (touch, keyboard and mouse, gamepad); minimum font 32 px.
+- Development harness: `tools/check.sh` quality gate (gdformat, gdlint, drift checks, script errors, tests), decision log and progress file, Claude Code skills, review agents and hooks.
 - Steam Deck and desktop: landscape layouts picked from the window aspect, full gamepad and keyboard controls with a focus outline (hidden for touch), gamepad rumble, fullscreen on the Deck, Fullscreen and Quit in Settings on PC.

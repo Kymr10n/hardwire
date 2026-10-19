@@ -40,24 +40,42 @@ Use the mouse as your finger (touch is emulated), or a gamepad / keyboard: D-pad
 
 ## Develop
 
+Requirements: Godot 4.7.2 and Python 3 (for gdtoolkit). GUT is vendored in `addons/gut`.
+
 ```bash
-tools/run_tests.sh   # import + all unit tests, with the same checks as CI (GUT is vendored)
+tools/setup.sh       # once: gdtoolkit (gdformat, gdlint) into .venv, version checks
+tools/check.sh       # the quality gate: format, lint, drift checks, script errors, tests
 godot -e --path .    # open the editor
 ```
 
-`tools/run_tests.sh` also fails if a test script doesn't parse, which GUT on its own reports as a pass. VS Code users get launch and task configs for running the game and the tests; install the recommended extensions when prompted.
+`tools/check.sh` is the same gate CI runs. Its drift checks keep code, tests and docs consistent: every `logic/` file has a mirrored test in `tests/logic/`, no tuning numbers in game logic, no duplicated blocks, short functions, input only through InputMap actions. VS Code users get tasks for the gate and for running the game as Steam Deck or phone.
 
 | Path | Contents |
 | --- | --- |
 | `docs/SPEC.md` | Game design spec: source of truth, milestones, acceptance criteria |
+| `docs/DECISIONS.md` | Why the spec is what it is (append-only decision log) |
+| `docs/PROGRESS.md` | Milestone status and play-test notes |
 | `data/balance.json` | Every tuning number, read through the `Balance` autoload |
-| `autoload/` | Singletons: Balance, GameState, SaveManager, Synth (generated audio), Haptics |
-| `logic/` | Pure, unit-tested rules: generators, rhythm judge, economy |
-| `scenes/` | Main scene, screens, the three puzzles, UI components (built in code) |
+| `autoload/` | Singletons: Balance, GameState, SaveManager, InputMode (glyphs), Synth (generated audio), Haptics |
+| `logic/` | Pure, unit-tested rules: generators, rhythm judge, economy, progress |
+| `scenes/` | Main scene, screens, the three puzzles, UI components (built in code with `Ui` helpers) |
 | `theme/` | Colors, sizes and durations |
-| `tests/` | GUT unit tests |
+| `tests/` | GUT tests; `tests/logic/` mirrors `logic/` |
+| `tools/` | Setup, quality gate, drift checks, exports, pinned versions |
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request. The project is developed with the help of [Claude Code](https://claude.com/claude-code); [`CLAUDE.md`](CLAUDE.md) holds the conventions it follows, which apply to human contributors too.
+See [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
+
+### Working with Claude Code
+
+The project is developed with [Claude Code](https://claude.com/claude-code) under a small harness. [`CLAUDE.md`](CLAUDE.md) holds the rules (KISS, DRY, YAGNI, architecture, platforms, tests), which apply to human contributors too.
+
+| What | How |
+| --- | --- |
+| Build the next milestone | `/milestone M#`: plan, tests first, minimal code, gate, review, progress, commit |
+| Change the design | `/spec-change <what and why>`: decision record, spec, data, tests and code together |
+| Review ad-hoc changes | `/review`: the gate plus the read-only `reviewer` and `spec-auditor` agents |
+
+Hooks in `.claude/settings.json` protect generated files and past decisions, format and lint every edit, and run `tools/check.sh` before Claude finishes a turn.
 
 ## Export
 
