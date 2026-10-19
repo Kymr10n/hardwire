@@ -1,10 +1,10 @@
-# Hardwire — Game Design Spec
+# Hardwire: Boot Sequence — Game Design Spec
 
 As of 2026-10-19. **Source of truth for implementation.** Build it milestone by milestone (see "Milestones and acceptance criteria"); progress is tracked in `docs/PROGRESS.md`. Change it only through `/spec-change`, which also records the change in `docs/DECISIONS.md`.
 
 ## Overview
 
-Hardwire is an endless incremental puzzle game for phones, PC and Steam Deck, built in Godot 4. The player upgrades a computer by solving three short memory and timing minigames. Each minigame raises one stat (RAM, CPU or Storage), and higher stats unlock harder puzzle slots that pay out more.
+*Hardwire: Boot Sequence* (short: Hardwire) is an endless incremental puzzle game for phones, PC and Steam Deck, built in Godot 4. The player upgrades a computer by solving three short memory and timing minigames. Each minigame raises one stat (RAM, CPU or Storage), and higher stats unlock harder puzzle slots that pay out more.
 
 | Decision | Choice |
 | --- | --- |
@@ -278,7 +278,7 @@ The prototype has five screens around one hub, the overview. Every screen works 
 
 | Screen | Contents | Leads to |
 | --- | --- | --- |
-| Boot | Title, "Press any button" ("Tap to start" on touch), loads the save | Overview |
+| Boot | Title "HARDWIRE" with the subtitle "BOOT SEQUENCE", "Press any button" ("Tap to start" on touch), loads the save | Overview |
 | Overview | Top bar with RAM, CPU, STO, Cycles and Cores (compact above 9999: 12.3K, 4.56M); vertical scroll list of tier rows (tier 1 at the top), newest unlocked tier in view on open; each row = tier number, requirement chips (accent-coloured while unmet) and 3 slot cards (RAM, CPU, STO); bottom bar with Shop, Rebuild, Settings and, on PC, Quit (saves and closes) | Puzzle, Shop, Rebuild dialog, Settings |
 | Puzzle | Header with minigame name, tier, modifier and a back button; phase label ("Watch" / "Your turn"); timer bar; the minigame area; result overlay | Overview |
 | Shop | List of upgrade cards, Cycles balance on top | Overview |
@@ -432,7 +432,7 @@ Build one milestone per session, in order. Each milestone ends with a playable b
 | M7 | Prestige and idle income | Rebuild becomes available after a tier 10 solve; Cores and multiplier are correct; the right fields reset; idle Cycles are offered after closing the app for over 5 minutes and respect the 8 h cap |
 | M8 | Polish and export | Synth sounds, haptics, screen transitions, first-run hints; Android APK and web build run on a real phone |
 | M9 | Steam Deck and desktop: landscape layouts, gamepad and keyboard controls, Linux build | The Linux build runs fullscreen in Steam Deck game mode; every screen and minigame is playable with the controller alone and with touch alone; landscape layouts work at 16:10 and 16:9; prompts show glyphs of the last-used device; export presets exist for Windows and macOS; CI builds Linux and Windows |
-| M10 | Steam release preparation (see After the prototype: Steam release) | Saves live in a `Hardwire` folder on desktop; the Windows exe carries the Hardwire icon, name, version and company; `tools/steam_upload.sh` exports Linux and Windows and uploads both depots with SteamPipe; the first Steam build installs and plays from the Steam client on PC and Steam Deck (needs the App ID) |
+| M10 | Steam release preparation (see After the prototype: Steam release) | Saves live in a `Hardwire` folder on desktop; the Windows exe carries the Hardwire icon, name ("Hardwire: Boot Sequence"), version and company; `tools/steam_upload.sh` exports Linux and Windows and uploads both depots with SteamPipe; the first Steam build installs and plays from the Steam client on PC and Steam Deck (needs the App ID) |
 
 ## After the prototype: Steam release
 
@@ -465,7 +465,7 @@ Every tier divisible by 5 gets a fourth slot, the Benchmark, which chains all th
 
 All open questions are decided as of 2026-10-19; the numbers in this spec are still first guesses meant to be tuned in play-testing.
 
-- Game name: Hardwire. Confirm availability when reserving it in Google Play Console and App Store Connect.
+- Game name: Hardwire: Boot Sequence (D-033); the subtitle keeps it apart from "Hardwired" (Lostbyte) on Steam. Files, folders, the save folder and the phone launcher label stay `hardwire` / `Hardwire`. Confirm availability when reserving it in Steamworks, Google Play Console and App Store Connect.
 - Idle income: Cycles only, capped at 8 hours (see Idle income).
 - Mixed slot: a Benchmark slot every 5th tier, built after the prototype.
 - Monetization beyond the Steam price: none. No ads, in-app purchases or tracking SDKs; the code

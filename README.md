@@ -1,4 +1,4 @@
-# Hardwire
+# Hardwire: Boot Sequence
 
 [![CI](https://github.com/Kymr10n/hardwire/actions/workflows/ci.yml/badge.svg)](https://github.com/Kymr10n/hardwire/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)

@@ -216,3 +216,13 @@ the spec. Saves from 0.1.0 are not moved automatically (only play-testers have t
 anyone buys the game, because moving it later loses saves.
 **Affects:** Milestones; After the prototype: Steam release; Save system; `project.godot`; `export_presets.cfg`;
 `tools/`.
+
+## D-033 — 2026-10-19 — Name: Hardwire: Boot Sequence
+
+**Decision:** The game is called "Hardwire: Boot Sequence". The Boot screen shows "HARDWIRE" with
+"BOOT SEQUENCE" below it; the window title, the Windows exe and the stores use the full name. Short
+form, phone launcher label, repository, file names and the save folder stay `hardwire` / `Hardwire`, so no save moves.
+**Why:** "Hardwired" by Lostbyte, a puzzle-tagged hacking game, is coming to Steam; the owner chose
+a subtitle over a new name to keep the two apart in search.
+**Affects:** Overview (name); Screens and UX flow (Boot); Decisions and balancing notes (Game name);
+M10; `project.godot`; `export_presets.cfg`; `BootScreen`; README.

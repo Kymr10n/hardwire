@@ -1,7 +1,7 @@
 class_name BootScreen
 extends Control
-## Boot screen (SPEC: Screens and UX flow): title and "Tap to start". The save is loaded by the
-## SaveManager autoload before this screen exists.
+## Boot screen (SPEC: Screens and UX flow): title, subtitle and "Tap to start". The save is loaded
+## by the SaveManager autoload before this screen exists.
 
 signal start_requested
 
@@ -10,9 +10,13 @@ var prompt: Label
 
 func _ready() -> void:
 	var box: VBoxContainer = Ui.centered_column(self)
-	var title: Label = Ui.label("HARDWIRE", get_theme_font_size("title", "Hardwire") * 2)
+	# The name lives once, in project.godot: "Title: Subtitle".
+	var game_name: String = ProjectSettings.get_setting("application/config/name")
+	var font_size: int = get_theme_font_size("title", "Hardwire")
+	var title: Label = Ui.label(game_name.get_slice(": ", 0).to_upper(), font_size * 2)
 	title.add_theme_color_override("font_color", get_theme_color("ram", "Hardwire"))
 	box.add_child(title)
+	box.add_child(Ui.label(game_name.get_slice(": ", 1).to_upper(), font_size))
 	prompt = Ui.dim_label("")
 	box.add_child(prompt)
 	InputMode.device_changed.connect(_update_prompt)

@@ -1,5 +1,5 @@
-extends GutTest
-## M10 Steam release preparation: save folder and Windows exe metadata (SPEC: Steam release).
+extends "res://tests/hardwire_test.gd"
+## M10 Steam release: name, save folder and Windows exe metadata (SPEC: Steam release, D-033).
 
 
 func test_desktop_saves_live_in_a_hardwire_folder() -> void:
@@ -21,5 +21,19 @@ func test_windows_exe_carries_icon_name_version_and_company() -> void:
 	assert_eq(presets.get_value(options, "application/product_version", ""), "")
 	assert_true(presets.get_value(options, "application/modify_resources", false))
 	assert_ne(presets.get_value(options, "application/icon", ""), "")
-	assert_eq(presets.get_value(options, "application/product_name", ""), "Hardwire")
+	assert_eq(presets.get_value(options, "application/product_name", ""), "Hardwire: Boot Sequence")
+	assert_eq(
+		presets.get_value(options, "application/file_description", ""), "Hardwire: Boot Sequence"
+	)
 	assert_ne(presets.get_value(options, "application/company_name", ""), "")
+
+
+func test_boot_shows_the_name_with_its_subtitle() -> void:
+	assert_eq(ProjectSettings.get_setting("application/config/name"), "Hardwire: Boot Sequence")
+	var boot: Control = BootScreen.new()
+	add_child_autofree(boot)
+	var texts: Array[String] = []
+	for label: Node in boot.find_children("*", "Label", true, false):
+		texts.append((label as Label).text)
+	assert_has(texts, "HARDWIRE")
+	assert_has(texts, "BOOT SEQUENCE")
