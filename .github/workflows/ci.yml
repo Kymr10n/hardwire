@@ -27,7 +27,7 @@ jobs:
         run: grep -E "^[A-Z_]+=" tools/versions.env >> "$GITHUB_ENV"
 
       - name: Cache Godot
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/godot
           key: godot-${{ env.GODOT_VERSION }}-editor
@@ -73,7 +73,7 @@ jobs:
         run: grep -E "^[A-Z_]+=" tools/versions.env >> "$GITHUB_ENV"
 
       - name: Cache Godot and export templates
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/godot
           key: godot-${{ env.GODOT_VERSION }}-templates
