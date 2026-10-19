@@ -194,3 +194,12 @@ tuning stays in `balance.json` → `audio`.
 **Decision:** The CPU minigame judges each check the moment the input determines it: a beat's interval when the next press lands, a hold when it is released. The first check out of tolerance ends the attempt at once: that beat's marker turns red and the hint line above the tile says why ("Beat 3 too late", "too early", "held too short", "held too long"). The attempt succeeds at the release of the last beat. The 600 ms grace after the last release and the "press beyond `beats` fails" rule are gone (input has already ended); the longest-passing-rhythm cap stays as a stall guard. Tolerance is `max(0.25, 0.40 − 0.0075(T−1))` with a 100 ms minimum (was 0.30 to 0.15, 60 ms). Supersedes the input-end rule of D-022 and D-013 and the tolerance formula.
 **Why:** Play-test: the game was not fun. The player pressed blind and learned pass/fail 600 ms after the last release without knowing which beat was wrong, and the timing felt too strict. Failing at the first miss with the reason shown is how Storage already behaves on a wrong pad.
 **Affects:** Minigame: CPU (Input phase, Judging); Difficulty curve (formulas, sample tiers); `balance.json` → `cpu` (`tolerance_start`, `tolerance_min`, `tolerance_abs_ms`; `end_grace_ms` removed); `RhythmJudge`, `CpuPuzzle`, `CpuMarkers`; tests `test_rhythm_judge`, `test_rhythm_gen`, `test_cpu_puzzle`.
+
+## D-031 — 2026-10-19 — Paid on Steam, still open source
+
+**Decision:** Supersedes "Free" in D-006. Hardwire is sold on Steam; the price is set in Steamworks
+at launch. The code stays public under the MIT licence, and there are still no ads, in-app
+purchases or tracking SDKs. Other storefronts are decided when they come up.
+**Why:** Steam charges the app fee for free games too; the owner wants it to pay for itself. Buyers
+pay for the convenience of the Steam build, updates and Steam features; open source stays.
+**Affects:** After the prototype: Steam release; Not in scope (Monetization); README.

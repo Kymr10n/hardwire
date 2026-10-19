@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Godot 4.7](https://img.shields.io/badge/Godot-4.7-478cbf.svg)](https://godotengine.org)
 
-An endless incremental puzzle game for phones and the Steam Deck. Upgrade a computer by solving three short memory and timing minigames: each one raises a stat, and higher stats unlock harder puzzle slots that pay out more. Free and open source, with no ads, purchases or tracking.
+An endless incremental puzzle game for phones and the Steam Deck. Upgrade a computer by solving three short memory and timing minigames: each one raises a stat, and higher stats unlock harder puzzle slots that pay out more. Open source (MIT), with no ads, in-app purchases or tracking.
 
 | Overview | Storage | RAM | CPU |
 | :---: | :---: | :---: | :---: |

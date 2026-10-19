@@ -435,7 +435,8 @@ Build one milestone per session, in order. Each milestone ends with a playable b
 
 ## After the prototype: Steam release
 
-Hardwire is meant to go on Steam eventually, free. That needs a Steamworks app (one-time app fee), builds uploaded with SteamPipe, a default Steam Input configuration matching the Controls table, and a Steam Deck Verified review (full controller support, 1280 × 800 layout, readable text, no launcher). M9 prepares everything except the Steamworks account.
+Hardwire is meant to go on Steam eventually as a paid game; the price is set in Steamworks at
+launch (D-031). That needs a Steamworks app (one-time app fee), builds uploaded with SteamPipe, a default Steam Input configuration matching the Controls table, and a Steam Deck Verified review (full controller support, 1280 × 800 layout, readable text, no launcher). M9 prepares everything except the Steamworks account.
 
 ## After the prototype: Benchmark slot
 
@@ -456,7 +457,8 @@ All open questions are decided as of 2026-10-19; the numbers in this spec are st
 - Game name: Hardwire. Confirm availability when reserving it in Google Play Console and App Store Connect.
 - Idle income: Cycles only, capped at 8 hours (see Idle income).
 - Mixed slot: a Benchmark slot every 5th tier, built after the prototype.
-- Monetization: none. Hardwire is free, with no ads, purchases or tracking SDKs.
+- Monetization beyond the Steam price: none. No ads, in-app purchases or tracking SDKs; the code
+  stays open source (MIT).
 - iOS builds: Android and web first; iOS later. Since 28 April 2026 App Store uploads need Xcode 26, which needs a recent macOS, so iOS will need a newer Mac or a cloud macOS build service ([Apple](https://developer.apple.com/news/upcoming-requirements/)).
 
 What to watch during play-testing:
