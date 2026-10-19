@@ -23,5 +23,70 @@ func load_balance() -> void:
 		push_error("Balance: %s is not a JSON object" % BALANCE_PATH)
 
 
-# TODO(M1): typed accessors per section (economy, storage, ram, cpu, modifiers, upgrades, idle).
+## Returns a top-level section of balance.json, or an empty Dictionary (with an error) if missing.
+func section(name: String) -> Dictionary:
+	var value: Variant = data.get(name)
+	if value is Dictionary:
+		return value
+	push_error("Balance: missing section '%s'" % name)
+	return {}
+
+
+## Returns a numeric value from a section. Errors and returns 0.0 if missing or not a number.
+func get_num(section_name: String, key: String) -> float:
+	var value: Variant = section(section_name).get(key)
+	if value is float or value is int:
+		return float(value)
+	push_error("Balance: missing number '%s.%s'" % [section_name, key])
+	return 0.0
+
+
+func get_int(section_name: String, key: String) -> int:
+	return int(get_num(section_name, key))
+
+
+func economy() -> Dictionary:
+	return section("economy")
+
+
+func flow() -> Dictionary:
+	return section("flow")
+
+
+func idle() -> Dictionary:
+	return section("idle")
+
+
+func storage() -> Dictionary:
+	return section("storage")
+
+
+func ram() -> Dictionary:
+	return section("ram")
+
+
+func cpu() -> Dictionary:
+	return section("cpu")
+
+
+func modifiers() -> Dictionary:
+	return section("modifiers")
+
+
+func upgrade(id: String) -> Dictionary:
+	var value: Variant = section("upgrades").get(id)
+	if value is Dictionary:
+		return value
+	push_error("Balance: unknown upgrade '%s'" % id)
+	return {}
+
+
+## Upgrade ids in balance.json order (also the keys of the save file's "upgrades" object).
+func upgrade_ids() -> Array[String]:
+	var ids: Array[String] = []
+	for id: Variant in section("upgrades").keys():
+		ids.append(str(id))
+	return ids
+
+
 # TODO(M5): formula functions req(tier), reward(tier), cycles(tier) — SPEC: Difficulty curve.

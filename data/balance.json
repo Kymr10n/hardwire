@@ -1,5 +1,8 @@
 {
   "_comment": "All tuning numbers from docs/SPEC.md. Game code must read these via the Balance autoload, never hard-code them.",
+  "debug": {
+    "stat_step": 1
+  },
   "flow": {
     "countdown_s": 1.5,
     "fail_reveal_s": 1.0,

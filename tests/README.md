@@ -1,7 +1,7 @@
 # Tests
 
 Unit tests use [GUT](https://github.com/bitwes/Gut) and live here as `test_*.gd` files extending `GutTest`.
-Install GUT into `addons/gut` first (see the project README), then run:
+GUT 9.7.1 is vendored in `addons/gut`. Run:
 
 ```bash
 godot --headless --path . -s addons/gut/gut_cmdln.gd
