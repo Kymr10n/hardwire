@@ -26,6 +26,7 @@ var modifier_label: Label
 var _style: BevelBox
 var _pressed_style: BevelBox
 var _screen: PanelContainer
+var _content: MarginContainer
 var _stamp: Label
 var _title: Label
 var _glyph: Label
@@ -50,6 +51,8 @@ func setup(p_slot: SlotDef) -> void:
 		add_theme_stylebox_override(state, _style)
 	add_theme_stylebox_override("pressed", _pressed_style)
 	add_theme_stylebox_override("disabled", get_theme_stylebox("plate", "Hardwire"))
+	button_down.connect(_press.bind(true))
+	button_up.connect(_press.bind(false))
 	_build()
 	refresh()
 
@@ -104,16 +107,31 @@ func _reward_text(first_solve: bool) -> String:
 	return "+%d %s\n+%d Cyc" % [gain.stat, SlotDef.STAT_NAMES[slot.type], gain.cycles]
 
 
+## The content goes in with the keycap: down by the bevel at once, back over press_out_ms.
+func _press(down: bool) -> void:
+	var offset: float = get_theme_constant("bevel", "Hardwire") if down else 0.0
+	var tween := create_tween()
+	if down:
+		tween.tween_property(_content, "offset_top", offset, 0.0)
+	else:
+		tween.tween_property(
+			_content, "offset_top", offset, get_theme_constant("press_out_ms", "Hardwire") / 1000.0
+		)
+	tween.parallel().tween_property(
+		_content, "offset_bottom", offset, tween.get_total_elapsed_time()
+	)
+
+
 func _build() -> void:
-	var margin := MarginContainer.new()
-	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_content = MarginContainer.new()
+	_content.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_content.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var pad: int = int(get_theme_constant("margin", "Hardwire") * PAD)
 	for side: String in ["left", "top", "right", "bottom"]:
-		margin.add_theme_constant_override("margin_" + side, pad)
-	add_child(margin)
+		_content.add_theme_constant_override("margin_" + side, pad)
+	add_child(_content)
 	var column := VBoxContainer.new()
-	margin.add_child(column)
+	_content.add_child(column)
 	var top := HBoxContainer.new()
 	column.add_child(top)
 	_title = _add_label(top, SlotDef.TYPE_NAMES[slot.type], "card_title", false)

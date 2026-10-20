@@ -29,6 +29,7 @@ func _ready() -> void:
 		meter.add_child(_banks[key])
 	var wallet: VBoxContainer = _meter(box, "cycles", "led_amber")
 	_row(wallet, "cores", "text_dim")
+	_readouts.cycles.get_parent().get_child(0).text = "CYC"
 	GameState.stats_changed.connect(refresh)
 	GameState.cycles_changed.connect(refresh)
 	GameState.cores_changed.connect(refresh)

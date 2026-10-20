@@ -257,3 +257,20 @@ func _input_ready() -> StoragePuzzle:
 	run_until(puzzle, PuzzleBase.Phase.INPUT)
 	await wait_process_frames(2)
 	return puzzle
+
+
+func test_flickering_pad_blinks_every_glow_ms() -> void:
+	var pad := StoragePad.new()
+	add_child_autofree(pad)
+	pad.flicker(0.2)
+	assert_eq(pad.level(), 0.2, "lit at the decoy level")
+	var seen: Array[float] = []
+	for i: int in 6:
+		await wait_seconds(0.05)
+		if not seen.has(pad.level()):
+			seen.append(pad.level())
+	assert_has(seen, 0.0, "off between blinks")
+	assert_has(seen, 0.2, "on again")
+	pad.set_level(0.0)
+	await wait_seconds(0.1)
+	assert_eq(pad.level(), 0.0, "set_level stops the flicker")

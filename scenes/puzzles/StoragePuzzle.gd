@@ -122,7 +122,7 @@ func _light_item(item: int) -> void:
 		return
 	var entry: Dictionary = _attempt.playback[item]
 	if entry.decoy:
-		_pads[entry.pad].set_level(Ui.pct(self, "decoy_pct"))
+		_pads[entry.pad].flicker(Ui.pct(self, "decoy_pct"))
 		Synth.play_note(entry.pad, _attempt.show_ms, Balance.get_num("audio", "decoy_volume"))
 	else:
 		_pads[entry.pad].set_level(1.0)

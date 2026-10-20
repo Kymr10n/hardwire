@@ -6,7 +6,7 @@ extends Control
 enum Kind { VENT, LED_BANK }
 
 ## LED gap as a fraction of led_size; vent slit length and gap as fractions of tap_min.
-const LED_GAP := 0.33
+const LED_GAP := 0.25
 const SLIT_LENGTH := 0.2
 const SLIT_GAP := 0.1
 const VENT_ROWS := 3

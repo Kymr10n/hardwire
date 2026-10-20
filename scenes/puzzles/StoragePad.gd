@@ -2,7 +2,9 @@ class_name StoragePad
 extends Control
 ## One pad of the Storage ring: an LED under frosted plastic (DESIGN: Pads) with a distinct tint
 ## and symbol (colorblind-safe), lit level 0..1 as the glow inside its recess. Lit pads brighten
-## and scale up with a small overshoot (theme: glow_ms, glow_scale_pct). A touch on the pad or the
+## and scale up with a small overshoot (theme: glow_ms, glow_scale_pct); a held pad goes in by
+## the bevel like a keycap; a flickering pad (the decoy) blinks every glow_ms like a bad solder
+## joint. A touch on the pad or the
 ## accept action while it has focus emits `tapped`; letting go emits `released` (with the pad's
 ## index for a touch, -1 for accept, whose release may come after focus moved). StoragePuzzle
 ## decides what they mean.
@@ -35,8 +37,10 @@ var index: int = 0
 
 var _level: float = 0.0
 var _held: bool = false
+var _dim: bool = false
 var _min_light: Tween
 var _tween: Tween
+var _flicker: Tween
 
 
 func _init(p_index: int = 0) -> void:
@@ -48,21 +52,41 @@ func _ready() -> void:
 	resized.connect(func() -> void: pivot_offset = size / 2.0)
 
 
+## The lit level as shown: 0 while a flicker has the LED off.
 func level() -> float:
-	return _level
+	return 0.0 if _dim else _level
 
 
-## Sets the lit level (0 = idle, 1 = fully lit). Cancels a hold and its minimum flash.
+## Sets the lit level (0 = idle, 1 = fully lit). Cancels a hold, its minimum flash and a flicker.
 func set_level(p_level: float) -> void:
 	_held = false
 	_cancel_min_light()
+	if _flicker:
+		_flicker.kill()
+		_flicker = null
+	_dim = false
 	_apply_level(p_level)
+
+
+## Lit at `p_level`, blinking off every glow_ms until the next set_level().
+func flicker(p_level: float) -> void:
+	set_level(p_level)
+	_flicker = create_tween().set_loops()
+	_flicker.tween_callback(_toggle_flicker).set_delay(
+		get_theme_constant("glow_ms", "Hardwire") / 1000.0
+	)
+
+
+func _toggle_flicker() -> void:
+	_dim = not _dim
+	queue_redraw()
 
 
 ## Fully lit until let_go(), and at least tap_flash_ms so a quick tap still shows.
 func hold() -> void:
 	set_level(1.0)
 	_held = true
+	queue_redraw()
 	_min_light = create_tween()
 	_min_light.tween_interval(get_theme_constant("tap_flash_ms", "Hardwire") / 1000.0)
 	_min_light.tween_callback(_end_min_light)
@@ -70,6 +94,7 @@ func hold() -> void:
 
 func let_go() -> void:
 	_held = false
+	queue_redraw()
 	if _min_light == null:
 		_apply_level(0.0)
 
@@ -119,11 +144,15 @@ func _apply_level(p_level: float) -> void:
 func _draw() -> void:
 	var rect := Rect2(Vector2.ZERO, size)
 	draw_style_box(get_theme_stylebox("recess", "Hardwire"), rect)
+	# The key goes in while held: its face shifts by the bevel.
+	var face: Rect2 = rect
+	if _held:
+		face.position += Vector2.ONE * get_theme_constant("bevel", "Hardwire")
 	var tint: Color = get_theme_color("pad_%d" % index, "Hardwire")
-	var alpha: float = lerpf(Ui.pct(self, "pad_idle_pct"), 1.0, _level)
-	Ui.draw_glow(self, rect, Color(tint, alpha))
-	var mark: Color = get_theme_color("bg" if _level > 0.0 else "text", "Hardwire")
-	_draw_symbol(index % Symbol.size(), size / 2.0, size.x * SYMBOL_RADIUS, mark)
+	var alpha: float = lerpf(Ui.pct(self, "pad_idle_pct"), 1.0, level())
+	Ui.draw_glow(self, face, Color(tint, alpha))
+	var mark: Color = get_theme_color("bg" if level() > 0.0 else "text", "Hardwire")
+	_draw_symbol(index % Symbol.size(), face.get_center(), size.x * SYMBOL_RADIUS, mark)
 	Ui.draw_focus(self, rect)
 
 
