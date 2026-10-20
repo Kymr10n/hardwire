@@ -466,6 +466,20 @@ Every tier divisible by 5 gets a fourth slot, the Benchmark, which chains all th
 - **Look:** a wider card spanning the tier row, labelled "Benchmark" with all three stat colors.
 - **Prototype requirement:** `PuzzleBase` must accept a `SlotDef` and emit `solved`/`failed` without owning the screen, so a `ChainPuzzle` can run three puzzles in sequence later without refactoring.
 
+## After the prototype: Beige Box, remaining steps
+
+The Beige Box look (Visual and audio style, `docs/DESIGN.md`, D-039) shipped its first five steps plus the decoy flicker, pad overshoot and the Rebuild hazard frame. The rest is built step by step, each with its own decision, in this order:
+
+| Step | Scope | Done when |
+| --- | --- | --- |
+| Power cycle | Screen transitions become a power cycle: the panel blanks to the case shade, the new screen pops with a one-frame light flash; about 200 ms in total, replacing the 150 ms fade | Every screen change shows the cycle on touch, mouse, keyboard and gamepad; no transition is longer than 250 ms; `transition_ms` keeps the single home |
+| Physical sound | Keycap clack on every button, a POST beep on success, a head-crash thunk on failure; the score gets a slight lo-fi detune. All still synthesized at runtime | Each sound respects the Sound setting and is tested like the existing effects; the owner approves the detune by ear |
+| Progress as hardware | Each unlocked slot fills its bay with a device face plate and lights one more front-panel LED for good; the Rebuild confirm plays a 2–3 s skippable teardown (bays slide out, screws drop) and reassembly with metal face plates per Core | Bay state follows `GameState` without new state; the teardown can be skipped with any input; a rebuilt case reads as higher grade in a screenshot |
+| Boot power switch | The Boot screen shows a red power toggle; pressing it (any input) runs a 1 s warm-up (LEDs flicker on in sequence, fan hum) before the overview | Touch, mouse, keyboard and gamepad all start it; the warm-up can be skipped |
+| Night Shift skin | A dark plastic variant of the same theme tokens, chosen in Settings | Both skins pass the design checklist; only the theme changes |
+
+Smaller leftovers: a vertical vent column on the overview's right edge, and the app icon redrawn as a beige case.
+
 ## Decisions and balancing notes
 
 All open questions are decided as of 2026-10-19; the numbers in this spec are still first guesses meant to be tuned in play-testing.

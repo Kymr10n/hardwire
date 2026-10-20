@@ -281,3 +281,9 @@ the CPU tile (tone and rumble while held) and Watch playback (rumble while a pad
 **Decision:** The scale overshoot of D-039 applies to Storage pads only; the CPU tile and RAM cells keep their plain 80 ms scale. `docs/DESIGN.md` is corrected to what shipped: vent slits are `vent_slit_h` (2 px) tall; every keycap, slot cards included, snaps back on release (the eased release and the `press_out_ms` constant of D-039 are dropped); the Boot title is drawn at twice `title`; the font-size table lists `card_title` 36, `card_body` 32 and the stat bar's `readout_small` 36 (a new theme size, so four meters fit a phone width); the `EMPTY BAY` stamp sits below the missing stats; the focus LED radius is `led_size` / 2, set on the focus style.
 **Why:** The spec audit after D-039 found the spec sentence broader than the decision and the guide's numbers drifting from the theme; the guide is a spec peer and must match the code.
 **Affects:** Visual and audio style (Visuals); `docs/DESIGN.md` §4.2, §5.1, §5.3, §6.2, §7; theme `readout_small`; `StatBar`; tests `test_overview`, `test_upgrades`, `test_storage_puzzle`.
+
+## D-041 — 2026-10-20 — Beige Box: remaining steps become spec scope
+
+**Decision:** The Beige Box steps deferred by D-039 (power-cycle transition, physical sound effects and score detune, progress-as-hardware with the Rebuild teardown, the Boot power switch, the Night Shift skin, plus the vent column and the icon) get a spec section "After the prototype: Beige Box, remaining steps" with a scope and a "Done when" per step, in build order. `docs/PROGRESS.md` tracks the redesign as its own row.
+**Why:** The spec is the source of truth and lists every unit of planned work with acceptance criteria; the guide alone (`docs/DESIGN.md` §9) described the leftovers without saying when each is done.
+**Affects:** After the prototype: Beige Box, remaining steps (new section); `docs/PROGRESS.md` (table row, next scope).

@@ -15,8 +15,9 @@ Status values: `todo`, `in progress`, `done`. Milestone scope and "Done when" cr
 | M8 | done | Polish, web and Linux builds; the Android APK and phone test are tracked in [issue #5](https://github.com/Kymr10n/hardwire/issues/5) (D-026) |
 | M9 | done | Steam Deck and desktop: landscape, controller, glyphs, Linux/Windows/macOS presets, `tools/deck.sh`, rumble; Deck play-test passed 2026-10-19 (issue #6) |
 | M10 | in progress | Steam release preparation (D-032): save folder, Windows exe metadata and `tools/steam_upload.sh` done; the first Steam install waits for the App ID |
+| Beige Box | done | Visual redesign (D-039, D-040, `docs/DESIGN.md`) on branch `beige-box`, 2026-10-20: palette, fonts, bevels, LEDs, wear, stickers, decoy flicker, hazard frame; play-test and merge pending; remaining steps are spec scope (D-041) |
 
-**Prototype v0.1.0 released 2026-10-19 (D-026); v0.2.0 released 2026-10-19 (name, ambient score, Storage hold feedback, Steam preparation).** Next scope: the "After the prototype" sections of the spec (Steam release, Benchmark slot).
+**Prototype v0.1.0 released 2026-10-19 (D-026); v0.2.0 released 2026-10-19 (name, ambient score, Storage hold feedback, Steam preparation).** Next scope: the "After the prototype" sections of the spec (Steam release, Benchmark slot, Beige Box remaining steps).
 
 ## Reviews
 
@@ -39,8 +40,7 @@ Deferred work, each with what it needs:
 - **Steam (M10):** create the Steamworks app; set depots, launch options, Steam Input, Linux Runtime and Auto-Cloud from the spec table; fill `tools/steam.local.env`; run `tools/steam_upload.sh --preview`, then a real upload; install from the Steam client on PC and Steam Deck. Copy the Deck's 0.1.0 save to `~/.local/share/Hardwire` if wanted. Needs the owner and the App ID.
 - **Ambient score on devices:** listen and profile on the web export, Steam Deck and Android. The score keeps 3–4 GDScript voices mixing on the main thread (single-threaded on web); if it is too heavy, drop the bass harmonic voice first.
 - **Ambient score code (review, should-fix):** schedule each bar's notes with per-voice `delay_ms` instead of per-frame dispatch (removes frame jitter on the hi-hat and the event index); resolve attack/release defaults once in `Synth._add_voice` and store the kick glide as a per-sample step; one `_pick_positions` helper for pads and leads; seed bars with `hash([seed, bar])` and drop `music_seed_stride`; `music_bass_min_midi`/`max_midi` are test-only (move into the test or enforce); `music_kick_beats` repeats the bass beats; the debug time scale also speeds up the score.
-- **Beige Box, deferred steps (D-039, `docs/DESIGN.md` §9):** power-cycle screen transition; physical sound effects and a lo-fi pass on the score; progress-as-hardware (bays fill per unlocked slot, Rebuild teardown animation); Boot power switch with warm-up; overview vent column; "Night Shift" dark skin. Each needs its own decision.
-- **Beige Box leftovers:** `icon.svg` / `docs/icon.png` still show the old dark look; redraw as a beige case.
+- **Beige Box, remaining steps:** see the spec section "After the prototype: Beige Box, remaining steps" (D-041); each step gets its own decision when built. The app icon (`icon.svg`, `docs/icon.png`) still shows the old dark look.
 - **Play-test the balance:** time to tiers 5, 10 and 20 on a fresh save (targets: 10 min, 1 h, several sessions); fail rate per minigame; rhythm tolerance on a real phone.
 
 ## Play-test notes

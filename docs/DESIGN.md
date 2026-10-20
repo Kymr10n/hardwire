@@ -226,7 +226,7 @@ Motion rule: **nothing eases over more than 250 ms.** 90s hardware snaps.
 
 Done (D-039): palette and shapes, fonts, wear overlay, screws and vents, LED system (banks, focus LED, pad glow), keycap press feel, stickers and part numbers, decoy flicker, pad overshoot, Rebuild hazard border.
 
-Deferred, each needing its own decision: a "power cycle" screen transition (blank to `case_shade`, pop with a light flash); physical sound effects (keycap clack, POST beep, head-crash thunk) and a lo-fi pass on the score; progress-as-hardware (bays fill as slots unlock, front-panel LEDs light permanently, a Rebuild teardown animation); a Boot power switch with a warm-up; a vertical vent column on the overview; a dark "Night Shift" skin.
+Remaining steps, each with a scope and "Done when" in the spec section "After the prototype: Beige Box, remaining steps" (D-041): the power-cycle screen transition, physical sound effects and a lo-fi pass on the score, progress-as-hardware with the Rebuild teardown, the Boot power switch, the Night Shift skin, the overview vent column and the icon.
 
 ### Definition of done (screen review checklist)
 
