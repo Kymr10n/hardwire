@@ -186,11 +186,50 @@ func test_stat_bar_leds_show_progress_to_next_tier() -> void:
 
 func test_cycles_readout_pulses_on_change() -> void:
 	var overview := _overview()
-	var bar: StatBar = overview.find_children("*", "StatBar", true, false)[0]
-	var readout: Label = bar._readouts.cycles
-	var idle: Color = bar.get_theme_color("led_amber", "Hardwire")
+	GameState.add_cycles(1234)
+	var readout: Label = _label(overview, "1234")
+	var idle: Color = overview.get_theme_color("led_amber", "Hardwire")
+	await wait_seconds(0.3)
 	assert_eq(readout.get_theme_color("font_color"), idle)
 	GameState.add_cycles(5)
 	assert_ne(readout.get_theme_color("font_color"), idle, "flashes bright")
 	await wait_seconds(0.3)
 	assert_eq(readout.get_theme_color("font_color"), idle, "back to amber within tap_flash_ms")
+
+
+func test_slot_cards_are_bays_with_stamps() -> void:
+	var overview := _overview()
+	var open: SlotCard = overview.rows()[0].cards[1]
+	var locked: SlotCard = overview.rows()[2].cards[1]
+	assert_true(_has_text(open, "BAY 2"), "tier 1, second bay")
+	assert_true(_has_text(locked, "BAY 8"), "tier 3, second bay")
+	assert_false(_stamp(open).visible, "an open bay has no EMPTY BAY stamp")
+	assert_true(_stamp(locked).visible, "a locked bay is stamped EMPTY BAY")
+	assert_true(_has_text(overview, Ui.FINE_PRINT), "fine-print footer")
+
+
+func test_only_the_rebuild_dialog_has_the_hazard_frame() -> void:
+	var overview := _overview()
+	overview._confirm_rebuild()
+	var dialog: ConfirmDialog = overview.find_children("*", "ConfirmDialog", true, false)[0]
+	assert_true(dialog.hazard)
+	var panel: PanelContainer = dialog.find_children("*", "PanelContainer", true, false)[0]
+	assert_true(panel.get_theme_stylebox("panel").get("hazard"), "striped frame")
+	var plain := ConfirmDialog.open(overview, "Reset save?", "", "Erase")
+	var plain_panel: PanelContainer = plain.find_children("*", "PanelContainer", true, false)[0]
+	assert_false(plain_panel.get_theme_stylebox("panel").get("hazard"))
+
+
+func _has_text(node: Node, text: String) -> bool:
+	return _label(node, text) != null
+
+
+func _label(node: Node, text: String) -> Label:
+	for label: Node in node.find_children("*", "Label", true, false):
+		if (label as Label).text == text:
+			return label
+	return null
+
+
+func _stamp(card: SlotCard) -> Label:
+	return _label(card, "EMPTY BAY")

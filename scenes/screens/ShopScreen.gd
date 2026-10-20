@@ -34,7 +34,7 @@ func _ready() -> void:
 		list.add_child(card)
 		cards.append(card)
 
-	column.add_child(Ui.sticker(Ui.FINE_PRINT))
+	column.add_child(Ui.footer())
 	GameState.cycles_changed.connect(_refresh)
 	GameState.upgrades_changed.connect(_refresh)
 	_refresh()

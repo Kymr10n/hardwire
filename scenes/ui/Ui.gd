@@ -83,7 +83,7 @@ static func accept_event(event: InputEvent) -> int:
 	return 0
 
 
-## Gives `screen` keyboard/gamepad focus without showing it (pointer users never see an outline):
+## Gives `screen` keyboard/gamepad focus without showing it (pointer users never see the LED):
 ## its default_focus() if it has one, else the first visible, enabled button.
 static func focus_first(screen: Control) -> void:
 	var target: Control = screen.default_focus() if screen.has_method("default_focus") else null
@@ -101,7 +101,7 @@ static func focus_first(screen: Control) -> void:
 		target.grab_focus.call_deferred(true)
 
 
-## Draws the theme's focus outline on a custom-drawn control while it has visible focus.
+## Draws the theme's focus LED on a custom-drawn control while it has visible focus.
 static func draw_focus(control: Control, rect: Rect2) -> void:
 	if control.has_focus(true):
 		control.draw_style_box(control.get_theme_stylebox("focus", "Button"), rect)
@@ -135,7 +135,7 @@ static func button(text: String, on_pressed: Callable, wide: bool = false) -> Bu
 
 
 ## Lets a custom-drawn control take gamepad/keyboard focus and pointer input (both arrive in its
-## _gui_input) and redraw its focus outline when focus changes.
+## _gui_input) and redraw its focus LED when focus changes.
 static func make_focusable(control: Control) -> void:
 	control.mouse_filter = Control.MOUSE_FILTER_STOP
 	control.focus_mode = Control.FOCUS_ALL
@@ -216,14 +216,21 @@ static func readout(text: String, color: String) -> Label:
 	return l
 
 
-## Fine print (DESIGN: Stickers & stamps): a small, dim, ALL CAPS centered label for footers and
-## designators.
-static func sticker(text: String) -> Label:
+## Fine print (DESIGN: Stickers & stamps): a small, dim, ALL CAPS centered label for designators.
+static func fine_print(text: String) -> Label:
 	var l: Label = dim_label(text)
 	l.uppercase = true
 	l.add_theme_font_size_override(
 		"font_size", ThemeDB.get_project_theme().get_font_size("small", "Hardwire")
 	)
+	return l
+
+
+## The fine-print footer of the main screens; wraps so a landscape sidebar keeps its width.
+static func footer() -> Label:
+	var l: Label = fine_print(FINE_PRINT)
+	l.autowrap_mode = TextServer.AUTOWRAP_WORD
+	l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	return l
 
 

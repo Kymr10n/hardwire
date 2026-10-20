@@ -1,6 +1,6 @@
 # Hardwire: Boot Sequence — Game Design Spec
 
-As of 2026-10-19. **Source of truth for implementation.** Build it milestone by milestone (see "Milestones and acceptance criteria"); progress is tracked in `docs/PROGRESS.md`. Change it only through `/spec-change`, which also records the change in `docs/DECISIONS.md`.
+As of 2026-10-20. **Source of truth for implementation.** Build it milestone by milestone (see "Milestones and acceptance criteria"); progress is tracked in `docs/PROGRESS.md`. Change it only through `/spec-change`, which also records the change in `docs/DECISIONS.md`.
 
 ## Overview
 
@@ -315,7 +315,7 @@ The look is "Beige Box": the game is a worn 90s beige PC tower, drawn with Godot
 - Two color families: plastic (beige case surfaces, silkscreen text; never saturated) and electric (LEDs and glows; the only saturated colors). The background is the case front; sections sit on case panels and in recesses.
 - One accent color per stat, used for its readout, slot borders, minigame header and glows: RAM cyan, CPU red-orange, STO amber. Status LEDs: green (ok), amber (focus, Cycles), red (failure).
 - Storage pads are square LED keys under frosted plastic: a recess with a radial glow in one of 8 colorblind-safe tints, each paired with a symbol.
-- Corner radius is 0 everywhere except LEDs and screws. Raised elements have a 2 px plastic bevel and a 1 px metal outline; recessed ones the inverse. A pressed keycap inverts its bevel and shifts its content 2 px down. Lit states glow and scale to 105% over 80 ms with a slight overshoot; nothing eases over 250 ms.
+- Corner radius is 0 everywhere except LEDs and screws. Raised elements have a 2 px plastic bevel and a 1 px metal outline; recessed ones the inverse. A pressed keycap inverts its bevel and shifts its content 2 px down. Lit states glow and scale to 105% over 80 ms; lit pads overshoot and settle; nothing eases over 250 ms.
 - Wear: a full-screen shader adds subtle grain, uneven yellowing towards the corners and a few shallow scuffs. Panels and cards carry screws at deterministic random angles; vent slits separate sections; screens carry part numbers ("BAY 3", "J7") and a fine-print footer ("HARDWIRE SYSTEMS · MODEL HW-486 · NO USER-SERVICEABLE PARTS INSIDE").
 - Two fonts under the SIL Open Font License, bundled with the project: VT323 for silkscreen text (ALL CAPS for titles, headers, phase labels and button captions; sentence case for body text) and DSEG14 Classic for numeric readouts (stat values, Cycles, prices). The minimum font size stays 32 px.
 - All colors, fonts, sizes and durations live in a theme resource so the style can be changed in one place.

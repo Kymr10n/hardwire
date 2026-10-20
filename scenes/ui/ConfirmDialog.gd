@@ -11,8 +11,7 @@ signal cancelled
 var hazard: bool = false:
 	set(value):
 		hazard = value
-		if _panel:
-			_panel.add_theme_stylebox_override("panel", get_theme_stylebox("hazard", "Hardwire"))
+		_apply_frame()
 
 var _panel: PanelContainer
 var _title: String
@@ -44,8 +43,6 @@ func _ready() -> void:
 		self, Ui.pct(self, "dialog_dim_pct"), get_theme_constant("dialog_width", "Hardwire")
 	)
 	_panel = box.get_parent()
-	if hazard:
-		hazard = true
 	var title: Label = Ui.label(_title, get_theme_font_size("header", "Hardwire"))
 	title.uppercase = true
 	var rule := StyleBoxFlat.new()
@@ -74,6 +71,15 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		if not _cancel_text.is_empty():
 			cancel()
+
+
+func _apply_frame() -> void:
+	if _panel == null:
+		return
+	if hazard:
+		_panel.add_theme_stylebox_override("panel", get_theme_stylebox("hazard", "Hardwire"))
+	else:
+		_panel.remove_theme_stylebox_override("panel")
 
 
 func confirm() -> void:

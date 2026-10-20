@@ -150,3 +150,22 @@ func test_shop_buy_button() -> void:
 	assert_eq(GameState.cycles, 30)
 	assert_true(FileAccess.file_exists(TEST_SAVE), "purchase saved")
 	assert_true(by_id.metronome.buy_button.disabled, "54 > 30")
+
+
+func test_shop_is_a_parts_catalog() -> void:
+	var shop: Control = ShopScreen.new()
+	add_child_autofree(shop)
+	var texts: Array[String] = []
+	for label: Node in shop.find_children("*", "Label", true, false):
+		texts.append((label as Label).text)
+	assert_has(texts, "Parts & upgrades", "header (drawn in caps)")
+	assert_has(texts, Ui.FINE_PRINT, "fine-print footer")
+	for card: UpgradeCard in shop.cards:
+		assert_has(texts, UpgradeCard.CATALOG[card.id].pn, "part number on " + card.id)
+		assert_eq(card.buy_button.text, "BUY")
+	GameState.add_cycles(1_000_000)
+	var replay: UpgradeCard = shop.cards[0]
+	for level: int in int(Balance.upgrade(replay.id).max_level):
+		GameState.buy_upgrade(replay.id)
+	replay.refresh()
+	assert_eq(replay.buy_button.text, "MAX")

@@ -107,12 +107,14 @@ JetBrains Mono is retired — it reads "modern IDE", which breaks the 1994 ficti
 
 | Element | Size | Face | Case |
 | --- | --- | --- | --- |
-| `title` (Boot title) | 64 | Silkscreen, +4 px letter-spacing (`Hardwire/fonts/title`) | ALL CAPS |
+| `title` (Boot subtitle; the Boot title is drawn at 2×) | 64 | Silkscreen, +4 px letter-spacing (`Hardwire/fonts/title`) | ALL CAPS |
 | `header` (screen titles) | 40 | Silkscreen | ALL CAPS |
 | `phase` (minigame prompts) | 56 | Silkscreen | ALL CAPS |
-| `body` | 32 | Silkscreen | Sentence case |
+| `card_title` (card and dialog titles) | 36 | Silkscreen | ALL CAPS on stickers |
+| `body`, `card_body` | 32 | Silkscreen | Sentence case |
 | `small` (stickers, part numbers, chips) | 32 | Silkscreen | ALL CAPS, `silk_dim` |
-| `readout` | 48 | DSEG14 | Digits |
+| `readout` (shop prices, balance) | 48 | DSEG14 | Digits |
+| `readout_small` (stat bar, so four meters fit a phone) | 36 | DSEG14 | Digits |
 
 The spec's 32 px minimum stands (the original guide's 30 px body and 8–10 px stickers were raised; `silk_dim` + caps do the "fine print" job). Silkscreen text on beige uses `silk`. **Never pure black** — beige-era printing was always dark brown or grey.
 
@@ -129,15 +131,15 @@ The spec's 32 px minimum stands (the original guide's 30 px body and 8–10 px s
 
 - Surface: `case_side` fill, raised bevel, 1 px `metal_dark` outline, radius 0.
 - Caption: silkscreen, ALL CAPS, `silk`.
-- Pressed: bevel recessed, content down 2 px, fill darkened 8%. This is the tactile core of the theme — a keycap going *in*.
-- Focus (gamepad/keyboard): **a physical, not glow, treatment** — a `led_amber` LED dot at the keycap's top-right corner (`led_size`). The focused element is the one whose LED is on; it never shows for pointer input.
+- Pressed: bevel recessed, content down 2 px, fill darkened 8%. This is the tactile core of the theme — a keycap going *in*. Release snaps back.
+- Focus (gamepad/keyboard): **a physical, not glow, treatment** — a `led_amber` LED dot of radius `led_size` / 2 at the keycap's top-right corner (set on the theme's focus style). The focused element is the one whose LED is on; it never shows for pointer input.
 - Disabled: fill `case_shade`, caption `silk_dim`.
 
 ### 5.2 Pads (Storage minigame) — "LEDs under frosted plastic"
 
 - Shape: **square**, radius 0, recessed bevel, fill `case_shade`. The glow is drawn *inside* the pad as a soft radial gradient of the pad tint (the theme's `glow` icon), not as a border or a fill.
 - Idle: `pad_idle_pct` (30%) glow. Lit: full glow, scaled to `glow_scale_pct` with a slight overshoot that settles over `glow_ms`.
-- Pressed (held): the pad recesses 2 px (keycap press) for at least `tap_flash_ms`.
+- Pressed (held): the pad recesses 2 px (keycap press) for as long as it glows, at least `tap_flash_ms`.
 - Decoy: glows at `decoy_pct` (20%) and **flickers** (blinks every `glow_ms`) — an LED with a bad solder joint, "half-alive" rather than "a different color".
 - Each pad carries a `J n` designator. The 8 pad tints, all verified to glow on beige:
 
@@ -150,7 +152,7 @@ The spec's 32 px minimum stands (the original guide's 30 px body and 8–10 px s
 
 - Card = a **bay device**: `case_side` face plate with screws, a recessed `case_shade` screen area showing the info, the stat accent as title color, a `BAY n` designator.
 - Never solved: accent-colored border (a lit border segment) and a square `NEW` sticker.
-- Locked: the face plate is a **blanking panel** — `case_shade` fill, no screen, a stamped `EMPTY BAY` label above the missing stats. Locked must look *physically absent*, not greyed-out.
+- Locked: the face plate is a **blanking panel** — `case_shade` fill, no screen, the missing stats and a stamped `EMPTY BAY` label below them. Locked must look *physically absent*, not greyed-out.
 - Pressed: bevel flips, content shifts down 2 px.
 
 ### 5.4 Panels & dialogs — "case panels"
@@ -181,7 +183,7 @@ The spec's 32 px minimum stands (the original guide's 30 px body and 8–10 px s
 
 ### 6.2 Vent slits
 
-Rows of short 1 px `metal_dark` lines with `case_shade` gaps (`Deco.vent()`), used as section separators under the front panel and between tier rows. Cheaper and more in-world than divider lines.
+Rows of short `metal_dark` lines, `vent_slit_h` (2 px) tall, with gaps (`Deco.vent()`), used as section separators under the front panel and between tier rows. Cheaper and more in-world than divider lines.
 
 ### 6.3 Screws
 
@@ -196,7 +198,7 @@ Rows of short 1 px `metal_dark` lines with `case_shade` gaps (`Deco.vent()`), us
 | --- | --- | --- |
 | Pad lights | Scale to 105% with a back-ease overshoot, settle | `glow_ms` (80 ms) |
 | Pad press | Glow *plus* a 2 px recess (keycap press) | at least `tap_flash_ms` (180 ms) |
-| Keycap press | Bevel flips to recessed, content 2 px down | instant in, `press_out_ms` (120 ms) out |
+| Keycap press | Bevel flips to recessed, content 2 px down | instant, both ways |
 | Screen transitions | Fade in | `transition_ms` (150 ms) |
 | Cycles change | Readout pulses once | `tap_flash_ms` |
 | Decoy | Blinks between `decoy_pct` and off | every `glow_ms` |

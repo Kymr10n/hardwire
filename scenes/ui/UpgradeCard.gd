@@ -6,21 +6,14 @@ extends PanelContainer
 
 signal buy_pressed(id: String)
 
-const NAMES := {
-	"replay_buffer": "Replay buffer",
-	"longer_exposure": "Longer exposure",
-	"metronome": "Metronome",
-	"time_dilation": "Time dilation",
-	"overclock": "Overclock",
-	"cycle_miner": "Cycle miner",
-}
-const PART_NUMBERS := {
-	"replay_buffer": "PN HW-RB2",
-	"longer_exposure": "PN HW-LE5",
-	"metronome": "PN HW-MT5",
-	"time_dilation": "PN HW-TD5",
-	"overclock": "PN HW-OC9",
-	"cycle_miner": "PN HW-CM9",
+## Catalog line per upgrade id: name and part number.
+const CATALOG := {
+	"replay_buffer": {"name": "Replay buffer", "pn": "PN HW-RB2"},
+	"longer_exposure": {"name": "Longer exposure", "pn": "PN HW-LE5"},
+	"metronome": {"name": "Metronome", "pn": "PN HW-MT5"},
+	"time_dilation": {"name": "Time dilation", "pn": "PN HW-TD5"},
+	"overclock": {"name": "Overclock", "pn": "PN HW-OC9"},
+	"cycle_miner": {"name": "Cycle miner", "pn": "PN HW-CM9"},
 }
 
 var id: String = ""
@@ -43,7 +36,7 @@ func _ready() -> void:
 	var text := VBoxContainer.new()
 	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(text)
-	text.add_child(Ui.sticker(PART_NUMBERS.get(id, "PN HW-000")))
+	text.add_child(Ui.fine_print(CATALOG[id].pn))
 	_title = Label.new()
 	_title.add_theme_font_size_override("font_size", get_theme_font_size("card_title", "Hardwire"))
 	text.add_child(_title)
@@ -68,7 +61,7 @@ func refresh() -> void:
 	var max_level: int = int(Balance.upgrade(id).max_level)
 	var maxed: bool = Economy.is_maxed(id, level)
 	_title.text = (
-		"%s  Lv %d%s" % [NAMES.get(id, id), level, ("/%d" % max_level) if max_level >= 0 else ""]
+		"%s  Lv %d%s" % [CATALOG[id].name, level, ("/%d" % max_level) if max_level >= 0 else ""]
 	)
 	if maxed:
 		_effect.text = effect_text(id, level) + "  (max)"

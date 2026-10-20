@@ -110,6 +110,8 @@ func test_landscape_uses_side_panels() -> void:
 	var overview: Control = await _open(screens.overview.new(), Vector2i(1920, 1080))
 	var bar: StatBar = overview.find_children("*", "StatBar", true, false)[0]
 	assert_true(bar.vertical, "stats in a sidebar")
+	var side: float = overview.get_theme_constant("side_panel", "Hardwire")
+	assert_eq(bar.get_parent().size.x, side, "the footer wraps instead of widening the sidebar")
 	var portrait: Control = await _open(screens.overview.new(), Vector2i(1080, 1920))
 	var portrait_bar: StatBar = portrait.find_children("*", "StatBar", true, false)[0]
 	assert_false(portrait_bar.vertical, "stats in a row")

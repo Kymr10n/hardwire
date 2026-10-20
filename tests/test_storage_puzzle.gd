@@ -118,10 +118,12 @@ func test_decoy_is_dim_and_not_expected() -> void:
 	watch_signals(puzzle)
 	run_until(puzzle, PuzzleBase.Phase.WATCH)
 	var saw_dim: bool = false
+	var decoy: float = Ui.pct(puzzle, "decoy_pct")
 	while puzzle.phase == PuzzleBase.Phase.WATCH:
 		puzzle._process(FRAME)
 		for pad: StoragePad in puzzle.pads():
 			if pad.level() > 0.0 and pad.level() < 1.0:
+				assert_almost_eq(pad.level(), decoy, 0.001, "decoy glows at decoy_pct")
 				saw_dim = true
 	assert_true(saw_dim, "decoy flashes dimly")
 	for pad: int in puzzle.expected():

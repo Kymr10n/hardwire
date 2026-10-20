@@ -16,7 +16,6 @@ const MOD_GLYPHS := {
 
 const HEIGHT_TAPS := 2.2
 const PAD := 0.4
-const PRESSED_DARKEN := 0.08
 
 var slot: SlotDef
 
@@ -46,7 +45,7 @@ func setup(p_slot: SlotDef) -> void:
 	_style = get_theme_stylebox("bay", "Hardwire").duplicate()
 	_pressed_style = _style.duplicate()
 	_pressed_style.sunken = true
-	_pressed_style.bg = _style.bg.darkened(PRESSED_DARKEN)
+	_pressed_style.bg = (get_theme_stylebox("pressed", "Button") as BevelBox).bg
 	for state: String in ["normal", "hover"]:
 		add_theme_stylebox_override(state, _style)
 	add_theme_stylebox_override("pressed", _pressed_style)
@@ -107,19 +106,11 @@ func _reward_text(first_solve: bool) -> String:
 	return "+%d %s\n+%d Cyc" % [gain.stat, SlotDef.STAT_NAMES[slot.type], gain.cycles]
 
 
-## The content goes in with the keycap: down by the bevel at once, back over press_out_ms.
+## The content goes in with the keycap, down by the bevel, and snaps back on release.
 func _press(down: bool) -> void:
 	var offset: float = get_theme_constant("bevel", "Hardwire") if down else 0.0
-	var tween := create_tween()
-	if down:
-		tween.tween_property(_content, "offset_top", offset, 0.0)
-	else:
-		tween.tween_property(
-			_content, "offset_top", offset, get_theme_constant("press_out_ms", "Hardwire") / 1000.0
-		)
-	tween.parallel().tween_property(
-		_content, "offset_bottom", offset, tween.get_total_elapsed_time()
-	)
+	_content.offset_top = offset
+	_content.offset_bottom = offset
 
 
 func _build() -> void:
@@ -140,7 +131,7 @@ func _build() -> void:
 	var bay: int = (
 		(slot.tier - 1) * SlotGenerator.TYPES.size() + SlotGenerator.TYPES.find(slot.type) + 1
 	)
-	var designator: Label = Ui.sticker("BAY %d" % bay)
+	var designator: Label = Ui.fine_print("BAY %d" % bay)
 	designator.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	top.add_child(designator)
 	var spacer := Control.new()

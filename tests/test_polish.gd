@@ -243,6 +243,7 @@ func test_theme_is_beige_box() -> void:
 	for type: StringName in theme.get_stylebox_type_list():
 		for name: StringName in theme.get_stylebox_list(type):
 			var style: StyleBox = theme.get_stylebox(name, type)
-			if style is StyleBoxFlat:
-				assert_eq((style as StyleBoxFlat).corner_radius_top_left, 0, "no rounded corners")
+			assert_true(
+				style is BevelBox or style is FocusLed, "%s/%s has no corners" % [type, name]
+			)
 	assert_eq(theme.get_constant("decoy_pct", "Hardwire"), 20)

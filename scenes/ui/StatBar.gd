@@ -9,11 +9,13 @@ extends PanelContainer
 signal debug_requested
 
 const LEDS := 10
+## Silkscreen captions that differ from the key.
+const CAPTIONS := {"cycles": "CYC"}
 
 var vertical: bool = false
 
-var _readouts := {}
-var _banks := {}
+var _readouts: Dictionary[String, Label] = {}
+var _banks: Dictionary[String, Deco] = {}
 var _cycles: int = -1
 var _taps: Array[float] = []
 
@@ -29,7 +31,6 @@ func _ready() -> void:
 		meter.add_child(_banks[key])
 	var wallet: VBoxContainer = _meter(box, "cycles", "led_amber")
 	_row(wallet, "cores", "text_dim")
-	_readouts.cycles.get_parent().get_child(0).text = "CYC"
 	GameState.stats_changed.connect(refresh)
 	GameState.cycles_changed.connect(refresh)
 	GameState.cores_changed.connect(refresh)
@@ -50,22 +51,25 @@ func _row(parent: Control, key: String, color: String) -> void:
 	var row := HBoxContainer.new()
 	parent.add_child(row)
 	var label := Label.new()
-	label.text = key
+	label.text = CAPTIONS.get(key, key)
 	label.uppercase = true
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	label.add_theme_font_size_override("font_size", get_theme_font_size("small", "Hardwire"))
 	row.add_child(label)
 	var readout: Label = Ui.readout("", color)
 	# Smaller than the shop readouts so four meters fit a phone width.
-	readout.add_theme_font_size_override("font_size", get_theme_font_size("card_title", "Hardwire"))
+	readout.add_theme_font_size_override(
+		"font_size", get_theme_font_size("readout_small", "Hardwire")
+	)
 	row.add_child(readout)
 	_readouts[key] = readout
 
 
 func refresh() -> void:
-	var tier: int = Progress.highest_unlocked_tier(GameState.stats())
+	var stats: Dictionary = GameState.stats()
+	var tier: int = Progress.highest_unlocked_tier(stats)
 	for key: String in SlotGenerator.TYPES:
-		var value: int = GameState.get(key)
+		var value: int = stats[key]
 		_readouts[key].text = short(value)
 		_banks[key].lit = Progress.tier_leds(value, tier, LEDS)
 	_readouts.cycles.text = short(GameState.cycles)

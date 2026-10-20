@@ -138,7 +138,6 @@ func _draw() -> void:
 		rect = rect.grow((rect.size.x * _scale[i] - rect.size.x) / 2.0)
 		if _on[i]:
 			draw_rect(rect, lit)
-			Ui.draw_glow(self, rect, lit)
 		draw_rect(rect, outline, false)
 	if n > 0:
 		Ui.draw_focus(self, cell_rect(cursor))

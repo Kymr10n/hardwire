@@ -36,8 +36,9 @@ func _add_wear() -> void:
 	add_child(layer)
 	var wear := ColorRect.new()
 	wear.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	wear.material = ShaderMaterial.new()
-	wear.material.shader = WEAR_SHADER
+	var material := ShaderMaterial.new()
+	material.shader = WEAR_SHADER
+	wear.material = material
 	wear.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	layer.add_child(wear)
 

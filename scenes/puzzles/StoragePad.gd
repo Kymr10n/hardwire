@@ -101,6 +101,7 @@ func let_go() -> void:
 
 func _end_min_light() -> void:
 	_min_light = null
+	queue_redraw()
 	if not _held:
 		_apply_level(0.0)
 
@@ -146,7 +147,7 @@ func _draw() -> void:
 	draw_style_box(get_theme_stylebox("recess", "Hardwire"), rect)
 	# The key goes in while held: its face shifts by the bevel.
 	var face: Rect2 = rect
-	if _held:
+	if _held or _min_light != null:
 		face.position += Vector2.ONE * get_theme_constant("bevel", "Hardwire")
 	var tint: Color = get_theme_color("pad_%d" % index, "Hardwire")
 	var alpha: float = lerpf(Ui.pct(self, "pad_idle_pct"), 1.0, level())
