@@ -3,12 +3,16 @@ extends StyleBox
 ## Plastic bevel (DESIGN: Shape language): a fill with a 1 px outline and `width` px edges, light
 ## at the top-left and dark at the bottom-right, swapped when `sunken`. With `screws`, a screw sits
 ## in two opposite corners, its slot at an angle hashed from the rect so it never repeats and
-## never changes between frames. Colors and sizes come from the theme that owns the instance.
+## never changes between frames. With `hazard`, a yellow-black striped band frames the box (the
+## Rebuild dialog only). Colors and sizes come from the theme that owns the instance.
 
 ## Screw inset from the corner and slot length, as fractions of the screw size.
 const SCREW_INSET := 1.0
 const SLOT_LENGTH := 0.7
 const SLOT_WIDTH := 2.0
+## Hazard band width and stripe pitch, in px at the reference size.
+const HAZARD_WIDTH := 14.0
+const STRIPE_PITCH := 28.0
 
 @export var bg: Color = Color.WHITE
 @export var light: Color = Color.WHITE
@@ -19,9 +23,14 @@ const SLOT_WIDTH := 2.0
 @export var sunken: bool = false
 @export var screws: bool = false
 @export var screw_size: float = 0.0
+@export var hazard: bool = false
+@export var hazard_color: Color = Color.YELLOW
 
 
 func _draw(to_canvas_item: RID, rect: Rect2) -> void:
+	if hazard:
+		_stripes(to_canvas_item, rect)
+		rect = rect.grow(-HAZARD_WIDTH)
 	RenderingServer.canvas_item_add_rect(to_canvas_item, rect, outline)
 	var inner: Rect2 = rect.grow(-1)
 	RenderingServer.canvas_item_add_rect(to_canvas_item, inner, bg)
@@ -40,6 +49,37 @@ func _draw(to_canvas_item: RID, rect: Rect2) -> void:
 		var inset: float = screw_size * SCREW_INSET
 		_screw(to_canvas_item, inner.position + Vector2(inset, inset), 0)
 		_screw(to_canvas_item, inner.end - Vector2(inset, inset), 1)
+
+
+## Diagonal stripes over the whole rect, clipped to it; the bevel drawn inside leaves only the
+## band showing.
+func _stripes(to_canvas_item: RID, rect: Rect2) -> void:
+	RenderingServer.canvas_item_add_rect(to_canvas_item, rect, hazard_color)
+	var frame := PackedVector2Array(
+		[
+			rect.position,
+			Vector2(rect.end.x, rect.position.y),
+			rect.end,
+			Vector2(rect.position.x, rect.end.y)
+		]
+	)
+	var h: float = rect.size.y
+	var half: float = STRIPE_PITCH / 2.0
+	var x: float = rect.position.x - h
+	while x < rect.end.x:
+		var stripe := PackedVector2Array(
+			[
+				Vector2(x, rect.end.y),
+				Vector2(x + h, rect.position.y),
+				Vector2(x + h + half, rect.position.y),
+				Vector2(x + half, rect.end.y),
+			]
+		)
+		for part: PackedVector2Array in Geometry2D.intersect_polygons(stripe, frame):
+			RenderingServer.canvas_item_add_polygon(
+				to_canvas_item, part, PackedColorArray([outline])
+			)
+		x += STRIPE_PITCH
 
 
 func _screw(to_canvas_item: RID, center: Vector2, corner: int) -> void:

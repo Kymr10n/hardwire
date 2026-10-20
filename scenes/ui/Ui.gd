@@ -7,6 +7,8 @@ extends RefCounted
 const PERCENT := 100.0
 ## Side padding of a sticker label.
 const STICKER_PAD := 10.0
+## The footer of the main screens (DESIGN: Label conventions).
+const FINE_PRINT := "HARDWIRE SYSTEMS · MODEL HW-486 · NO USER-SERVICEABLE PARTS INSIDE"
 
 
 ## True when the node's viewport is wider than tall (Steam Deck, desktop).
@@ -201,6 +203,28 @@ static func sticker_color(label: Label, fill: Color) -> void:
 	label.add_theme_color_override(
 		"font_color", ThemeDB.get_project_theme().get_color(role, "Hardwire")
 	)
+
+
+## A dot-matrix readout (DESIGN: Typography) in the theme color `color`.
+static func readout(text: String, color: String) -> Label:
+	var theme: Theme = ThemeDB.get_project_theme()
+	var l := Label.new()
+	l.text = text
+	l.add_theme_font_override("font", theme.get_font("readout", "Hardwire"))
+	l.add_theme_font_size_override("font_size", theme.get_font_size("readout", "Hardwire"))
+	l.add_theme_color_override("font_color", theme.get_color(color, "Hardwire"))
+	return l
+
+
+## Fine print (DESIGN: Stickers & stamps): a small, dim, ALL CAPS centered label for footers and
+## designators.
+static func sticker(text: String) -> Label:
+	var l: Label = dim_label(text)
+	l.uppercase = true
+	l.add_theme_font_size_override(
+		"font_size", ThemeDB.get_project_theme().get_font_size("small", "Hardwire")
+	)
+	return l
 
 
 ## A centered label in the dim text color (prompts and notes).

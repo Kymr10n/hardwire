@@ -1,7 +1,8 @@
 class_name UpgradeCard
 extends PanelContainer
-## One upgrade in the shop (SPEC: Upgrade shop): name, level, current and next effect, and a buy
-## button with the cost, greyed out when unaffordable or maxed.
+## One upgrade in the shop (SPEC: Upgrade shop), a catalog line item (DESIGN: Shop): part number,
+## name, level, current and next effect, the price as a readout and a BUY keycap, greyed out
+## when unaffordable or maxed.
 
 signal buy_pressed(id: String)
 
@@ -13,12 +14,21 @@ const NAMES := {
 	"overclock": "Overclock",
 	"cycle_miner": "Cycle miner",
 }
+const PART_NUMBERS := {
+	"replay_buffer": "PN HW-RB2",
+	"longer_exposure": "PN HW-LE5",
+	"metronome": "PN HW-MT5",
+	"time_dilation": "PN HW-TD5",
+	"overclock": "PN HW-OC9",
+	"cycle_miner": "PN HW-CM9",
+}
 
 var id: String = ""
 
 var buy_button: Button
 var _title: Label
 var _effect: Label
+var _price: Label
 
 
 func _init(p_id: String = "") -> void:
@@ -33,6 +43,7 @@ func _ready() -> void:
 	var text := VBoxContainer.new()
 	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(text)
+	text.add_child(Ui.sticker(PART_NUMBERS.get(id, "PN HW-000")))
 	_title = Label.new()
 	_title.add_theme_font_size_override("font_size", get_theme_font_size("card_title", "Hardwire"))
 	text.add_child(_title)
@@ -41,9 +52,14 @@ func _ready() -> void:
 	_effect.add_theme_color_override("font_color", get_theme_color("text_dim", "Hardwire"))
 	_effect.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	text.add_child(_effect)
-	buy_button = Ui.button("", func() -> void: buy_pressed.emit(id), true)
-	buy_button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	row.add_child(buy_button)
+	var order := VBoxContainer.new()
+	order.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(order)
+	_price = Ui.readout("", "text")
+	_price.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	order.add_child(_price)
+	buy_button = Ui.button("Buy", func() -> void: buy_pressed.emit(id), true)
+	order.add_child(buy_button)
 	refresh()
 
 
@@ -57,9 +73,11 @@ func refresh() -> void:
 	if maxed:
 		_effect.text = effect_text(id, level) + "  (max)"
 		buy_button.text = "MAX"
+		_price.text = "---"
 	else:
 		_effect.text = "%s  ->  %s" % [effect_text(id, level), effect_text(id, level + 1)]
-		buy_button.text = "%d CYC" % Economy.upgrade_cost(id, level)
+		buy_button.text = "BUY"
+		_price.text = "%d CYC" % Economy.upgrade_cost(id, level)
 	buy_button.disabled = not Economy.can_buy(id, GameState.upgrade_level(id), GameState.cycles)
 
 

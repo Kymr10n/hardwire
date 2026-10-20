@@ -39,6 +39,7 @@ func _ready() -> void:
 		side.add_child(spacer)
 	body.add_child(_build_list())
 	side.add_child(_build_buttons(landscape))
+	side.add_child(Ui.sticker(Ui.FINE_PRINT))
 	GameState.stats_changed.connect(_sync_rows)
 	GameState.upgrades_changed.connect(_refresh_rows)
 	GameState.cores_changed.connect(_refresh_rows)
@@ -126,6 +127,7 @@ func _confirm_rebuild() -> void:
 		]
 	)
 	var dialog := ConfirmDialog.open(self, "Rebuild?", message, "Rebuild")
+	dialog.hazard = true
 	dialog.confirmed.connect(
 		func() -> void:
 			GameState.rebuild()

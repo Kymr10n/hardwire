@@ -153,6 +153,16 @@ func _draw() -> void:
 	Ui.draw_glow(self, face, Color(tint, alpha))
 	var mark: Color = get_theme_color("bg" if level() > 0.0 else "text", "Hardwire")
 	_draw_symbol(index % Symbol.size(), face.get_center(), size.x * SYMBOL_RADIUS, mark)
+	var small: int = get_theme_font_size("small", "Hardwire")
+	draw_string(
+		get_theme_default_font(),
+		face.position + Vector2(small / 2.0, small),
+		"J%d" % (index + 1),
+		HORIZONTAL_ALIGNMENT_LEFT,
+		-1,
+		small,
+		get_theme_color("text_dim", "Hardwire")
+	)
 	Ui.draw_focus(self, rect)
 
 

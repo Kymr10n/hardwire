@@ -1,4 +1,4 @@
-[gd_resource type="Theme" load_steps=16 format=3]
+[gd_resource type="Theme" load_steps=17 format=3]
 
 [ext_resource type="FontFile" path="res://fonts/VT323-Regular.ttf" id="1_silk"]
 [ext_resource type="FontFile" path="res://fonts/DSEG14Classic-Regular.ttf" id="2_readout"]
@@ -64,6 +64,23 @@ content_margin_top = 48.0
 content_margin_right = 48.0
 content_margin_bottom = 48.0
 
+[sub_resource type="StyleBox" id="hazard"]
+script = ExtResource("3_bevel")
+bg = Color(0.847, 0.796, 0.69, 1)
+light = Color(0.929, 0.89, 0.808, 1)
+dark = Color(0.431, 0.408, 0.357, 1)
+outline = Color(0.353, 0.353, 0.353, 1)
+metal = Color(0.612, 0.612, 0.612, 1)
+width = 2
+screws = true
+screw_size = 16.0
+hazard = true
+hazard_color = Color(1, 0.69, 0, 1)
+content_margin_left = 62.0
+content_margin_top = 62.0
+content_margin_right = 62.0
+content_margin_bottom = 62.0
+
 [sub_resource type="StyleBox" id="recess"]
 script = ExtResource("3_bevel")
 bg = Color(0.561, 0.525, 0.467, 1)
@@ -88,10 +105,10 @@ metal = Color(0.612, 0.612, 0.612, 1)
 width = 2
 screws = true
 screw_size = 16.0
-content_margin_left = 16.0
-content_margin_top = 16.0
-content_margin_right = 16.0
-content_margin_bottom = 16.0
+content_margin_left = 24.0
+content_margin_top = 24.0
+content_margin_right = 24.0
+content_margin_bottom = 24.0
 
 [sub_resource type="StyleBox" id="plate"]
 script = ExtResource("3_bevel")
@@ -142,6 +159,7 @@ PanelContainer/styles/panel = SubResource("panel")
 Hardwire/fonts/title = SubResource("title_font")
 Hardwire/fonts/readout = ExtResource("2_readout")
 Hardwire/icons/glow = SubResource("glow")
+Hardwire/styles/hazard = SubResource("hazard")
 Hardwire/styles/recess = SubResource("recess")
 Hardwire/styles/bay = SubResource("bay")
 Hardwire/styles/plate = SubResource("plate")

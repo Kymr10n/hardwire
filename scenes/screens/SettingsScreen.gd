@@ -28,6 +28,7 @@ func _ready() -> void:
 	var actions: GridContainer = _grid(box)
 	var reset: Button = _add_button(actions, "Reset save", _on_reset)
 	reset.add_theme_color_override("font_color", get_theme_color("fail", "Hardwire"))
+	box.add_child(Ui.sticker(Ui.FINE_PRINT))
 	_refresh()
 
 

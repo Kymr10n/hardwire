@@ -137,6 +137,12 @@ func _build() -> void:
 	_title = _add_label(top, SlotDef.TYPE_NAMES[slot.type], "card_title", false)
 	_title.uppercase = true
 	Ui.make_sticker(_title)
+	var bay: int = (
+		(slot.tier - 1) * SlotGenerator.TYPES.size() + SlotGenerator.TYPES.find(slot.type) + 1
+	)
+	var designator: Label = Ui.sticker("BAY %d" % bay)
+	designator.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	top.add_child(designator)
 	var spacer := Control.new()
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE

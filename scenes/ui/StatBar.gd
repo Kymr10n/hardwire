@@ -55,10 +55,9 @@ func _row(parent: Control, key: String, color: String) -> void:
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	label.add_theme_font_size_override("font_size", get_theme_font_size("small", "Hardwire"))
 	row.add_child(label)
-	var readout := Label.new()
-	readout.add_theme_font_override("font", get_theme_font("readout", "Hardwire"))
-	readout.add_theme_font_size_override("font_size", get_theme_font_size("readout", "Hardwire"))
-	readout.add_theme_color_override("font_color", get_theme_color(color, "Hardwire"))
+	var readout: Label = Ui.readout("", color)
+	# Smaller than the shop readouts so four meters fit a phone width.
+	readout.add_theme_font_size_override("font_size", get_theme_font_size("card_title", "Hardwire"))
 	row.add_child(readout)
 	_readouts[key] = readout
 
