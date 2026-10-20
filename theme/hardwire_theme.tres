@@ -1,6 +1,11 @@
-[gd_resource type="Theme" load_steps=7 format=3]
+[gd_resource type="Theme" load_steps=9 format=3]
 
-[ext_resource type="FontFile" path="res://fonts/JetBrainsMono-Regular.ttf" id="1_font"]
+[ext_resource type="FontFile" path="res://fonts/VT323-Regular.ttf" id="1_silk"]
+[ext_resource type="FontFile" path="res://fonts/DSEG14Classic-Regular.ttf" id="2_readout"]
+
+[sub_resource type="FontVariation" id="title_font"]
+base_font = ExtResource("1_silk")
+spacing_glyph = 4
 
 [sub_resource type="StyleBoxFlat" id="button_normal"]
 bg_color = Color(0.105, 0.137, 0.169, 1)
@@ -83,21 +88,23 @@ expand_margin_right = 6.0
 expand_margin_bottom = 6.0
 
 [resource]
-default_font = ExtResource("1_font")
-default_font_size = 40
+default_font = ExtResource("1_silk")
+default_font_size = 32
 Button/colors/font_color = Color(0.86, 0.9, 0.88, 1)
 Button/colors/font_pressed_color = Color(1, 1, 1, 1)
 Button/colors/font_hover_color = Color(0.86, 0.9, 0.88, 1)
 Button/colors/font_disabled_color = Color(0.4, 0.45, 0.43, 1)
-Button/font_sizes/font_size = 40
+Button/font_sizes/font_size = 32
 Button/styles/normal = SubResource("button_normal")
 Button/styles/hover = SubResource("button_normal")
 Button/styles/pressed = SubResource("button_pressed")
 Button/styles/disabled = SubResource("button_disabled")
 Button/styles/focus = SubResource("focus")
 Label/colors/font_color = Color(0.86, 0.9, 0.88, 1)
-Label/font_sizes/font_size = 40
+Label/font_sizes/font_size = 32
 PanelContainer/styles/panel = SubResource("panel")
+Hardwire/fonts/title = SubResource("title_font")
+Hardwire/fonts/readout = ExtResource("2_readout")
 Hardwire/colors/bg = Color(0.059, 0.078, 0.102, 1)
 Hardwire/colors/trace = Color(0.25, 0.32, 0.29, 1)
 Hardwire/colors/text = Color(0.86, 0.9, 0.88, 1)
@@ -137,10 +144,11 @@ Hardwire/constants/tap_min = 120
 Hardwire/constants/timer_bar_height = 24
 Hardwire/constants/max_column = 1200
 Hardwire/constants/side_panel = 440
-Hardwire/font_sizes/title = 72
-Hardwire/font_sizes/header = 44
-Hardwire/font_sizes/phase = 64
-Hardwire/font_sizes/body = 34
+Hardwire/font_sizes/title = 64
+Hardwire/font_sizes/header = 40
+Hardwire/font_sizes/phase = 56
+Hardwire/font_sizes/body = 32
 Hardwire/font_sizes/card_title = 36
 Hardwire/font_sizes/card_body = 32
 Hardwire/font_sizes/small = 32
+Hardwire/font_sizes/readout = 48

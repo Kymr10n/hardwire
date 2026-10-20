@@ -56,10 +56,10 @@ func refresh() -> void:
 	)
 	if maxed:
 		_effect.text = effect_text(id, level) + "  (max)"
-		buy_button.text = "Max"
+		buy_button.text = "MAX"
 	else:
 		_effect.text = "%s  ->  %s" % [effect_text(id, level), effect_text(id, level + 1)]
-		buy_button.text = "%d Cyc" % Economy.upgrade_cost(id, level)
+		buy_button.text = "%d CYC" % Economy.upgrade_cost(id, level)
 	buy_button.disabled = not Economy.can_buy(id, GameState.upgrade_level(id), GameState.cycles)
 
 

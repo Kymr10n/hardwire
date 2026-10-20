@@ -1,14 +1,16 @@
 class_name LicensesScreen
 extends Control
-## Licenses: Hardwire (MIT), JetBrains Mono (OFL) and Godot with its third-party components,
-## as required when distributing builds. Godot's texts come from the engine itself, so they
-## always match the shipped engine. LICENSE and the OFL text are exported via include_filter.
+## Licenses: Hardwire (MIT), the VT323 and DSEG fonts (OFL) and Godot with its third-party
+## components, as required when distributing builds. Godot's texts come from the engine itself,
+## so they always match the shipped engine. LICENSE and the OFL texts are exported via
+## include_filter.
 
 signal exit_requested
 
 const FILES := {
 	"Hardwire": "res://LICENSE",
-	"JetBrains Mono": "res://fonts/JetBrainsMono-OFL.txt",
+	"VT323": "res://fonts/VT323-OFL.txt",
+	"DSEG14 Classic": "res://fonts/DSEG-OFL.txt",
 }
 
 ## D-pad scrolling step, in tap_min units.

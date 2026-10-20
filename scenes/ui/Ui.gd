@@ -108,9 +108,10 @@ static func pct(control: Control, name: String) -> float:
 
 
 ## A button at least tap_min tall; `wide` makes it the theme's button_width (dialogs, actions).
+## Captions are silkscreen: ALL CAPS (DESIGN: Typography); text set later must be caps too.
 static func button(text: String, on_pressed: Callable, wide: bool = false) -> Button:
 	var b := Button.new()
-	b.text = text
+	b.text = text.to_upper()
 	b.pressed.connect(on_pressed)
 	# Lets a swipe over a button in a scroll list reach the ScrollContainer (see SlotCard).
 	b.mouse_filter = Control.MOUSE_FILTER_PASS

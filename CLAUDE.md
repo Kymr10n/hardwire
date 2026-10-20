@@ -74,7 +74,7 @@ tools/steam_upload.sh [--preview]                # export + upload Linux/Windows
 
 ## Gotchas
 
-- `data/balance.json`, `LICENSE` and `fonts/JetBrainsMono-OFL.txt` are not Godot resources: every export preset must list them under "Filters to export non-resource files".
+- `data/balance.json`, `LICENSE`, `fonts/VT323-OFL.txt` and `fonts/DSEG-OFL.txt` are not Godot resources: every export preset must list them under "Filters to export non-resource files".
 - `.godot/` is a cache; never commit or edit it. `build/` and `docs/` carry a `.gdignore` so Godot never imports exports or screenshots.
 - Autoload scripts have no `class_name` (it would clash with the singleton name).
 - Controls built in code: use `set_anchors_and_offsets_preset(PRESET_FULL_RECT)`, not `set_anchors_preset`; on a node already in the tree the latter keeps the old (often zero) rect.

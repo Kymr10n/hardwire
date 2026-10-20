@@ -63,7 +63,7 @@ func grid() -> RamGrid:
 ## "Commit", plus the key or button for it when not on touch ("Commit (Y)").
 func _updatecommit_button_text(_device: int = 0) -> void:
 	var glyph: String = InputMode.glyph("commit")
-	commit_button.text = "Commit" if glyph.is_empty() else "Commit (%s)" % glyph
+	commit_button.text = "COMMIT" if glyph.is_empty() else "COMMIT (%s)" % glyph
 
 
 func can_commit() -> bool:

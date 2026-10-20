@@ -68,14 +68,14 @@ func _refresh() -> void:
 	)
 	_tier_label.text = "T%d" % tier
 	var type: String = SlotGenerator.TYPES[type_index]
-	_type_button.text = "Minigame: %s" % SlotDef.TYPE_NAMES[type]
+	_type_button.text = "MINIGAME: %s" % SlotDef.TYPE_NAMES[type]
 	var mod: String = _modifiers()[modifier_index]
 	_modifier_button.text = (
-		"Modifier: %s" % ("none" if mod.is_empty() else SlotDef.modifier_name(mod))
+		("MODIFIER: %s" % ("none" if mod.is_empty() else SlotDef.modifier_name(mod))).to_upper()
 	)
-	_play_button.text = "Play %s T%d" % [SlotDef.TYPE_NAMES[type], tier]
+	_play_button.text = "PLAY %s T%d" % [SlotDef.TYPE_NAMES[type], tier]
 	_play_button.add_theme_color_override("font_color", get_theme_color(type, "Hardwire"))
-	_scale_button.text = "Time scale: %sx" % Engine.time_scale
+	_scale_button.text = "TIME SCALE: %sX" % Engine.time_scale
 
 
 ## "" plus the selected minigame's modifier pool from balance.json.

@@ -139,10 +139,10 @@ func test_slot_cards_draw_their_frame() -> void:
 
 func test_overview_has_quit_on_pc() -> void:
 	var overview := _overview()
-	assert_has(_button_texts(overview), "Quit", "tests run on PC (D-025)")
+	assert_has(_button_texts(overview), "QUIT", "tests run on PC (D-025)")
 	var settings := SettingsScreen.new()
 	add_child_autofree(settings)
-	assert_does_not_have(_button_texts(settings), "Quit", "Quit left Settings")
+	assert_does_not_have(_button_texts(settings), "QUIT", "Quit left Settings")
 
 
 func test_ambient_score_only_runs_on_gameplay_screens() -> void:

@@ -12,7 +12,7 @@ As of 2026-10-19. **Source of truth for implementation.** Build it milestone by 
 | Platforms | Android, iOS, Windows, Linux, macOS, Steam Deck (native Linux build), plus Web — see Platforms and input |
 | Orientation | Phones portrait; PC and Steam Deck landscape. One layout code path per screen adapts to both |
 | Input | Touch, mouse, keyboard and gamepad, all through InputMap actions |
-| Art | Minimal flat circuit-board look, no drawn assets |
+| Art | "Beige Box": a worn 90s PC case drawn with Godot shapes, two OFL fonts and one wear shader, no drawn assets (`docs/DESIGN.md`) |
 | Audio | Synthesized tones generated in code, no audio files needed |
 | Save | Local JSON in `user://` |
 | Prototype scope | All three minigames, overview with tiers, upgrade shop, prestige, idle income |
@@ -55,7 +55,7 @@ Every screen and minigame must be fully playable with touch, mouse, keyboard and
 | CPU tile | Hold tile | Hold Space or Enter | Hold A |
 | Debug panel (`debug_panel`, debug builds) | Tap the stat bar 5 times | F1 | View (Select) |
 
-The focus outline shows only for keyboard and gamepad input; when the overview opens, focus starts on the first unsolved slot of the newest unlocked tier. Storage pads keep their ring on every input method (D-021).
+The focus LED (an amber dot in the focused element's top-right corner, D-039) shows only for keyboard and gamepad input; when the overview opens, focus starts on the first unsolved slot of the newest unlocked tier. Storage pads keep their LED on every input method (D-021).
 
 **Glyphs.** On-screen prompts show the glyphs of the last-used input device: none for touch ("Tap to …"), keys for keyboard and mouse ("Click or press Enter to …"), A/B/X/Y for gamepad (Xbox layout, which matches Steam Deck). Keyboard prompts never appear while a gamepad is in use.
 
@@ -100,7 +100,7 @@ The player has three stats that only go up until a prestige, plus one spendable 
 Gating rule, per slot:
 
 - Unlocked when `ram >= req.ram and cpu >= req.cpu and sto >= req.sto`.
-- Locked slots stay visible, greyed out, and show the missing amount per stat (for example "CPU 4 more").
+- Locked slots stay visible as blanking plates (stamped "EMPTY BAY", no screen) and show the missing amount per stat (for example "CPU 4 more").
 - Stats are integers and are never spent. Upgrades cost Cycles only.
 
 A solve credits stat points to the slot's own stat and Cycles to the wallet. The first solve of each slot pays double, so a new tier always feels rewarding. Replays pay the normal amount, which grows with tier, so replaying the highest unlocked tier is always the most efficient way to grind.
@@ -125,7 +125,7 @@ The game lights a sequence of colored pads, and the player taps them back in the
 **Modifiers** (from tier 8, see Difficulty curve):
 
 - *Reverse:* enter the sequence back to front.
-- *Decoy:* one extra pad flashes dimly, with a quieter tone, during playback and must be ignored. It appears between two real items (never first or last) and on a pad different from both neighbors.
+- *Decoy:* one extra pad flickers dimly (20% glow, blinking every 80 ms), with a quieter tone, during playback and must be ignored. It appears between two real items (never first or last) and on a pad different from both neighbors.
 
 ## Minigame: RAM (pattern grid)
 
@@ -259,7 +259,7 @@ Once the player has solved any tier 10 slot, they can Rebuild: reset progress in
 - **Effect:** every Core adds +25% to stat rewards and Cycles, additively. Total multiplier = `1 + 0.25 × total_cores`.
 - **Reset:** stats, Cycles, upgrade levels and first-solve flags.
 - **Kept:** Cores, best tier ever reached, settings, lifetime statistics and the first-run hints already seen.
-- A confirm dialog shows Cores to be gained and the new multiplier before the reset.
+- A confirm dialog shows Cores to be gained and the new multiplier before the reset. It is the only dialog with a yellow-black hazard border.
 
 ## Idle income
 
@@ -279,12 +279,12 @@ The prototype has five screens around one hub, the overview. Every screen works 
 | Screen | Contents | Leads to |
 | --- | --- | --- |
 | Boot | Title "HARDWIRE" with the subtitle "BOOT SEQUENCE", "Press any button" ("Tap to start" on touch), a small dim "FIRMWARE v<version>" line in the bottom-right corner (from `application/config/version`), loads the save | Overview |
-| Overview | Top bar with RAM, CPU, STO, Cycles and Cores (compact above 9999: 12.3K, 4.56M); vertical scroll list of tier rows (tier 1 at the top), newest unlocked tier in view on open; each row = tier number, requirement chips (accent-coloured while unmet) and 3 slot cards (RAM, CPU, STO); bottom bar with Shop, Rebuild, Settings and, on PC, Quit (saves and closes) | Puzzle, Shop, Rebuild dialog, Settings |
+| Overview | Front panel with RAM, CPU and STO (label, a bank of 10 LEDs lit by progress from the current tier's requirement to the next, readout), Cycles (readout, pulses when it changes) and Cores (compact above 9999: 12.3K, 4.56M); a vent slit row under it; vertical scroll list of tier rows (tier 1 at the top), newest unlocked tier in view on open; each row = tier number, requirement chips (accent-coloured while unmet) and 3 slot cards (RAM, CPU, STO); bottom bar with Shop, Rebuild, Settings and, on PC, Quit (saves and closes) | Puzzle, Shop, Rebuild dialog, Settings |
 | Puzzle | Header with minigame name, tier, modifier and a back button; phase label ("Watch" / "Your turn"); timer bar; the minigame area; result overlay | Overview |
-| Shop | List of upgrade cards, Cycles balance on top | Overview |
-| Settings | Sound on or off, haptics on or off, licenses (full texts of Hardwire, the font and Godot with its third-party components; the text scrolls with the D-pad or arrows; Back returns to Settings), reset save (with confirm) | Overview, Licenses |
+| Shop | "PARTS & UPGRADES": list of upgrade cards, each with a part number, price readout and a "BUY" button; Cycles balance on top | Overview |
+| Settings | Sound on or off, haptics on or off, licenses (full texts of Hardwire, the fonts and Godot with its third-party components; the text scrolls with the D-pad or arrows; Back returns to Settings), reset save (with confirm) | Overview, Licenses |
 
-**Slot card states:** locked (greyed, shows missing stats), unlocked and never solved (accent border, "NEW" badge), solved (normal), modifier (icon in the corner). Unlocked cards show what the next solve pays (+stat, +Cycles).
+**Slot card states:** locked (blanking plate, shows missing stats), unlocked and never solved (accent border, "NEW" sticker), solved (normal), modifier (icon in the corner). Every card is a drive-bay device with a "BAY n" designator. Unlocked cards show what the next solve pays (+stat, +Cycles).
 
 **Result overlay:**
 
@@ -308,16 +308,17 @@ On PC, Settings adds "Fullscreen" and the overview adds "Quit"; B on the overvie
 
 ## Visual and audio style
 
-The look is a dark, flat circuit board drawn entirely with Godot shapes and one font, so the prototype needs no art assets. The sound is simple synthesized tones generated at runtime.
+The look is "Beige Box": the game is a worn 90s beige PC tower, drawn with Godot shapes, two fonts and one shader, so it needs no art assets. `docs/DESIGN.md` is the visual guide (palette, shapes, components, motion) and is changed before the code, like this spec (D-039). The sound is simple synthesized tones generated at runtime.
 
 **Visuals:**
 
-- Background near-black blue-grey; thin trace lines in a muted green-grey connect the tier rows on the overview.
-- One accent color per stat, used for its numbers, slot borders and minigame header: RAM cyan, CPU magenta, STO amber.
-- Storage pads use an 8-color colorblind-safe palette, each paired with a symbol.
-- Shapes are rounded rectangles; lit states glow by brightening and scaling to 105% over 80 ms. No gradients or textures.
-- One monospace font under the SIL Open Font License (for example JetBrains Mono), bundled with the project.
-- All colors, sizes and durations live in a theme resource so the style can be changed in one place.
+- Two color families: plastic (beige case surfaces, silkscreen text; never saturated) and electric (LEDs and glows; the only saturated colors). The background is the case front; sections sit on case panels and in recesses.
+- One accent color per stat, used for its readout, slot borders, minigame header and glows: RAM cyan, CPU red-orange, STO amber. Status LEDs: green (ok), amber (focus, Cycles), red (failure).
+- Storage pads are square LED keys under frosted plastic: a recess with a radial glow in one of 8 colorblind-safe tints, each paired with a symbol.
+- Corner radius is 0 everywhere except LEDs and screws. Raised elements have a 2 px plastic bevel and a 1 px metal outline; recessed ones the inverse. A pressed keycap inverts its bevel and shifts its content 2 px down. Lit states glow and scale to 105% over 80 ms with a slight overshoot; nothing eases over 250 ms.
+- Wear: a full-screen shader adds subtle grain, uneven yellowing towards the corners and a few shallow scuffs. Panels and cards carry screws at deterministic random angles; vent slits separate sections; screens carry part numbers ("BAY 3", "J7") and a fine-print footer ("HARDWIRE SYSTEMS · MODEL HW-486 · NO USER-SERVICEABLE PARTS INSIDE").
+- Two fonts under the SIL Open Font License, bundled with the project: VT323 for silkscreen text (ALL CAPS for titles, headers, phase labels and button captions; sentence case for body text) and DSEG14 Classic for numeric readouts (stat values, Cycles, prices). The minimum font size stays 32 px.
+- All colors, fonts, sizes and durations live in a theme resource so the style can be changed in one place.
 
 **Audio** (generated with `AudioStreamGenerator`, no files):
 
@@ -404,7 +405,7 @@ res://
                           # ResultOverlay, ConfirmDialog, HintOverlay, UpgradeCard
   theme/
     hardwire_theme.tres   # colors, font sizes, sizes, durations
-  fonts/                  # JetBrains Mono + OFL
+  fonts/                  # VT323 and DSEG14 Classic + OFL texts
   tests/                  # GUT tests: tests/logic/ mirrors logic/ one-to-one
   tools/                  # versions.env, setup.sh, check.sh, drift_check.py (the quality gate),
                           # install_godot.sh, export.sh, deck.sh, steam_upload.sh;

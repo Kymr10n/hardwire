@@ -2,13 +2,13 @@
 
 importer="font_data_dynamic"
 type="FontFile"
-uid="uid://c7n2w6rn2wx7j"
-path="res://.godot/imported/JetBrainsMono-Regular.ttf-e1c4e1d22b8ac683c9c2806d9bd3f76d.fontdata"
+uid="uid://c25sfhgbx7rjr"
+path="res://.godot/imported/VT323-Regular.ttf-bff42fb840215fe474048a1b5fed41ab.fontdata"
 
 [deps]
 
-source_file="res://fonts/JetBrainsMono-Regular.ttf"
-dest_files=["res://.godot/imported/JetBrainsMono-Regular.ttf-e1c4e1d22b8ac683c9c2806d9bd3f76d.fontdata"]
+source_file="res://fonts/VT323-Regular.ttf"
+dest_files=["res://.godot/imported/VT323-Regular.ttf-bff42fb840215fe474048a1b5fed41ab.fontdata"]
 
 [params]
 

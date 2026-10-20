@@ -64,6 +64,8 @@ func test_licenses_screen_shows_all_texts() -> void:
 	var text: String = LicensesScreen.full_text()
 	assert_string_contains(text, "Copyright (c) 2026 kamyrion")
 	assert_string_contains(text, "SIL OPEN FONT LICENSE")
+	assert_string_contains(text, "VT323 Project Authors")
+	assert_string_contains(text, "keshikan")
 	assert_string_contains(text, "Godot Engine contributors")
 	assert_string_contains(text, "FreeType")
 
@@ -198,7 +200,7 @@ func test_settings_change_is_saved() -> void:
 	var settings := SettingsScreen.new()
 	add_child_autofree(settings)
 	for node: Node in settings.find_children("*", "Button", true, false):
-		if (node as Button).text.begins_with("Sound"):
+		if (node as Button).text.begins_with("SOUND"):
 			(node as Button).pressed.emit()
 	assert_true(GameState.settings.sound, "muted by the test base, toggled back on")
 	assert_true(FileAccess.file_exists(TEST_SAVE))

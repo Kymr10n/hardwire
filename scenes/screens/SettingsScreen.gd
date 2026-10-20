@@ -49,10 +49,14 @@ func _add_button(parent: Control, text: String, on_pressed: Callable) -> Button:
 
 
 func _refresh() -> void:
-	_sound.text = "Sound: %s" % ("On" if GameState.settings.sound else "Off")
-	_haptics.text = "Haptics: %s" % ("On" if GameState.settings.haptics else "Off")
+	_sound.text = "SOUND: %s" % _state(GameState.settings.sound)
+	_haptics.text = "HAPTICS: %s" % _state(GameState.settings.haptics)
 	if _fullscreen:
-		_fullscreen.text = "Fullscreen: %s" % ("On" if _is_fullscreen() else "Off")
+		_fullscreen.text = "FULLSCREEN: %s" % _state(_is_fullscreen())
+
+
+static func _state(on: bool) -> String:
+	return "ON" if on else "OFF"
 
 
 func _is_fullscreen() -> bool:

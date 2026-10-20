@@ -84,9 +84,9 @@ func test_ram_commit_shows_glyph() -> void:
 	var puzzle: PuzzleBase = RamPuzzle.new()
 	add_child_autofree(puzzle)
 	_use(_pad_button(JOY_BUTTON_A))
-	assert_eq(puzzle.commit_button.text, "Commit (Y)")
+	assert_eq(puzzle.commit_button.text, "COMMIT (Y)")
 	_use(_touch(false))
-	assert_eq(puzzle.commit_button.text, "Commit")
+	assert_eq(puzzle.commit_button.text, "COMMIT")
 
 
 func test_debug_panel_action_opens_panel() -> void:

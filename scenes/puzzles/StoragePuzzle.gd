@@ -133,7 +133,7 @@ func _light_item(item: int) -> void:
 func _on_phase_entered(p_phase: Phase) -> void:
 	release_pad()
 	replay_button.visible = p_phase == Phase.INPUT and _replays_left > 0
-	replay_button.text = "Replay (%d)" % _replays_left
+	replay_button.text = "REPLAY (%d)" % _replays_left
 
 
 func _on_fail_reveal() -> void:

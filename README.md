@@ -117,4 +117,4 @@ Desktop saves live in `~/.local/share/Hardwire` (Linux, Steam Deck) and `%APPDAT
 
 ## License
 
-Hardwire is released under the [MIT License](LICENSE). It uses the Godot Engine (MIT), the JetBrains Mono font (SIL Open Font License 1.1) and, for tests only, GUT (MIT); see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). The game lists all license texts under Settings → Licenses.
+Hardwire is released under the [MIT License](LICENSE). It uses the Godot Engine (MIT), the VT323 and DSEG fonts (SIL Open Font License 1.1) and, for tests only, GUT (MIT); see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). The game lists all license texts under Settings → Licenses.

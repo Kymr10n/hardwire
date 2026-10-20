@@ -4,6 +4,10 @@ All notable changes to Hardwire are documented here. The format follows [Keep a 
 
 ## [Unreleased]
 
+### Changed
+
+- New look, "Beige Box" (`docs/DESIGN.md`): the UI is a worn 90s beige PC case with bevelled keycaps, LED banks on a front panel, drive-bay slot cards, screws, vents and a grain-and-scuff overlay; focus is an amber LED; fonts are VT323 and DSEG14 Classic (JetBrains Mono removed); the Storage decoy flickers at 20%; the Rebuild dialog has a hazard border.
+
 ### Added
 
 - One-click Steam Deck install: download `Hardwire-SteamDeck.desktop` from the latest release, double-click it in Desktop Mode; it installs or updates the game and adds it to Steam. Releases are published by pushing a `v<version>` tag.
