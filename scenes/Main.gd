@@ -2,7 +2,10 @@ extends Control
 ## Root scene. Holds the current screen and handles transitions (SPEC: Screens and UX flow): Boot ->
 ## Overview hub -> Puzzle / Shop / Settings / debug panel, plus the "While you were away" idle
 ## income dialog (on start and after a resume, shown on the overview). Picks
-## portrait or landscape from the window aspect and rebuilds the screen when it flips.
+## portrait or landscape from the window aspect and rebuilds the screen when it flips. The case
+## front (bg) sits under every screen and the wear overlay (DESIGN: Texture & wear) above.
+
+const WEAR_SHADER := preload("res://theme/wear.gdshader")
 
 var screen: Control
 ## An idle-income offer is still due (on start and after a resume) and is made on the overview.
@@ -18,12 +21,25 @@ func _ready() -> void:
 	bg.color = get_theme_color("bg", "Hardwire")
 	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(bg)
+	_add_wear()
 	_apply_orientation()
 	get_window().size_changed.connect(_on_window_resized)
 	# Steam sets SteamDeck=1 on the Deck: start fullscreen there (SPEC: Controls).
 	if OS.get_environment("SteamDeck") == "1":
 		get_window().mode = Window.MODE_FULLSCREEN
 	show_boot()
+
+
+## A full-screen shader on its own canvas layer, so it stays above every screen and dialog.
+func _add_wear() -> void:
+	var layer := CanvasLayer.new()
+	add_child(layer)
+	var wear := ColorRect.new()
+	wear.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	wear.material = ShaderMaterial.new()
+	wear.material.shader = WEAR_SHADER
+	wear.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	layer.add_child(wear)
 
 
 ## Base size for the current window aspect: the project's portrait size, or the same size swapped.
