@@ -1,7 +1,7 @@
 class_name TierRow
 extends VBoxContainer
 ## One tier on the overview: tier number, requirement chips (accent stickers while unmet) and 3
-## slot cards.
+## slot cards, a drive-bay stack under a vent row (the front panel has its own above tier 1).
 
 signal slot_pressed(slot: SlotDef)
 
@@ -21,6 +21,8 @@ func _ready() -> void:
 	var margin: int = get_theme_constant("margin", "Hardwire")
 	var gap: int = get_theme_constant("row_gap", "Hardwire")
 	add_theme_constant_override("separation", gap)
+	if tier > 1:
+		add_child(Deco.vent())
 	_header = HBoxContainer.new()
 	_header.add_theme_constant_override("separation", margin / 2)
 	add_child(_header)

@@ -32,6 +32,7 @@ func _ready() -> void:
 	stat_bar.vertical = landscape
 	stat_bar.debug_requested.connect(debug_requested.emit)
 	side.add_child(stat_bar)
+	side.add_child(Deco.vent())
 	if landscape:
 		var spacer := Control.new()
 		spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL

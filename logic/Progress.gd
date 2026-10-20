@@ -30,6 +30,14 @@ static func highest_unlocked_tier(stats: Dictionary) -> int:
 	return tier
 
 
+## LEDs (0..leds) lit for `stat` on the way from the requirement of `tier` to the next tier's
+## (DESIGN: Stat bar); all lit once the next tier is reached.
+static func tier_leds(stat: int, tier: int, leds: int) -> int:
+	var from: int = Balance.req(tier)
+	var span: int = Balance.req(tier + 1) - from
+	return floori(leds * clampf(float(stat - from) / span, 0.0, 1.0))
+
+
 ## Highest tier with at least one solved slot ("tier:type" ids), or 0.
 static func highest_solved_tier(solved_slots: Array[String]) -> int:
 	var best: int = 0

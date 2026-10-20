@@ -24,6 +24,14 @@ func test_highest_unlocked_tier() -> void:
 	assert_eq(Progress.highest_unlocked_tier(_stats(162, 161, 162)), 9, "the lowest stat decides")
 
 
+func test_tier_leds_show_progress_to_the_next_tier() -> void:
+	assert_eq(Progress.tier_leds(0, 1, 10), 0, "tier 1 needs 0, tier 2 needs 2")
+	assert_eq(Progress.tier_leds(1, 1, 10), 5)
+	assert_eq(Progress.tier_leds(2, 1, 10), 10)
+	assert_eq(Progress.tier_leds(11, 3, 10), 3, "tier 3 needs 8, tier 4 needs 18")
+	assert_eq(Progress.tier_leds(99, 3, 10), 10, "never past the bank")
+
+
 func test_highest_solved_tier() -> void:
 	assert_eq(Progress.highest_solved_tier([] as Array[String]), 0)
 	assert_eq(Progress.highest_solved_tier(["3:ram", "7:cpu", "2:sto"] as Array[String]), 7)

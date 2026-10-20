@@ -1,3 +1,4 @@
+# gdlint: disable=max-public-methods
 extends "res://tests/hardwire_test.gd"
 ## Overview screen: visible tiers, card states, gating in the UI, reward flow from the puzzle
 ## screen.
@@ -162,3 +163,34 @@ func _button_texts(screen: Control) -> Array[String]:
 	for node: Node in screen.find_children("*", "Button", true, false):
 		texts.append((node as Button).text)
 	return texts
+
+
+func _led_banks(overview: Control) -> Array[Deco]:
+	var banks: Array[Deco] = []
+	for node: Node in overview.find_children("*", "Deco", true, false):
+		if (node as Deco).kind == Deco.Kind.LED_BANK:
+			banks.append(node)
+	return banks
+
+
+func test_stat_bar_leds_show_progress_to_next_tier() -> void:
+	var overview := _overview()
+	var banks: Array[Deco] = _led_banks(overview)
+	assert_eq(banks.size(), 3, "one bank per stat")
+	assert_eq(banks[0].lit, 0)
+	GameState.add_stats(1, 0, 0)
+	assert_eq(banks[0].lit, 5, "RAM 1 of the 2 tier 2 needs")
+	GameState.add_stats(1, 0, 0)
+	assert_eq(banks[0].lit, 10)
+
+
+func test_cycles_readout_pulses_on_change() -> void:
+	var overview := _overview()
+	var bar: StatBar = overview.find_children("*", "StatBar", true, false)[0]
+	var readout: Label = bar._readouts.cycles
+	var idle: Color = bar.get_theme_color("led_amber", "Hardwire")
+	assert_eq(readout.get_theme_color("font_color"), idle)
+	GameState.add_cycles(5)
+	assert_ne(readout.get_theme_color("font_color"), idle, "flashes bright")
+	await wait_seconds(0.3)
+	assert_eq(readout.get_theme_color("font_color"), idle, "back to amber within tap_flash_ms")

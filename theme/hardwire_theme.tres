@@ -88,6 +88,10 @@ metal = Color(0.612, 0.612, 0.612, 1)
 width = 2
 screws = true
 screw_size = 16.0
+content_margin_left = 16.0
+content_margin_top = 16.0
+content_margin_right = 16.0
+content_margin_bottom = 16.0
 
 [sub_resource type="StyleBox" id="plate"]
 script = ExtResource("3_bevel")
@@ -175,6 +179,7 @@ Hardwire/constants/button_width = 300
 Hardwire/constants/tier_label_width = 130
 Hardwire/constants/bevel = 2
 Hardwire/constants/led_size = 18
+Hardwire/constants/vent_slit_h = 2
 Hardwire/constants/row_gap = 16
 Hardwire/constants/glow_scale_pct = 105
 Hardwire/constants/pad_size = 220
