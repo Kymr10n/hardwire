@@ -1,9 +1,8 @@
 class_name CpuTile
 extends Control
-## The central CPU tile: a large rounded square that lights in the CPU accent color.
-## Lit state brightens and scales to glow_scale_pct over glow_ms. Input is handled by CpuPuzzle.
-
-const CORNER := 0.12
+## The central CPU tile: a big square switch (DESIGN: Minigame surfaces) that goes in and glows in
+## the CPU accent color while lit, scaling to glow_scale_pct over glow_ms. Input is handled by
+## CpuPuzzle.
 
 var lit: bool = false:
 	set(value):
@@ -14,7 +13,6 @@ var lit: bool = false:
 		_animate()
 
 var _tween: Tween
-var _style := StyleBoxFlat.new()
 
 
 func _init() -> void:
@@ -38,8 +36,8 @@ func _animate() -> void:
 
 
 func _draw() -> void:
+	var rect := Rect2(Vector2.ZERO, size)
+	draw_style_box(get_theme_stylebox("pressed" if lit else "normal", "Button"), rect)
 	var accent: Color = get_theme_color("cpu", "Hardwire")
-	_style.bg_color = (accent if lit else accent.darkened(1.0 - Ui.pct(self, "pad_idle_pct")))
-	_style.set_corner_radius_all(int(size.x * CORNER))
-	draw_style_box(_style, Rect2(Vector2.ZERO, size))
-	Ui.draw_focus(self, Rect2(Vector2.ZERO, size))
+	Ui.draw_glow(self, rect, Color(accent, 1.0 if lit else Ui.pct(self, "pad_idle_pct")))
+	Ui.draw_focus(self, rect)

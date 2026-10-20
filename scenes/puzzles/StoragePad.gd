@@ -1,7 +1,8 @@
 class_name StoragePad
 extends Control
-## One colored pad of the Storage ring: distinct color and symbol (colorblind-safe), lit level 0..1.
-## Lit pads brighten and scale up (theme: glow_ms, glow_scale_pct). A touch on the pad or the
+## One pad of the Storage ring: an LED under frosted plastic (DESIGN: Pads) with a distinct tint
+## and symbol (colorblind-safe), lit level 0..1 as the glow inside its recess. Lit pads brighten
+## and scale up with a small overshoot (theme: glow_ms, glow_scale_pct). A touch on the pad or the
 ## accept action while it has focus emits `tapped`; letting go emits `released` (with the pad's
 ## index for a touch, -1 for accept, whose release may come after focus moved). StoragePuzzle
 ## decides what they mean.
@@ -12,10 +13,7 @@ signal released(index: int)
 enum Symbol { CIRCLE, TRIANGLE, SQUARE, DIAMOND, STAR, PLUS, HEXAGON, RING }
 
 ## Pad look, as fractions of the pad size.
-const CORNER := 0.18
 const SYMBOL_RADIUS := 0.2
-const LIT_LIGHTEN := 0.15
-const IDLE_MARK_DARKEN := 0.2
 ## Regular polygons: [sides, radius scale, start angle].
 const UP := -PI / 2.0
 const POLYGONS := {
@@ -39,7 +37,6 @@ var _level: float = 0.0
 var _held: bool = false
 var _min_light: Tween
 var _tween: Tween
-var _style := StyleBoxFlat.new()
 
 
 func _init(p_index: int = 0) -> void:
@@ -113,23 +110,21 @@ func _apply_level(p_level: float) -> void:
 	var target: float = 1.0
 	if p_level > 0.0:
 		target = Ui.pct(self, "glow_scale_pct")
-	_tween = create_tween()
+	_tween = create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	_tween.tween_property(
 		self, "scale", Vector2.ONE * target, get_theme_constant("glow_ms", "Hardwire") / 1000.0
 	)
 
 
 func _draw() -> void:
-	var base: Color = get_theme_color("pad_%d" % index, "Hardwire")
-	var idle: Color = base.darkened(1.0 - Ui.pct(self, "pad_idle_pct"))
-	_style.bg_color = idle.lerp(base.lightened(LIT_LIGHTEN), _level)
-	_style.set_corner_radius_all(int(size.x * CORNER))
-	draw_style_box(_style, Rect2(Vector2.ZERO, size))
-	var mark: Color = get_theme_color("bg", "Hardwire")
-	if _level <= 0.0:
-		mark = base.darkened(IDLE_MARK_DARKEN)
+	var rect := Rect2(Vector2.ZERO, size)
+	draw_style_box(get_theme_stylebox("recess", "Hardwire"), rect)
+	var tint: Color = get_theme_color("pad_%d" % index, "Hardwire")
+	var alpha: float = lerpf(Ui.pct(self, "pad_idle_pct"), 1.0, _level)
+	Ui.draw_glow(self, rect, Color(tint, alpha))
+	var mark: Color = get_theme_color("bg" if _level > 0.0 else "text", "Hardwire")
 	_draw_symbol(index % Symbol.size(), size / 2.0, size.x * SYMBOL_RADIUS, mark)
-	Ui.draw_focus(self, Rect2(Vector2.ZERO, size))
+	Ui.draw_focus(self, rect)
 
 
 func _draw_symbol(symbol: int, c: Vector2, r: float, color: Color) -> void:

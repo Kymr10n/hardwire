@@ -1,7 +1,7 @@
 class_name TierRow
 extends VBoxContainer
-## One tier on the overview: tier number, requirement chips (accent while unmet) and 3 slot cards.
-## A thin trace line on the left connects the rows (SPEC: Visual style).
+## One tier on the overview: tier number, requirement chips (accent stickers while unmet) and 3
+## slot cards.
 
 signal slot_pressed(slot: SlotDef)
 
@@ -25,7 +25,7 @@ func _ready() -> void:
 	_header.add_theme_constant_override("separation", margin / 2)
 	add_child(_header)
 	var title := Label.new()
-	title.text = "  T%d" % tier
+	title.text = "T%d" % tier
 	title.custom_minimum_size.x = get_theme_constant("tier_label_width", "Hardwire")
 	title.add_theme_font_size_override("font_size", get_theme_font_size("header", "Hardwire"))
 	_header.add_child(title)
@@ -34,15 +34,13 @@ func _ready() -> void:
 		chip.text = "%s %d" % [SlotDef.STAT_NAMES[type], Balance.req(tier)]
 		chip.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		chip.add_theme_font_size_override("font_size", get_theme_font_size("small", "Hardwire"))
+		Ui.make_sticker(chip)
 		_header.add_child(chip)
 		_chips.append(chip)
 
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", gap)
 	add_child(row)
-	var spacer := Control.new()
-	spacer.custom_minimum_size.x = _spacer_width()
-	row.add_child(spacer)
 	for slot: SlotDef in SlotGenerator.tier_slots(tier):
 		var card := SlotCard.new()
 		card.setup(slot)
@@ -56,25 +54,6 @@ func refresh() -> void:
 	for i: int in _chips.size():
 		var type: String = SlotGenerator.TYPES[i]
 		var met: bool = GameState.stats()[type] >= Balance.req(tier)
-		_chips[i].add_theme_color_override(
-			"font_color",
-			get_theme_color("text_dim", "Hardwire") if met else get_theme_color(type, "Hardwire")
-		)
+		Ui.sticker_color(_chips[i], Color.TRANSPARENT if met else get_theme_color(type, "Hardwire"))
 	for card: SlotCard in cards:
 		card.refresh()
-	queue_redraw()
-
-
-## Trace line down the left edge with a node at the tier label (SPEC: Visual style).
-func _draw() -> void:
-	var trace: Color = get_theme_color("trace", "Hardwire")
-	var margin: float = get_theme_constant("margin", "Hardwire")
-	var x: float = _spacer_width() / 2
-	var width: float = get_theme_constant("trace_width", "Hardwire")
-	draw_line(Vector2(x, 0), Vector2(x, size.y + margin), trace, width)
-	draw_circle(Vector2(x, _header.size.y / 2), x, trace)
-
-
-## Empty strip left of the cards that the trace line runs through.
-func _spacer_width() -> float:
-	return get_theme_constant("margin", "Hardwire") / 2.0

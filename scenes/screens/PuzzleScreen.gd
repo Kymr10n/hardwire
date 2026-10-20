@@ -68,8 +68,14 @@ func _build_panel(landscape: bool) -> BoxContainer:
 	if landscape:
 		panel.custom_minimum_size.x = get_theme_constant("side_panel", "Hardwire")
 	var title: Label = Ui.header(panel, title_text(), go_back, landscape)
-	title.add_theme_color_override("font_color", accent)
+	# The title is a sticker in the stat color (accent text alone is faint on beige).
+	Ui.make_sticker(title)
+	Ui.sticker_color(title, accent)
+	title.size_flags_horizontal = (
+		Control.SIZE_SHRINK_BEGIN if landscape else Control.SIZE_EXPAND | Control.SIZE_SHRINK_END
+	)
 	_phase_label = Ui.label("", get_theme_font_size("phase", "Hardwire"))
+	_phase_label.uppercase = true
 	panel.add_child(_phase_label)
 	_timer_bar = TimerBar.new()
 	_timer_bar.color = accent

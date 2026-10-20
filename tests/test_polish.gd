@@ -231,3 +231,18 @@ func test_pausing_the_score_keeps_sound_effects_playing() -> void:
 	Synth.set_music_enabled(false)
 	assert_true(Synth.is_playing(id), "effect survives the pause")
 	Synth.stop_all()
+
+
+func test_theme_is_beige_box() -> void:
+	var theme: Theme = ThemeDB.get_project_theme()
+	assert_true(theme.get_stylebox("normal", "Button") is BevelBox, "keycaps are bevelled")
+	assert_true(theme.get_stylebox("focus", "Button") is FocusLed, "focus is an LED")
+	assert_true(theme.get_stylebox("recess", "Hardwire").get("sunken"), "recesses are sunken")
+	assert_not_null(theme.get_font("readout", "Hardwire"))
+	assert_true(theme.get_icon("glow", "Hardwire") is GradientTexture2D)
+	for type: StringName in theme.get_stylebox_type_list():
+		for name: StringName in theme.get_stylebox_list(type):
+			var style: StyleBox = theme.get_stylebox(name, type)
+			if style is StyleBoxFlat:
+				assert_eq((style as StyleBoxFlat).corner_radius_top_left, 0, "no rounded corners")
+	assert_eq(theme.get_constant("decoy_pct", "Hardwire"), 20)

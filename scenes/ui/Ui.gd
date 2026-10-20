@@ -5,6 +5,8 @@ extends RefCounted
 
 ## Theme `*_pct` constants are percentages.
 const PERCENT := 100.0
+## Side padding of a sticker label.
+const STICKER_PAD := 10.0
 
 
 ## True when the node's viewport is wider than tall (Steam Deck, desktop).
@@ -62,6 +64,7 @@ static func header(
 		HORIZONTAL_ALIGNMENT_LEFT if stacked else HORIZONTAL_ALIGNMENT_RIGHT
 	)
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.uppercase = true
 	label.add_theme_font_size_override(
 		"font_size", parent.get_theme_font_size("header", "Hardwire")
 	)
@@ -100,6 +103,14 @@ static func focus_first(screen: Control) -> void:
 static func draw_focus(control: Control, rect: Rect2) -> void:
 	if control.has_focus(true):
 		control.draw_style_box(control.get_theme_stylebox("focus", "Button"), rect)
+
+
+## Draws the theme's radial glow (an LED under frosted plastic) inside `rect`, inset by the bevel.
+static func draw_glow(control: Control, rect: Rect2, color: Color) -> void:
+	var inset: float = control.get_theme_constant("bevel", "Hardwire")
+	control.draw_texture_rect(
+		control.get_theme_icon("glow", "Hardwire"), rect.grow(-inset), false, color
+	)
 
 
 ## A `*_pct` theme constant as a ratio (glow_scale_pct 105 -> 1.05).
@@ -144,14 +155,15 @@ static func centered_column(overlay: Control, dim_alpha: float = 0.0) -> VBoxCon
 	return column
 
 
-## Full-rect overlay with an optional dim layer over what is behind it. Pointer input on the dim
+## Full-rect overlay with an optional dim layer (plastic over the screen, DESIGN: Panels) over
+## what is behind it. Pointer input on the dim
 ## layer goes to the overlay (which, as a Control, stops it from reaching what is behind).
 static func _backdrop(overlay: Control, dim_alpha: float) -> void:
 	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	if dim_alpha <= 0.0:
 		return
 	var dim := ColorRect.new()
-	dim.color = Color(overlay.get_theme_color("bg", "Hardwire"), dim_alpha)
+	dim.color = Color(overlay.get_theme_color("card_locked", "Hardwire"), dim_alpha)
 	dim.mouse_filter = Control.MOUSE_FILTER_PASS
 	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	overlay.add_child(dim)
@@ -172,6 +184,23 @@ static func modal(overlay: Control, dim_alpha: float, min_width: float = 0.0) ->
 	)
 	panel.add_child(column)
 	return column
+
+
+## Turns `label` into a square sticker: a filled box behind the text (DESIGN: Stickers).
+static func make_sticker(label: Label) -> void:
+	var style := StyleBoxFlat.new()
+	style.content_margin_left = STICKER_PAD
+	style.content_margin_right = STICKER_PAD
+	label.add_theme_stylebox_override("normal", style)
+
+
+## Sets a sticker's fill; its text is in the case color, or dim when the fill is clear.
+static func sticker_color(label: Label, fill: Color) -> void:
+	(label.get_theme_stylebox("normal") as StyleBoxFlat).bg_color = fill
+	var role: String = "text_dim" if fill.a == 0.0 else "bg"
+	label.add_theme_color_override(
+		"font_color", ThemeDB.get_project_theme().get_color(role, "Hardwire")
+	)
 
 
 ## A centered label in the dim text color (prompts and notes).

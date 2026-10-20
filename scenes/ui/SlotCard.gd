@@ -1,8 +1,9 @@
 class_name SlotCard
 extends Button
-## One slot on the overview (SPEC: Slot card states): locked (greyed, missing stats), unlocked and
-## never solved (accent border, NEW badge), solved (normal), modifier (icon in the corner). Shows
-## what the next solve pays. Labels in containers on a Button styled per state.
+## One slot on the overview (SPEC: Slot card states), a drive-bay device (DESIGN: Cards): locked
+## (blanking plate stamped EMPTY BAY, missing stats), unlocked and never solved (accent border,
+## NEW sticker), solved (normal), modifier (icon in the corner). Shows what the next solve pays
+## on a recessed screen. Labels in containers on a Button styled per state.
 
 const MOD_GLYPHS := {
 	"reverse": "<",
@@ -15,20 +16,17 @@ const MOD_GLYPHS := {
 
 const HEIGHT_TAPS := 2.2
 const PAD := 0.4
-const CORNER := 18
-const BORDER := 2
-const BORDER_NEW := 4
-const BADGE_CORNER := 10
-const BADGE_PAD := 10.0
-const PRESSED_LIGHTEN := 0.08
+const PRESSED_DARKEN := 0.08
 
 var slot: SlotDef
 
 var lines: Label
 var badge_new: Label
 var modifier_label: Label
-var _style := StyleBoxFlat.new()
-var _pressed_style := StyleBoxFlat.new()
+var _style: BevelBox
+var _pressed_style: BevelBox
+var _screen: PanelContainer
+var _stamp: Label
 var _title: Label
 var _glyph: Label
 
@@ -44,9 +42,14 @@ func setup(p_slot: SlotDef) -> void:
 	text = ""
 	custom_minimum_size = Vector2(0, get_theme_constant("tap_min", "Hardwire") * HEIGHT_TAPS)
 	size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	for state: String in ["normal", "hover", "disabled"]:
+	_style = get_theme_stylebox("bay", "Hardwire").duplicate()
+	_pressed_style = _style.duplicate()
+	_pressed_style.sunken = true
+	_pressed_style.bg = _style.bg.darkened(PRESSED_DARKEN)
+	for state: String in ["normal", "hover"]:
 		add_theme_stylebox_override(state, _style)
 	add_theme_stylebox_override("pressed", _pressed_style)
+	add_theme_stylebox_override("disabled", get_theme_stylebox("plate", "Hardwire"))
 	_build()
 	refresh()
 
@@ -57,25 +60,26 @@ func refresh() -> void:
 	var accent: Color = get_theme_color(slot.type, "Hardwire")
 	var dim: Color = get_theme_color("text_dim", "Hardwire")
 	disabled = locked
-	_style.bg_color = get_theme_color("card_locked" if locked else "card", "Hardwire")
-	_style.border_color = (
-		accent if not locked and not solved else get_theme_color("trace", "Hardwire")
+	# A never-solved bay has a lit (accent) frame instead of the plastic bevel.
+	var lit: bool = not locked and not solved
+	for style: BevelBox in [_style, _pressed_style]:
+		style.light = accent if lit else get_theme_color("plastic_light", "Hardwire")
+		style.dark = accent if lit else get_theme_color("plastic_dark", "Hardwire")
+	_screen.add_theme_stylebox_override(
+		"panel", StyleBoxEmpty.new() if locked else get_theme_stylebox("recess", "Hardwire")
 	)
-	_style.set_border_width_all(BORDER_NEW if not locked and not solved else BORDER)
-	_pressed_style.set_border_width_all(_style.border_width_left)
-	_pressed_style.border_color = _style.border_color
-	_pressed_style.bg_color = _style.bg_color.lightened(PRESSED_LIGHTEN)
-	_title.add_theme_color_override("font_color", dim if locked else accent)
+	Ui.sticker_color(_title, dim if locked else accent)
 	_glyph.visible = not slot.modifier.is_empty()
 	_glyph.text = MOD_GLYPHS.get(slot.modifier, "*")
-	_badge_color(_glyph, dim if locked else accent)
+	Ui.sticker_color(_glyph, dim if locked else accent)
 	modifier_label.text = SlotDef.modifier_name(slot.modifier)
 	lines.text = _missing_text() if locked else _reward_text(not solved)
+	_stamp.visible = locked
 	lines.add_theme_color_override(
 		"font_color", dim if locked else get_theme_color("text", "Hardwire")
 	)
 	badge_new.visible = not locked and not solved
-	_badge_color(badge_new, accent)
+	Ui.sticker_color(badge_new, accent)
 
 
 ## "CPU 4 more" per missing stat.
@@ -101,8 +105,6 @@ func _reward_text(first_solve: bool) -> String:
 
 
 func _build() -> void:
-	_style.set_corner_radius_all(CORNER)
-	_pressed_style.set_corner_radius_all(CORNER)
 	var margin := MarginContainer.new()
 	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -114,17 +116,28 @@ func _build() -> void:
 	margin.add_child(column)
 	var top := HBoxContainer.new()
 	column.add_child(top)
-	_title = _add_label(top, SlotDef.TYPE_NAMES[slot.type], "card_title", true)
+	_title = _add_label(top, SlotDef.TYPE_NAMES[slot.type], "card_title", false)
+	_title.uppercase = true
+	Ui.make_sticker(_title)
+	var spacer := Control.new()
+	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	top.add_child(spacer)
 	_glyph = _add_label(top, "", "small", false)
-	_make_badge(_glyph)
-	lines = _add_label(column, "", "card_body", false)
-	lines.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	Ui.make_sticker(_glyph)
+	_screen = PanelContainer.new()
+	_screen.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_screen.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	column.add_child(_screen)
+	lines = _add_label(_screen, "", "card_body", false)
 	var bottom := HBoxContainer.new()
 	column.add_child(bottom)
 	modifier_label = _add_label(bottom, "", "small", true)
 	modifier_label.add_theme_color_override("font_color", get_theme_color("text_dim", "Hardwire"))
+	_stamp = _add_label(bottom, "EMPTY BAY", "small", false)
+	_stamp.add_theme_color_override("font_color", get_theme_color("text_dim", "Hardwire"))
 	badge_new = _add_label(bottom, "NEW", "small", false)
-	_make_badge(badge_new)
+	Ui.make_sticker(badge_new)
 
 
 func _add_label(parent: Control, text: String, font: String, expand: bool) -> Label:
@@ -137,17 +150,3 @@ func _add_label(parent: Control, text: String, font: String, expand: bool) -> La
 		l.clip_text = true
 	parent.add_child(l)
 	return l
-
-
-## Small filled pill behind a badge label (modifier glyph, NEW); _badge_color sets its color.
-func _make_badge(badge: Label) -> void:
-	var style := StyleBoxFlat.new()
-	style.set_corner_radius_all(BADGE_CORNER)
-	style.content_margin_left = BADGE_PAD
-	style.content_margin_right = BADGE_PAD
-	badge.add_theme_stylebox_override("normal", style)
-	badge.add_theme_color_override("font_color", get_theme_color("bg", "Hardwire"))
-
-
-static func _badge_color(badge: Label, color: Color) -> void:
-	(badge.get_theme_stylebox("normal") as StyleBoxFlat).bg_color = color

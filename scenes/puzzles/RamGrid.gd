@@ -1,7 +1,8 @@
 class_name RamGrid
 extends Control
-## Square grid of RAM cells drawn in one _draw. Each cell is on or off; on cells brighten
-## and scale to glow_scale_pct over glow_ms (SPEC: Visual style). A touch on a cell emits
+## Square grid of RAM cells drawn in one _draw: a PCB window (DESIGN: Minigame surfaces), a recess
+## with metal cell outlines. Each cell is on or off; on cells glow and scale to glow_scale_pct
+## over glow_ms. A touch on a cell emits
 ## cell_activated. With focus, ui_* directions move a cursor and ui_accept emits it for the cursor;
 ## at an edge the direction is left unhandled, so focus moves on to the next control (e.g. Commit).
 
@@ -14,10 +15,8 @@ const DIRECTIONS := {
 	"ui_down": Vector2i(0, 1)
 }
 
-## Cell look, as fractions of the grid / cell size.
+## Gap between cells as a fraction of the grid size.
 const GAP := 0.03
-const CORNER := 0.14
-const IDLE_DARKEN := 0.4
 const MIN_GLOW_S := 0.001
 
 var n: int = 0
@@ -25,7 +24,6 @@ var cursor: int = 0
 
 var _on: Array[bool] = []
 var _scale: Array[float] = []
-var _style := StyleBoxFlat.new()
 
 
 func _init() -> void:
@@ -131,12 +129,16 @@ func cell_rect(i: int) -> Rect2:
 
 func _draw() -> void:
 	var lit: Color = get_theme_color("ram", "Hardwire")
-	var idle: Color = get_theme_color("trace", "Hardwire").darkened(IDLE_DARKEN)
+	var outline: Color = get_theme_color("metal", "Hardwire")
+	draw_style_box(
+		get_theme_stylebox("recess", "Hardwire"), Rect2(Vector2.ZERO, size).grow(size.x * GAP)
+	)
 	for i: int in n * n:
 		var rect: Rect2 = cell_rect(i)
 		rect = rect.grow((rect.size.x * _scale[i] - rect.size.x) / 2.0)
-		_style.bg_color = lit if _on[i] else idle
-		_style.set_corner_radius_all(int(rect.size.x * CORNER))
-		draw_style_box(_style, rect)
+		if _on[i]:
+			draw_rect(rect, lit)
+			Ui.draw_glow(self, rect, lit)
+		draw_rect(rect, outline, false)
 	if n > 0:
 		Ui.draw_focus(self, cell_rect(cursor))

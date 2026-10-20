@@ -1,9 +1,9 @@
 class_name CpuMarkers
 extends Control
-## Beat markers under the CPU tile (SPEC: Watch phase, D-022): a dot per tap and a bar as long as
-## its steps per hold; the first `filled` of them are lit and the `missed` one (the beat that broke
-## the attempt, D-030) is red. Under Audio only (`plain`) every marker is a dot, so lengths must
-## be heard.
+## Beat markers under the CPU tile (SPEC: Watch phase, D-022), an LED strip (DESIGN: Minigame
+## surfaces): a round LED per tap and a bar LED as long as its steps per hold; the first
+## `filled` of them are lit and the `missed` one (the beat that broke the attempt, D-030) is red.
+## Under Audio only (`plain`) every marker is a dot, so lengths must be heard.
 
 ## Radius as a fraction of tap_min; gap and outline as fractions of the radius.
 const RADIUS := 0.2
@@ -21,14 +21,9 @@ var missed: int = -1:
 		missed = value
 		queue_redraw()
 
-var _on := StyleBoxFlat.new()
-var _off := StyleBoxFlat.new()
-var _miss := StyleBoxFlat.new()
-
 
 func _init() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_off.draw_center = false
 
 
 func setup(p_steps: Array[float], p_plain: bool) -> void:
@@ -65,13 +60,23 @@ func _draw() -> void:
 	var all: Array[Rect2] = rects()
 	if all.is_empty():
 		return
-	var r: float = all[0].size.y / 2.0
-	_on.bg_color = get_theme_color("cpu", "Hardwire")
-	_miss.bg_color = get_theme_color("fail", "Hardwire")
-	_off.border_color = get_theme_color("text_dim", "Hardwire")
-	_off.set_border_width_all(int(r * RING))
-	for style: StyleBoxFlat in [_on, _off, _miss]:
-		style.set_corner_radius_all(int(r))
+	var ring: float = all[0].size.y / 2.0 * RING
+	var off: Color = get_theme_color("card_locked", "Hardwire")
+	var on: Color = get_theme_color("cpu", "Hardwire")
 	for i: int in all.size():
-		var style: StyleBoxFlat = _on if i < filled else _off
-		draw_style_box(_miss if i == missed else style, all[i])
+		var color: Color = on if i < filled else off
+		if i == missed:
+			color = get_theme_color("fail", "Hardwire")
+		_draw_led(all[i], ring, color)
+
+
+## A dark ring with the LED inside: round when square (a tap), a bar otherwise (a hold).
+func _draw_led(rect: Rect2, ring: float, color: Color) -> void:
+	var dark: Color = get_theme_color("text_dim", "Hardwire")
+	if is_equal_approx(rect.size.x, rect.size.y):
+		var r: float = rect.size.y / 2.0
+		draw_circle(rect.get_center(), r, dark)
+		draw_circle(rect.get_center(), r - ring, color)
+	else:
+		draw_rect(rect, dark)
+		draw_rect(rect.grow(-ring), color)
