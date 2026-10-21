@@ -16,6 +16,28 @@ const REQUIRED := {
 		"prestige_core_offset"
 	],
 	"idle": ["replays_per_hour", "cap_hours", "min_away_minutes"],
+	"audio":
+	[
+		"key_hz",
+		"key_ms",
+		"key_volume",
+		"relay_hz",
+		"relay_end_hz",
+		"relay_ms",
+		"relay_volume",
+		"tick_hz",
+		"tick_ms",
+		"tick_volume",
+		"click_volume",
+		"boot_from_hz",
+		"boot_to_hz",
+		"boot_ms",
+		"boot_volume",
+		"boot_noise_volume",
+		"hum_volume",
+		"hum_cutoff_hz",
+		"hum_attack_ms"
+	],
 	"storage":
 	[
 		"length_base",

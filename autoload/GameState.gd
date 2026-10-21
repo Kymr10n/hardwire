@@ -9,8 +9,9 @@ signal stats_changed
 signal cycles_changed
 signal cores_changed
 signal upgrades_changed
+signal settings_changed
 
-const DEFAULT_SETTINGS := {"sound": true, "haptics": true}
+const DEFAULT_SETTINGS := {"sound": true, "haptics": true, "crt": true}
 const DEFAULT_LIFETIME := {"solves": 0, "fails": 0, "rebuilds": 0}
 
 var ram: int = 0
@@ -141,6 +142,12 @@ func add_stats(d_ram: int, d_cpu: int, d_sto: int) -> void:
 	cpu += d_cpu
 	sto += d_sto
 	stats_changed.emit()
+
+
+## Settings toggles go through here so listeners (the glass overlay) follow at once.
+func set_setting(key: String, value: bool) -> void:
+	settings[key] = value
+	settings_changed.emit()
 
 
 ## Emits every change signal (after a reset or a load).

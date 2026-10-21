@@ -14,6 +14,8 @@ var shop_button: Button
 ## "System ready", or "Rebuild available" in the attention colour once a Rebuild is possible.
 var status: Label
 
+var _cursor: Label
+
 var _scroll: ScrollContainer
 var _list: VBoxContainer
 var _rows: Array[TierRow] = []
@@ -58,14 +60,20 @@ func _build_header(stacked: bool) -> VBoxContainer:
 	var title: Label = Ui.dim_label(Ui.title_parts()[0])
 	title.add_theme_font_size_override("font_size", font)
 	status = Ui.label("", font)
+	_cursor = Ui.label(Ui.CURSOR, font)
+	# The cursor sits right after the status text in both layouts: the row aligns, not the label.
+	var status_row := HBoxContainer.new()
+	status_row.alignment = BoxContainer.ALIGNMENT_BEGIN if stacked else BoxContainer.ALIGNMENT_END
+	status_row.add_child(status)
+	status_row.add_child(_cursor)
+	Ui.blink(_cursor)
+	for item: Control in [title, status_row]:
+		item.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	for label: Label in [title, status]:
 		label.uppercase = true
-		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		row.add_child(label)
+	row.add_child(title)
+	row.add_child(status_row)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
-	status.horizontal_alignment = (
-		HORIZONTAL_ALIGNMENT_LEFT if stacked else HORIZONTAL_ALIGNMENT_RIGHT
-	)
 	box.add_child(HSeparator.new())
 	return box
 
@@ -167,9 +175,10 @@ func _refresh_rows() -> void:
 	var can_rebuild: bool = Progress.can_rebuild(GameState.solved_slots)
 	rebuild_button.disabled = not can_rebuild
 	status.text = "Rebuild available" if can_rebuild else "System ready"
-	status.add_theme_color_override(
-		"font_color", get_theme_color("warn" if can_rebuild else "accent", "Hardwire")
-	)
+	for label: Label in [status, _cursor]:
+		label.add_theme_color_override(
+			"font_color", get_theme_color("warn" if can_rebuild else "accent", "Hardwire")
+		)
 
 
 ## Brings the newest unlocked tier into view once the list has laid out its rows.

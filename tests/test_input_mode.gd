@@ -65,32 +65,41 @@ func test_boot_prompt_and_any_press() -> void:
 	assert_signal_emitted(boot, "start_requested", "any gamepad button starts")
 
 
-## D-039: the check list comes from the real state, one line per boot_line_ms, and a press
-## before it is complete still starts the game.
+## D-039/D-041: the check list is typed from the real state, the title fades in with the first
+## line, and a press before it is complete still starts the game.
 func test_boot_check_list_and_early_skip() -> void:
 	GameState.cores = 2
 	GameState.best_tier_ever = 12
 	GameState.lifetime.solves = 5
 	var boot: Control = BootScreen.new()
 	add_child_autofree(boot)
-	assert_eq(
-		boot.check_texts(),
-		["Save loaded", "Cores 2", "Best tier 12", "System ready"] as Array[String]
-	)
-	assert_eq(boot.lines.size(), 4)
-	assert_eq(boot.lines[0].text, "", "lines appear over time")
+	GameState.add_stats(140, 131, 136)
+	var texts: Array[String] = boot.check_texts()
+	assert_eq(texts.size(), 6)
+	assert_true(texts[0].begins_with("Memory check ..") and texts[0].ends_with(" RAM 140 OK"))
+	assert_true(texts[1].ends_with(" CPU 131 OK") and texts[2].ends_with(" STO 136 OK"))
+	assert_eq(texts.slice(3), ["Cores 2  Best tier 12", "Save loaded", "System ready"])
+	assert_eq(boot.lines.size(), 6)
+	assert_true(boot.lines[0].text.length() <= 1, "typing has barely begun")
+	assert_eq(boot.title.modulate.a, 0.0, "title fades in")
 	assert_false(boot.prompt.visible)
 	watch_signals(boot)
 	boot._input(_pad_button(JOY_BUTTON_A))
 	assert_signal_emitted(boot, "start_requested", "a press mid-list starts at once")
-	var step: float = ThemeDB.get_project_theme().get_constant("boot_line_ms", "Hardwire") / 1000.0
-	await wait_seconds(step * (boot.lines.size() + 1))
-	assert_eq(boot.lines[3].text, "System ready")
+	var char_s: float = (
+		ThemeDB.get_project_theme().get_constant("boot_char_ms", "Hardwire") / 1000.0
+	)
+	var chars: int = 0
+	for text: String in texts:
+		chars += text.length()
+	await wait_seconds(char_s * chars + 0.2)
+	assert_eq(boot.lines[5].text, "System ready", "typed out, cursor gone")
 	assert_true(boot.prompt.visible)
+	assert_eq(boot.title.modulate.a, 1.0)
 	GameState.reset_all()
 	var fresh: Control = BootScreen.new()
 	add_child_autofree(fresh)
-	assert_eq(fresh.check_texts()[0], "New system")
+	assert_eq(fresh.check_texts()[4], "New system")
 
 
 ## D-035: the version from project.godot sits in the bottom-right corner.

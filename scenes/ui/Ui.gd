@@ -5,6 +5,8 @@ extends RefCounted
 
 ## Theme `*_pct` constants are percentages.
 const PERCENT := 100.0
+## The terminal's block cursor (boot typing, the overview status).
+const CURSOR := "█"
 
 
 ## True when the node's viewport is wider than tall (Steam Deck, desktop).
@@ -181,6 +183,8 @@ static func tag(badge: Label, color: Color, filled: bool = true) -> void:
 	var pad: int = theme.get_constant("tag_pad", "Hardwire")
 	style.content_margin_left = pad
 	style.content_margin_right = pad
+	style.content_margin_top = pad / 2.0
+	style.content_margin_bottom = pad / 2.0
 	style.draw_center = filled
 	style.bg_color = color
 	style.border_color = color
@@ -189,6 +193,15 @@ static func tag(badge: Label, color: Color, filled: bool = true) -> void:
 	badge.add_theme_color_override(
 		"font_color", theme.get_color("bg", "Hardwire") if filled else color
 	)
+
+
+## Blinks `item` (a cursor, a status lamp) at the theme's blink_ms half period until the returned
+## tween is killed. Toggles the alpha, not visibility, so containers never re-layout.
+static func blink(item: CanvasItem) -> Tween:
+	var tween: Tween = item.create_tween().set_loops()
+	tween.tween_interval(ThemeDB.get_project_theme().get_constant("blink_ms", "Hardwire") / 1000.0)
+	tween.tween_callback(func() -> void: item.modulate.a = 1.0 - item.modulate.a)
+	return tween
 
 
 ## Colours a button's text in every state but disabled (consequential actions: warn, fail).

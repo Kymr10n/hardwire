@@ -2,12 +2,16 @@ extends Control
 ## Root scene. Holds the current screen and handles transitions (SPEC: Screens and UX flow): Boot ->
 ## Overview hub -> Puzzle / Shop / Settings / debug panel, plus the "While you were away" idle
 ## income dialog (on start and after a resume, shown on the overview). Picks
-## portrait or landscape from the window aspect and rebuilds the screen when it flips.
+## portrait or landscape from the window aspect and rebuilds the screen when it flips. The glass
+## overlay (D-041) sits on its own canvas layer above every screen and dialog.
+
+const GLASS_SHADER := preload("res://theme/glass.gdshader")
 
 var screen: Control
 ## An idle-income offer is still due (on start and after a resume) and is made on the overview.
 var offer_idle: bool = true
 
+var _glass: ShaderMaterial
 var _landscape: bool = false
 ## Re-creates the current screen (used when the orientation flips).
 var _recreate_screen: Callable
@@ -18,12 +22,45 @@ func _ready() -> void:
 	bg.color = get_theme_color("bg", "Hardwire")
 	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(bg)
+	_add_glass()
 	_apply_orientation()
 	get_window().size_changed.connect(_on_window_resized)
 	# Steam sets SteamDeck=1 on the Deck: start fullscreen there (SPEC: Controls).
 	if OS.get_environment("SteamDeck") == "1":
 		get_window().mode = Window.MODE_FULLSCREEN
 	show_boot()
+
+
+## Full-screen glass shader above everything; its numbers come from the theme (one home).
+func _add_glass() -> void:
+	var layer := CanvasLayer.new()
+	var rect := ColorRect.new()
+	rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_glass = ShaderMaterial.new()
+	_glass.shader = GLASS_SHADER
+	for effect: String in ["vignette", "scanline", "bloom", "flicker"]:
+		_glass.set_shader_parameter(effect, Ui.pct(self, "glass_%s_pct" % effect))
+	_glass.set_shader_parameter("scanline_px", get_theme_constant("glass_scanline_px", "Hardwire"))
+	_glass.set_shader_parameter(
+		"flicker_hz", 1000.0 / get_theme_constant("glass_flicker_period_ms", "Hardwire")
+	)
+	rect.material = _glass
+	rect.resized.connect(func() -> void: _glass.set_shader_parameter("content_size", rect.size))
+	layer.add_child(rect)
+	add_child(layer)
+	GameState.settings_changed.connect(_apply_glass)
+	_apply_glass()
+
+
+## The "CRT glass" setting keeps the vignette and turns the rest off.
+func _apply_glass() -> void:
+	_glass.set_shader_parameter("glass", 1.0 if GameState.settings.get("crt", true) else 0.0)
+
+
+## Glass strength the shader is using (1 on, 0 off); for tests.
+func glass_level() -> float:
+	return _glass.get_shader_parameter("glass")
 
 
 ## Base size for the current window aspect: the project's portrait size, or the same size swapped.

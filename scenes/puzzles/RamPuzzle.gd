@@ -75,7 +75,7 @@ func toggle_cell(i: int) -> void:
 	if phase != Phase.INPUT or i < 0 or i >= _grid.n * _grid.n:
 		return
 	_grid.set_on(i, not _grid.is_on(i))
-	Synth.play_click()
+	Synth.play_fx("click")
 	Haptics.pulse()
 	_update_counter()
 

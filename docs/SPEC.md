@@ -261,6 +261,8 @@ Once the player has solved any tier 10 slot, they can Rebuild: reset progress in
 - **Kept:** Cores, best tier ever reached, settings, lifetime statistics and the first-run hints already seen.
 - A confirm dialog shows Cores to be gained and the new multiplier before the reset.
 
+Dialog titles are drawn as an inverted header strip (accent background; red for Erase), D-041.
+
 ## Idle income
 
 While the app is closed, the player earns Cycles (never stats), capped at 8 hours, so coming back always pays something but puzzles remain the only way to progress.
@@ -278,11 +280,11 @@ The prototype has five screens around one hub, the overview. Every screen works 
 
 | Screen | Contents | Leads to |
 | --- | --- | --- |
-| Boot | Title "HARDWIRE" with the subtitle "BOOT SEQUENCE"; under them a short check list from real state, one line per `boot_line_ms` (theme): "SAVE LOADED" (or "NEW SYSTEM" before the first solve), "CORES n", "BEST TIER n", then "SYSTEM READY" in the accent; then "Press any button" ("Tap to start" on touch). Any press starts at once, also mid-list. A small dim "FIRMWARE v<version>" line sits in the bottom-right corner (from `application/config/version`); the save is loaded before the screen opens | Overview |
-| Overview | System header line: "HARDWIRE" and the status "SYSTEM READY", or "REBUILD AVAILABLE" (attention colour) once a Rebuild is possible; top bar with RAM, CPU, STO, Cycles and Cores (compact above 9999: 12.3K, 4.56M); vertical scroll list of tier rows (tier 1 at the top), newest unlocked tier in view on open; each row = tier number, a rule, requirement chips (amber while unmet, dim when met) and 3 slot cards (RAM, CPU, STO); bottom bar with Shop, Rebuild, Settings and, on PC, Quit (saves and closes) | Puzzle, Shop, Rebuild dialog, Settings |
-| Puzzle | Header with minigame name, tier, modifier and a back button; phase label ("Watch" / "Your turn"); timer bar; the minigame area; result overlay | Overview |
+| Boot | Title "HARDWIRE" (fading in) with the subtitle "BOOT SEQUENCE"; under them a check list typed character by character (`boot_char_ms` per character, theme) behind a block cursor, with a soft tick every other character, from real state: "MEMORY CHECK ..... RAM n OK", "CLOCK ........... CPU n OK", "STORAGE ......... STO n OK", "CORES n  BEST TIER n", "SAVE LOADED" (or "NEW SYSTEM" before the first solve), then "SYSTEM READY" in the accent; then "Press any button" ("Tap to start" on touch). A low power-on sweep plays when the screen opens. Any press starts at once, also mid-list. A small dim "FIRMWARE v<version>" line sits in the bottom-right corner (from `application/config/version`); the save is loaded before the screen opens | Overview |
+| Overview | System header line: "HARDWIRE" and the status "SYSTEM READY", or "REBUILD AVAILABLE" (attention colour) once a Rebuild is possible, followed by a blinking block cursor; a readout with RAM, CPU, STO, Cycles and Cores (compact above 9999: 12.3K, 4.56M), each with a small square lamp that flashes accent and fades back while its value counts up to a new number over `flow.reward_countup_s` (a drop, after a Rebuild, shows at once); vertical scroll list of tier rows (tier 1 at the top), newest unlocked tier in view on open; each row = a trace node (outlined while locked, filled when unlocked, accent once all three slots are solved), tier number, a rule, requirement chips (amber while unmet, dim when met) and 3 slot cards (RAM, CPU, STO) joined by thin traces; bottom bar with Shop, Rebuild, Settings and, on PC, Quit (saves and closes) | Puzzle, Shop, Rebuild dialog, Settings |
+| Puzzle | Header with minigame name, tier, modifier and a back button; a status square (solid during Watch, blinking during input) and the phase label ("Watch" / "Your turn"); a segmented timer bar (`timer_segments`, theme); the minigame area inside a bezel with corner ticks that pulses accent on success and red on failure; result overlay | Overview |
 | Shop | List of upgrade cards, Cycles balance on top | Overview |
-| Settings | Sound on or off, haptics on or off, licenses (full texts of Hardwire, the font and Godot with its third-party components; the text scrolls with the D-pad or arrows; Back returns to Settings), reset save (with confirm) | Overview, Licenses |
+| Settings | Sound on or off, haptics on or off, CRT glass on or off (D-041), licenses (full texts of Hardwire, the font and Godot with its third-party components; the text scrolls with the D-pad or arrows; Back returns to Settings), reset save (with confirm) | Overview, Licenses |
 
 **Slot card states:** locked (greyed, "LOCKED" tag, shows missing stats), unlocked and never solved (stat-hue border, "NEW" tag), solved (normal), modifier (icon in the corner). Unlocked cards show what the next solve pays (+stat, +Cycles).
 
@@ -312,12 +314,13 @@ The look is Cold Boot: a dark, flat diagnostic terminal drawn entirely with Godo
 
 **Visuals** (D-039; the full design language with every token is `docs/DESIGN.md`):
 
-- Cold Boot: a flat industrial diagnostic terminal. Background near-black green-grey; panels, cards and buttons are flat surfaces with thin 2 px outlines; thin trace lines connect the tier rows on the overview. No gradients, textures, shaders or image assets.
+- Cold Boot: a flat industrial diagnostic terminal, seen through the glass of a powered-on monitor (D-041). Background near-black green; text pale phosphor, dim text grey-green; panels, cards and buttons are flat surfaces with a faint green cast and thin 2 px outlines; thin trace lines connect the tier rows on the overview. No gradients, textures or image assets.
+- Glass overlay: one full-screen shader above every screen draws a radial vignette (always on), horizontal scanlines, a slight bloom of bright pixels and a slow 2 % brightness flicker at about 1.3 Hz. The Settings toggle "CRT glass" (saved as `settings.crt`, default on) turns scanlines, bloom and flicker off. Its values are theme constants (`glass_*`).
 - Square corners everywhere (cards, buttons, pads, cells, tile, tags, timer bar, focus ring). Markers and tags are small squares.
-- Phosphor green is the one UI accent: focus ring, pressed border, "Your turn", success, "SYSTEM READY". A NEW tag and border use the slot's stat hue. Amber marks attention only: unmet requirement chips, "REBUILD AVAILABLE", the enabled Rebuild button and its confirm button. Red marks failure only: "Corrupted", the missed beat marker, Reset save / Erase. Colour never carries a state alone; text, shape or position says it too.
+- Phosphor green is the one UI accent: focus ring, pressed border, "Your turn" and its status square, success, "SYSTEM READY" and its cursor, readout lamp flashes, fully solved tier nodes, the bezel pulse on success, dialog title strips. A NEW tag and border use the slot's stat hue. Amber marks attention only: unmet requirement chips, "REBUILD AVAILABLE", the enabled Rebuild button and its confirm button. Red marks failure only: "Corrupted", the missed beat marker, the bezel pulse on failure, Reset save / Erase and its dialog strip. Colour never carries a state alone; text, shape or position says it too.
 - One hue per stat marks module identity only (its stat value, card and header title, timer fill, lit RAM cells and the CPU tile): RAM cyan, CPU violet, STO orange.
 - Storage pads use an 8-color colorblind-safe palette, each paired with a symbol.
-- Lit states glow by brightening and scaling to 105% over 80 ms; motion marks state changes only (no idle animation, no flashing).
+- Lit states glow by brightening and scaling to 105% over 80 ms; motion marks state changes or live state (a blinking cursor after the overview status, a blinking status square during a puzzle's input phase, a readout lamp that flashes when its value changes); nothing flashes faster than 2 Hz.
 - One monospace font under the SIL Open Font License (JetBrains Mono), bundled with the project. Section, phase and status labels are drawn uppercase; body text stays normal case. Minimum font size per Platforms and input.
 - All colors, sizes and durations live in a theme resource so the style can be changed in one place.
 
@@ -339,6 +342,7 @@ The look is Cold Boot: a dark, flat diagnostic terminal drawn entirely with Godo
 - RAM: a soft click on toggle.
 - CPU tile: a steady sine tone while lit or held.
 - Success: a short rising arpeggio. Failure: a 200 ms noise burst ("glitch").
+- Machine bed (D-041): a faint low-pass-filtered noise hum under the Overview and Puzzle screens (it starts and stops with the score); a short key click on every button press; a relay click that drops in pitch on every puzzle phase change; a soft tick every other typed character and a low power-on sweep on the Boot screen. Levels and frequencies live in `balance.json` → `audio` (`hum_*`, `key_*`, `relay_*`, `tick_*`, `boot_*`).
 
 ## Save system
 
@@ -355,7 +359,7 @@ The game saves one JSON file to `user://save.json` after every solve, purchase, 
   "solved_slots": ["3:ram", "3:cpu"],
   "best_tier_ever": 0,
   "seen_tutorials": ["sto"],
-  "settings": { "sound": true, "haptics": true },
+  "settings": { "sound": true, "haptics": true, "crt": true },
   "lifetime": { "solves": 0, "fails": 0, "rebuilds": 0 }
 }
 ```
@@ -425,7 +429,7 @@ res://
 
 ## Milestones and acceptance criteria
 
-Build one milestone per session, in order. Each milestone ends with a playable build and passing tests, so the game can be play-tested at any point. Status lives in `docs/PROGRESS.md`. **M1–M9 are complete (prototype v0.1.0, 2026-10-19, D-026); the Android build is tracked in issue #5.** New work starts from the "After the prototype" sections; M11 is the Cold Boot visual redesign (D-039).
+Build one milestone per session, in order. Each milestone ends with a playable build and passing tests, so the game can be play-tested at any point. Status lives in `docs/PROGRESS.md`. **M1–M9 are complete (prototype v0.1.0, 2026-10-19, D-026); the Android build is tracked in issue #5.** New work starts from the "After the prototype" sections; M11 and M12 are the Cold Boot look (D-039, D-041).
 
 | # | Milestone | Done when |
 | --- | --- | --- |
@@ -440,6 +444,7 @@ Build one milestone per session, in order. Each milestone ends with a playable b
 | M9 | Steam Deck and desktop: landscape layouts, gamepad and keyboard controls, Linux build | The Linux build runs fullscreen in Steam Deck game mode; every screen and minigame is playable with the controller alone and with touch alone; landscape layouts work at 16:10 and 16:9; prompts show glyphs of the last-used device; export presets exist for Windows and macOS; CI builds Linux and Windows |
 | M10 | Steam release preparation (see After the prototype: Steam release) | Saves live in a `Hardwire` folder on desktop; the Windows exe carries the Hardwire icon, name ("Hardwire: Boot Sequence"), version and company; `tools/steam_upload.sh` exports Linux and Windows and uploads both depots with SteamPipe; the first Steam build installs and plays from the Steam client on PC and Steam Deck (needs the App ID) |
 | M11 | Cold Boot visual redesign (D-039, `docs/DESIGN.md`) | The theme and every screen use the DESIGN.md tokens and no rounded corners; focus, pressed and disabled states are visible with keyboard and gamepad; the boot check list and the overview status line show real state; gameplay, balance and saves unchanged; `tools/check.sh` passes; `docs/screenshots` regenerated at phone size |
+| M12 | Cold Boot, powered on (D-041): phosphor palette, glass overlay with toggle, typed boot, sound bed, readout, lit board, bezel | Glass overlay draws on every screen and the Settings toggle persists; the boot types from real state and any press skips it; hum, key and relay clicks play only when sound is on; readout lamps, tier nodes, bezel pulses and the segmented timer behave as the Screens table says; the `crt` setting round-trips through the save; `tools/check.sh` passes; screenshots regenerated |
 
 ## After the prototype: Steam release
 

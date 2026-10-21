@@ -1,18 +1,20 @@
 extends Node
 ## Runtime-synthesized audio via AudioStreamGenerator, no audio files (SPEC: Visual and audio
-## style). Ambient score with a soft beat, pentatonic pad notes, RAM click, CPU sine tone,
-## success arpeggio, fail noise burst. Respects GameState.settings.sound. Tuning comes from
-## balance.json "audio".
+## style): score with a hum, pad notes, clicks, CPU tone, result sounds, power-on sweep. Every
+## button clicks through the hook below (D-041). Tuning: balance.json "audio"; respects Sound.
 
 enum Wave { SINE, NOISE }
 
-## Every sample is mixed in GDScript; the highest tone is about 1 kHz, so half the usual rate
-## keeps phones comfortable.
+## Mixed in GDScript at a low rate (phones); every tone stays under half of it (test_synth).
 const MIX_RATE := 22050.0
 const MIDI_A4 := 69
 const MIDI_A4_HZ := 440.0
 const SEMITONES_PER_OCTAVE := 12.0
 const SECONDS_PER_MINUTE := 60.0
+
+## The hum's voice id while the score runs (0 when silent) and blips sounded so far; for tests.
+var hum_id: int = 0
+var fx_played: int = 0
 
 var _player: AudioStreamPlayer
 var _playback: AudioStreamGeneratorPlayback
@@ -41,6 +43,12 @@ func _ready() -> void:
 	_playback = _player.get_stream_playback() as AudioStreamGeneratorPlayback
 	_rng.randomize()
 	_music_seed = _rng.randi()
+	get_tree().node_added.connect(_on_node_added)
+
+
+func _on_node_added(node: Node) -> void:
+	if node is BaseButton:
+		(node as BaseButton).pressed.connect(play_fx.bind("key"))
 
 
 func _process(delta: float) -> void:
@@ -67,9 +75,30 @@ static func _pad_hz(index: int) -> float:
 	return float(notes[index % notes.size()])
 
 
-func play_click() -> void:
+## A short blip named by its balance keys: "key" (buttons), "relay" (puzzle phase; drops to
+## relay_end_hz), "tick" (boot typing), "click" (RAM toggle). Voice id, 0 when sound is off.
+func play_fx(fx: String) -> int:
+	var audio: Dictionary = Balance.section("audio")
+	var hz: float = audio[fx + "_hz"]
+	var ms: float = audio[fx + "_ms"]
+	var options := {"end_hz": audio.get(fx + "_end_hz", hz), "release_ms": ms / 2}  # short release
+	var id: int = _add_voice(Wave.SINE, hz, ms, audio[fx + "_volume"], options)
+	fx_played += int(id > 0)
+	return id
+
+
+## Power-on (Boot screen): a low sine sweep under a soft filtered noise burst.
+func play_boot() -> int:
+	var audio: Dictionary = Balance.section("audio")
 	_add_voice(
-		Wave.SINE, Balance.get_num("audio", "click_hz"), Balance.get_num("audio", "click_ms"), 1.0
+		Wave.NOISE, 0.0, audio.boot_ms, audio.boot_noise_volume, {"lowpass": _lowpass_coefficient()}
+	)
+	return _add_voice(
+		Wave.SINE,
+		audio.boot_from_hz,
+		audio.boot_ms,
+		audio.boot_volume,
+		{"end_hz": audio.boot_to_hz}
 	)
 
 
@@ -119,6 +148,22 @@ func set_music_enabled(enabled: bool) -> void:
 		_set_music_bar()
 	else:
 		_voices = _voices.filter(func(voice: Dictionary) -> bool: return not voice.music)
+		hum_id = 0
+
+
+## The hum runs with the score: one low-passed noise voice, restarted after sound was off.
+func _ensure_hum() -> void:
+	if is_playing(hum_id):
+		return
+	var audio: Dictionary = Balance.section("audio")
+	var options := {
+		"music": true, "attack_ms": audio.hum_attack_ms, "lowpass": _lowpass_coefficient()
+	}
+	hum_id = _add_voice(Wave.NOISE, 0.0, -1.0, audio.hum_volume, options)
+
+
+static func _lowpass_coefficient() -> float:
+	return 1.0 - exp(-TAU * Balance.get_num("audio", "hum_cutoff_hz") / MIX_RATE)
 
 
 func is_music_enabled() -> bool:
@@ -135,25 +180,23 @@ func _add_voice(
 	var release_ms: float = float(options.get("release_ms", -1.0))
 	var id: int = _next_voice_id
 	_next_voice_id += 1
-	(
-		_voices
-		. append(
-			{
-				"id": id,
-				"wave": wave,
-				"step": TAU * hz / MIX_RATE,
-				"end_step": TAU * float(options.get("end_hz", hz)) / MIX_RATE,
-				"phase": 0.0,
-				"t": -_ms_to_samples(delay_ms),
-				"length": _ms_to_samples(length_ms) if length_ms >= 0.0 else -1,
-				"amp": volume * Balance.get_num("audio", "volume"),
-				"attack": _ms_to_samples(attack_ms) if attack_ms >= 0.0 else 0,
-				"release": _ms_to_samples(release_ms) if release_ms >= 0.0 else 0,
-				"music": options.get("music", false),
-				"min_length": _ms_to_samples(float(options.get("min_ms", 0.0))),
-			}
-		)
-	)
+	var voice := {
+		"id": id,
+		"wave": wave,
+		"step": TAU * hz / MIX_RATE,
+		"end_step": TAU * float(options.get("end_hz", hz)) / MIX_RATE,
+		"phase": 0.0,
+		"t": -_ms_to_samples(delay_ms),
+		"length": _ms_to_samples(length_ms) if length_ms >= 0.0 else -1,
+		"amp": volume * Balance.get_num("audio", "volume"),
+		"attack": _ms_to_samples(attack_ms) if attack_ms >= 0.0 else 0,
+		"release": _ms_to_samples(release_ms) if release_ms >= 0.0 else 0,
+		"music": options.get("music", false),
+		"min_length": _ms_to_samples(float(options.get("min_ms", 0.0))),
+		"lowpass": float(options.get("lowpass", 0.0)),
+		"lp": 0.0,
+	}
+	_voices.append(voice)
 	return id
 
 
@@ -189,6 +232,9 @@ func _next_sample(voice: Dictionary, attack: int, release: int) -> float:
 	var raw: float
 	if voice.wave == Wave.NOISE:
 		raw = _rng.randf_range(-1.0, 1.0)
+		if voice.lowpass > 0.0:
+			voice.lp += voice.lowpass * (raw - voice.lp)
+			raw = voice.lp
 	else:
 		raw = sin(voice.phase)
 		var step: float = voice.step
@@ -205,6 +251,7 @@ static func _ms_to_samples(ms: float) -> int:
 func _advance_music(delta: float) -> void:
 	if not _music_enabled:
 		return
+	_ensure_hum()
 	var audio: Dictionary = Balance.section("audio")
 	var beat_s: float = SECONDS_PER_MINUTE / float(audio.music_bpm)
 	var bar_s: float = beat_s * float(audio.music_beats_per_bar)

@@ -19,6 +19,7 @@ func _fill_state() -> void:
 	GameState.best_tier_ever = 4
 	GameState.seen_tutorials = ["sto"] as Array[String]
 	GameState.settings["sound"] = false
+	GameState.settings["crt"] = false
 	GameState.lifetime["solves"] = 9
 
 
@@ -75,6 +76,7 @@ func test_from_dict_fills_missing_fields() -> void:
 	assert_false(GameState.upgrades.has("bogus"))
 	assert_eq(GameState.upgrades.size(), 6)
 	assert_true(GameState.settings["sound"])
+	assert_true(GameState.settings["crt"], "D-041: the glass is on by default")
 	assert_eq(GameState.lifetime["rebuilds"], 0)
 
 

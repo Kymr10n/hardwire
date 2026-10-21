@@ -1,13 +1,14 @@
 class_name SettingsScreen
 extends Control
-## Settings (SPEC: Screens and UX flow): sound on/off, haptics on/off, licenses, reset save
-## (with confirm); on PC also Fullscreen. Saves after every change.
+## Settings (SPEC: Screens and UX flow): sound on/off, haptics on/off, CRT glass on/off, licenses,
+## reset save (with confirm); on PC also Fullscreen. Saves after every change.
 
 signal exit_requested
 signal licenses_requested
 
 var _sound: Button
 var _haptics: Button
+var _crt: Button
 var _fullscreen: Button
 
 
@@ -19,6 +20,7 @@ func _ready() -> void:
 	var options: GridContainer = _grid(box)
 	_sound = _add_button(options, "", _toggle_setting.bind("sound"))
 	_haptics = _add_button(options, "", _toggle_setting.bind("haptics"))
+	_crt = _add_button(options, "", _toggle_setting.bind("crt"))
 	_add_button(options, "Licenses", licenses_requested.emit)
 	if OS.has_feature("pc"):
 		_fullscreen = _add_button(options, "", _toggle_fullscreen)
@@ -51,6 +53,7 @@ func _add_button(parent: Control, text: String, on_pressed: Callable) -> Button:
 func _refresh() -> void:
 	_sound.text = "Sound: %s" % ("On" if GameState.settings.sound else "Off")
 	_haptics.text = "Haptics: %s" % ("On" if GameState.settings.haptics else "Off")
+	_crt.text = "CRT glass: %s" % ("On" if GameState.settings.crt else "Off")
 	if _fullscreen:
 		_fullscreen.text = "Fullscreen: %s" % ("On" if _is_fullscreen() else "Off")
 
@@ -65,7 +68,7 @@ func _toggle_fullscreen() -> void:
 
 
 func _toggle_setting(key: String) -> void:
-	GameState.settings[key] = not GameState.settings[key]
+	GameState.set_setting(key, not GameState.settings[key])
 	if key == "sound" and not GameState.settings.sound:
 		Synth.stop_all()
 	SaveManager.save_game()
@@ -77,6 +80,7 @@ func _on_reset() -> void:
 		self, "Reset save?", "All progress, Cores and statistics will be erased.", "Erase"
 	)
 	Ui.tint(dialog.confirm_button, get_theme_color("fail", "Hardwire"))
+	Ui.tag(dialog.title_label, get_theme_color("fail", "Hardwire"))
 	dialog.confirmed.connect(
 		func() -> void:
 			GameState.reset_all()

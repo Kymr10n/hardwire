@@ -8,6 +8,8 @@ signal cancelled
 
 ## The confirm button; callers colour it for a consequential action (warn, fail).
 var confirm_button: Button
+## The title, drawn as an inverted strip (accent); callers may re-tag it (fail for Erase).
+var title_label: Label
 
 var _title: String
 var _message: String
@@ -37,9 +39,10 @@ func _ready() -> void:
 	var box: VBoxContainer = Ui.modal(
 		self, Ui.pct(self, "dialog_dim_pct"), get_theme_constant("dialog_width", "Hardwire")
 	)
-	var title: Label = Ui.label(_title, get_theme_font_size("header", "Hardwire"))
-	title.uppercase = true
-	box.add_child(title)
+	title_label = Ui.label(_title, get_theme_font_size("header", "Hardwire"))
+	title_label.uppercase = true
+	Ui.tag(title_label, get_theme_color("accent", "Hardwire"))
+	box.add_child(title_label)
 	var message: Label = Ui.label(_message)
 	message.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	box.add_child(message)

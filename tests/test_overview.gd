@@ -90,6 +90,29 @@ func test_rebuild_disabled_before_tier_10() -> void:
 	assert_true(overview.rebuild_button.disabled)
 
 
+## D-041: the tier node is outlined while locked, filled when open, accent once fully solved.
+func test_tier_node_states() -> void:
+	var overview := _overview()
+	assert_eq(overview.rows()[0].node_state(), TierRow.NodeState.OPEN)
+	assert_eq(overview.rows()[1].node_state(), TierRow.NodeState.LOCKED)
+	for card: SlotCard in overview.rows()[0].cards:
+		GameState.apply_solve(card.slot)
+	overview._refresh_rows()
+	assert_eq(overview.rows()[0].node_state(), TierRow.NodeState.SOLVED)
+	assert_eq(overview.rows()[1].node_state(), TierRow.NodeState.OPEN, "tier 2 opened")
+
+
+## D-041: the readout counts up to a new value over flow.reward_countup_s.
+func test_readout_counts_up() -> void:
+	var overview := _overview()
+	var bar: StatBar = overview.find_children("*", "StatBar", true, false)[0]
+	assert_eq(bar.value_text("ram"), "0")
+	GameState.add_stats(40, 0, 0)
+	assert_ne(bar.value_text("ram"), "40", "starts counting from the old value")
+	await wait_seconds(Balance.get_num("flow", "reward_countup_s") + 0.1)
+	assert_eq(bar.value_text("ram"), "40")
+
+
 ## D-039: unmet requirement chips are amber, met ones dim.
 func test_requirement_chips_colour() -> void:
 	var overview := _overview()

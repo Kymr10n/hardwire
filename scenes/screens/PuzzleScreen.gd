@@ -19,8 +19,11 @@ var puzzle: PuzzleBase
 var hint: HintOverlay
 
 var overlay: ResultOverlay
+var bezel: Bezel
 var _rng := RandomNumberGenerator.new()
 var _phase_label: Label
+var _status: ColorRect
+var _blink: Tween
 var _timer_bar: TimerBar
 
 
@@ -38,13 +41,15 @@ func _ready() -> void:
 	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	Ui.screen_root(self, 0.0, 1.0).add_child(body)
 	body.add_child(_build_panel(landscape))
-	var area := Control.new()
-	area.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	area.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	body.add_child(area)
+	bezel = Bezel.new()
+	bezel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	bezel.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	body.add_child(bezel)
 	puzzle = _new_puzzle(slot.type)
-	puzzle.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	area.add_child(puzzle)
+	bezel.add_child(puzzle)
+	puzzle.set_anchors_and_offsets_preset(
+		Control.PRESET_FULL_RECT, Control.PRESET_MODE_MINSIZE, bezel.inset()
+	)
 	puzzle.phase_changed.connect(_on_phase_changed)
 	puzzle.solved.connect(_on_solved)
 	puzzle.failed.connect(_on_failed)
@@ -69,9 +74,19 @@ func _build_panel(landscape: bool) -> BoxContainer:
 		panel.custom_minimum_size.x = get_theme_constant("side_panel", "Hardwire")
 	var title: Label = Ui.header(panel, title_text(), go_back, landscape)
 	title.add_theme_color_override("font_color", hue)
+	# Status square (solid while watching, blinking while the player's turn runs) and phase label.
+	var status_row := HBoxContainer.new()
+	status_row.add_theme_constant_override("separation", get_theme_constant("tag_pad", "Hardwire"))
+	panel.add_child(status_row)
+	_status = ColorRect.new()
+	_status.custom_minimum_size = Vector2.ONE * get_theme_constant("lamp_size", "Hardwire")
+	_status.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	_status.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	status_row.add_child(_status)
 	_phase_label = Ui.label("", get_theme_font_size("phase", "Hardwire"))
 	_phase_label.uppercase = true
-	panel.add_child(_phase_label)
+	_phase_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	status_row.add_child(_phase_label)
 	_timer_bar = TimerBar.new()
 	_timer_bar.color = hue
 	_timer_bar.custom_minimum_size.y = get_theme_constant("timer_bar_height", "Hardwire")
@@ -118,13 +133,24 @@ func _on_phase_changed(phase: PuzzleBase.Phase, text: String) -> void:
 	if phase == PuzzleBase.Phase.INPUT:
 		color_name = "accent"
 	elif phase == PuzzleBase.Phase.RESULT:
-		color_name = "fail" if text == "Corrupted" else "accent"
+		var corrupted: bool = text == "Corrupted"
+		color_name = "fail" if corrupted else "accent"
+		if corrupted:
+			bezel.pulse(get_theme_color("fail", "Hardwire"))
 	_phase_label.add_theme_color_override("font_color", get_theme_color(color_name, "Hardwire"))
+	_status.color = get_theme_color(color_name, "Hardwire")
+	if _blink:
+		_blink.kill()
+	_status.modulate.a = 1.0
+	_status.visible = phase in [PuzzleBase.Phase.WATCH, PuzzleBase.Phase.INPUT]
+	if phase == PuzzleBase.Phase.INPUT:
+		_blink = Ui.blink(_status)
 
 
 func _on_solved(_result: Dictionary) -> void:
 	var gain: Dictionary = GameState.apply_solve(slot)
 	SaveManager.save_game()
+	bezel.pulse(get_theme_color("accent", "Hardwire"))
 	overlay.show_result("Write complete", SlotDef.STAT_NAMES[slot.type], gain)
 
 

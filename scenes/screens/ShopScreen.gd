@@ -44,6 +44,5 @@ func _refresh() -> void:
 
 func _on_buy(id: String, card: UpgradeCard) -> void:
 	if GameState.buy_upgrade(id):
-		Synth.play_click()
 		SaveManager.save_game()
 		card.flash()

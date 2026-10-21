@@ -119,7 +119,9 @@ func test_theme_is_square_and_phosphor() -> void:
 		assert_eq(flat.corner_radius_top_left, 0, "no rounded corners")
 	var focus := theme.get_stylebox("focus", "Button") as StyleBoxFlat
 	assert_eq(focus.border_color, theme.get_color("accent", "Hardwire"), "phosphor focus ring")
-	assert_eq(theme.get_constant("boot_line_ms", "Hardwire"), 250)
+	assert_eq(theme.get_constant("boot_char_ms", "Hardwire"), 18)
+	assert_eq(theme.get_constant("blink_ms", "Hardwire"), 500)
+	assert_eq(theme.get_constant("pulse_ms", "Hardwire"), 400)
 	var hues: Array[Color] = [
 		theme.get_color("ram", "Hardwire"),
 		theme.get_color("cpu", "Hardwire"),

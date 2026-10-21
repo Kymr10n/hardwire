@@ -16,8 +16,9 @@ Status values: `todo`, `in progress`, `done`. Milestone scope and "Done when" cr
 | M9 | done | Steam Deck and desktop: landscape, controller, glyphs, Linux/Windows/macOS presets, `tools/deck.sh`, rumble; Deck play-test passed 2026-10-19 (issue #6) |
 | M10 | in progress | Steam release preparation (D-032): save folder, Windows exe metadata and `tools/steam_upload.sh` done; the first Steam install waits for the App ID |
 | M11 | done | Cold Boot visual redesign (D-039, `docs/DESIGN.md`): square terminal theme, phosphor accent, retuned stat hues, boot check list, overview status line; checked in screenshots at 540 × 960 and 1280 × 800 (2026-10-21) |
+| M12 | done | Cold Boot, powered on (D-041): phosphor palette, glass overlay with the CRT glass setting, typed boot with power-on sweep, hum and key/relay clicks, readout lamps and count-ups, lit tier nodes, bezel and segmented timer, dialog strips; checked in screenshots at 540 × 960 and 1280 × 800 (2026-10-21) |
 
-**Prototype v0.1.0 released 2026-10-19 (D-026); v0.2.0 released 2026-10-19 (name, ambient score, Storage hold feedback, Steam preparation); M11 Cold Boot look 2026-10-21 (D-039).** Next scope: the "After the prototype" sections of the spec (Steam release, Benchmark slot).
+**Prototype v0.1.0 released 2026-10-19 (D-026); v0.2.0 released 2026-10-19 (name, ambient score, Storage hold feedback, Steam preparation); M11 and M12 Cold Boot look 2026-10-21 (D-039, D-041).** Next scope: the "After the prototype" sections of the spec (Steam release, Benchmark slot).
 
 ## Reviews
 
@@ -37,13 +38,15 @@ Deferred work, each with what it needs:
 - **Private vulnerability reporting:** `SECURITY.md` points at GitHub's private report form; the owner enables it under Settings → Code security (`gh api -X PUT repos/Kymr10n/hardwire/private-vulnerability-reporting`).
 - **Name:** reserve "Hardwire: Boot Sequence" in Steamworks (and later Google Play Console and App Store Connect). The macOS bundle takes its name from `config/name`; check it at the first macOS export (D-008). Needs the owner.
 - **Steam (M10):** create the Steamworks app; set depots, launch options, Steam Input, Linux Runtime and Auto-Cloud from the spec table; fill `tools/steam.local.env`; run `tools/steam_upload.sh --preview`, then a real upload; install from the Steam client on PC and Steam Deck. Copy the Deck's 0.1.0 save to `~/.local/share/Hardwire` if wanted. Needs the owner and the App ID.
-- **Ambient score on devices:** listen and profile on the web export, Steam Deck and Android. The score keeps 3–4 GDScript voices mixing on the main thread (single-threaded on web); if it is too heavy, drop the bass harmonic voice first.
+- **Ambient score and glass on devices:** listen and profile on the web export, Steam Deck and Android. The score keeps 3–4 GDScript voices plus the hum mixing on the main thread (single-threaded on web); if it is too heavy, drop the bass harmonic voice first, then the hum. The glass overlay reads the screen once per frame even with "CRT glass" off; if a phone needs it, swap in a vignette-only shader when the setting is off (D-041).
 - **Ambient score code (review, should-fix):** schedule each bar's notes with per-voice `delay_ms` instead of per-frame dispatch (removes frame jitter on the hi-hat and the event index); resolve attack/release defaults once in `Synth._add_voice` and store the kick glide as a per-sample step; one `_pick_positions` helper for pads and leads; seed bars with `hash([seed, bar])` and drop `music_seed_stride`; `music_bass_min_midi`/`max_midi` are test-only (move into the test or enforce); `music_kick_beats` repeats the bass beats; the debug time scale also speeds up the score.
 - **Play-test the balance:** time to tiers 5, 10 and 20 on a fresh save (targets: 10 min, 1 h, several sessions); fail rate per minigame; rhythm tolerance on a real phone.
 
 ## Play-test notes
 
 Add dated notes here after play-testing (what felt wrong, which numbers to tune). Turn agreed changes into `/spec-change`.
+
+- 2026-10-21, powered on (M12, D-041): play-test checklist. Glass: are the scanlines and vignette right at `glass_scanline_pct` 8 / `glass_vignette_pct` 35 on the Deck and a phone, is the 1.3 Hz flicker felt but not seen, does "CRT glass: Off" look acceptable? Sound: hum level (`hum_volume` 0.2) against the score, key click on every button (not too sharp at `key_hz` 2600), relay click on phase changes, the power-on sweep. Boot: typing speed (`boot_char_ms` 18) for a returning player; does a press mid-typing start at once? Overview: lamps flash and values count up after a solve; tier nodes light; cursor blink. Puzzle: bezel pulse on success and failure, segmented timer readable, status square blinking during input. Tests: 260 in 26 scripts.
 
 - 2026-10-21, Cold Boot (M11, D-039): play-test checklist. Phone portrait 540 × 960 and Deck 1280 × 800: is `text_dim` on `card` readable at Deck size (locked card text, effect lines)? Keyboard and gamepad: the phosphor focus ring on cards, pads, cells, tile, buttons and dialogs; A on the boot list mid-way starts at once. Overview: the status line flips to REBUILD AVAILABLE after a tier 10 solve; unmet chips amber, met chips dim. Shop: a purchase flashes the card frame. Does the retuned CPU violet read as "CPU" after the magenta, and STO orange apart from the amber chips? Tests: 250 in 25 scripts.
 

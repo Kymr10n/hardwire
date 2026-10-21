@@ -103,6 +103,7 @@ func _set_phase(p_phase: Phase, text: String) -> void:
 	if p_phase == Phase.INPUT:
 		time_left_s = time_limit_s
 	_phase_text = text
+	Synth.play_fx("relay")
 	_on_phase_entered(p_phase)
 	phase_changed.emit(p_phase, text)
 
