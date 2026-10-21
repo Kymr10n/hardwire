@@ -21,6 +21,7 @@ var _again: Button
 func _ready() -> void:
 	var box: VBoxContainer = Ui.modal(self, Ui.pct(self, "overlay_dim_pct"))
 	_title = Ui.label("", get_theme_font_size("phase", "Hardwire"))
+	_title.uppercase = true
 	box.add_child(_title)
 	gain = Ui.label("")
 	box.add_child(gain)
@@ -36,9 +37,9 @@ func _ready() -> void:
 
 
 ## gain: {stat, cycles, first_solve, new_tier} from GameState.apply_solve, or {} for no reward line.
-func show_result(title: String, accent: Color, stat_name: String, gain: Dictionary) -> void:
+func show_result(title: String, stat_name: String, gain: Dictionary) -> void:
 	_title.text = title
-	_title.add_theme_color_override("font_color", accent)
+	_title.add_theme_color_override("font_color", get_theme_color("accent", "Hardwire"))
 	_stat_name = stat_name
 	_stat = int(gain.get("stat", 0))
 	_cycles = int(gain.get("cycles", 0))

@@ -27,7 +27,7 @@ func _ready() -> void:
 	box.add_child(spacer)
 	var actions: GridContainer = _grid(box)
 	var reset: Button = _add_button(actions, "Reset save", _on_reset)
-	reset.add_theme_color_override("font_color", get_theme_color("fail", "Hardwire"))
+	Ui.tint(reset, get_theme_color("fail", "Hardwire"))
 	_refresh()
 
 
@@ -76,6 +76,7 @@ func _on_reset() -> void:
 	var dialog := ConfirmDialog.open(
 		self, "Reset save?", "All progress, Cores and statistics will be erased.", "Erase"
 	)
+	Ui.tint(dialog.confirm_button, get_theme_color("fail", "Hardwire"))
 	dialog.confirmed.connect(
 		func() -> void:
 			GameState.reset_all()

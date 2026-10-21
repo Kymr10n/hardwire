@@ -12,7 +12,6 @@ signal released(index: int)
 enum Symbol { CIRCLE, TRIANGLE, SQUARE, DIAMOND, STAR, PLUS, HEXAGON, RING }
 
 ## Pad look, as fractions of the pad size.
-const CORNER := 0.18
 const SYMBOL_RADIUS := 0.2
 const LIT_LIGHTEN := 0.15
 const IDLE_MARK_DARKEN := 0.2
@@ -123,7 +122,6 @@ func _draw() -> void:
 	var base: Color = get_theme_color("pad_%d" % index, "Hardwire")
 	var idle: Color = base.darkened(1.0 - Ui.pct(self, "pad_idle_pct"))
 	_style.bg_color = idle.lerp(base.lightened(LIT_LIGHTEN), _level)
-	_style.set_corner_radius_all(int(size.x * CORNER))
 	draw_style_box(_style, Rect2(Vector2.ZERO, size))
 	var mark: Color = get_theme_color("bg", "Hardwire")
 	if _level <= 0.0:

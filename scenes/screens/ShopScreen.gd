@@ -27,7 +27,7 @@ func _ready() -> void:
 	for id: String in Balance.upgrade_ids():
 		var card := UpgradeCard.new(id)
 		card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		card.buy_pressed.connect(_on_buy)
+		card.buy_pressed.connect(_on_buy.bind(card))
 		list.add_child(card)
 		cards.append(card)
 
@@ -42,7 +42,8 @@ func _refresh() -> void:
 		card.refresh()
 
 
-func _on_buy(id: String) -> void:
+func _on_buy(id: String, card: UpgradeCard) -> void:
 	if GameState.buy_upgrade(id):
 		Synth.play_click()
 		SaveManager.save_game()
+		card.flash()

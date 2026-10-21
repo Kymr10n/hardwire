@@ -1,8 +1,8 @@
 class_name SlotCard
 extends Button
-## One slot on the overview (SPEC: Slot card states): locked (greyed, missing stats), unlocked and
-## never solved (accent border, NEW badge), solved (normal), modifier (icon in the corner). Shows
-## what the next solve pays. Labels in containers on a Button styled per state.
+## One slot on the overview (SPEC: Slot card states): locked (greyed, LOCKED tag, missing stats),
+## unlocked and never solved (stat-hue border, NEW tag), solved (normal), modifier (icon in the
+## corner). Shows what the next solve pays. Labels in containers on a Button styled per state.
 
 const MOD_GLYPHS := {
 	"reverse": "<",
@@ -14,23 +14,22 @@ const MOD_GLYPHS := {
 }
 
 const HEIGHT_TAPS := 2.2
+## A locked card stacks the modifier name over the LOCKED tag (both would not fit one row on a
+## phone), so it is taller; a tier's three cards are always locked together.
+const LOCKED_HEIGHT_TAPS := 2.4
 const PAD := 0.4
-const CORNER := 18
-const BORDER := 2
-const BORDER_NEW := 4
-const BADGE_CORNER := 10
-const BADGE_PAD := 10.0
-const PRESSED_LIGHTEN := 0.08
 
 var slot: SlotDef
 
 var lines: Label
 var badge_new: Label
+var tag_locked: Label
 var modifier_label: Label
 var _style := StyleBoxFlat.new()
 var _pressed_style := StyleBoxFlat.new()
 var _title: Label
 var _glyph: Label
+var _bottom: BoxContainer
 
 
 func _init() -> void:
@@ -42,7 +41,6 @@ func _init() -> void:
 func setup(p_slot: SlotDef) -> void:
 	slot = p_slot
 	text = ""
-	custom_minimum_size = Vector2(0, get_theme_constant("tap_min", "Hardwire") * HEIGHT_TAPS)
 	size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	for state: String in ["normal", "hover", "disabled"]:
 		add_theme_stylebox_override(state, _style)
@@ -54,28 +52,33 @@ func setup(p_slot: SlotDef) -> void:
 func refresh() -> void:
 	var locked: bool = not Progress.is_unlocked(slot.req, GameState.stats())
 	var solved: bool = GameState.is_solved(slot)
-	var accent: Color = get_theme_color(slot.type, "Hardwire")
+	var hue: Color = get_theme_color(slot.type, "Hardwire")
 	var dim: Color = get_theme_color("text_dim", "Hardwire")
 	disabled = locked
-	_style.bg_color = get_theme_color("card_locked" if locked else "card", "Hardwire")
-	_style.border_color = (
-		accent if not locked and not solved else get_theme_color("trace", "Hardwire")
+	_bottom.vertical = locked
+	custom_minimum_size.y = (
+		get_theme_constant("tap_min", "Hardwire") * (LOCKED_HEIGHT_TAPS if locked else HEIGHT_TAPS)
 	)
-	_style.set_border_width_all(BORDER_NEW if not locked and not solved else BORDER)
+	_style.bg_color = get_theme_color("card_locked" if locked else "card", "Hardwire")
+	var fresh: bool = not locked and not solved
+	_style.border_color = hue if fresh else get_theme_color("trace", "Hardwire")
+	_style.set_border_width_all(
+		get_theme_constant("outline_new_width" if fresh else "outline_width", "Hardwire")
+	)
 	_pressed_style.set_border_width_all(_style.border_width_left)
 	_pressed_style.border_color = _style.border_color
-	_pressed_style.bg_color = _style.bg_color.lightened(PRESSED_LIGHTEN)
-	_title.add_theme_color_override("font_color", dim if locked else accent)
+	_pressed_style.bg_color = get_theme_color("raised", "Hardwire")
+	_title.add_theme_color_override("font_color", dim if locked else hue)
 	_glyph.visible = not slot.modifier.is_empty()
 	_glyph.text = MOD_GLYPHS.get(slot.modifier, "*")
-	_badge_color(_glyph, dim if locked else accent)
+	Ui.tag(_glyph, dim if locked else hue)
 	modifier_label.text = SlotDef.modifier_name(slot.modifier)
 	lines.text = _missing_text() if locked else _reward_text(not solved)
 	lines.add_theme_color_override(
 		"font_color", dim if locked else get_theme_color("text", "Hardwire")
 	)
-	badge_new.visible = not locked and not solved
-	_badge_color(badge_new, accent)
+	badge_new.visible = fresh
+	tag_locked.visible = locked
 
 
 ## "CPU 4 more" per missing stat.
@@ -101,8 +104,6 @@ func _reward_text(first_solve: bool) -> String:
 
 
 func _build() -> void:
-	_style.set_corner_radius_all(CORNER)
-	_pressed_style.set_corner_radius_all(CORNER)
 	var margin := MarginContainer.new()
 	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -116,15 +117,17 @@ func _build() -> void:
 	column.add_child(top)
 	_title = _add_label(top, SlotDef.TYPE_NAMES[slot.type], "card_title", true)
 	_glyph = _add_label(top, "", "small", false)
-	_make_badge(_glyph)
 	lines = _add_label(column, "", "card_body", false)
 	lines.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	var bottom := HBoxContainer.new()
-	column.add_child(bottom)
-	modifier_label = _add_label(bottom, "", "small", true)
+	_bottom = BoxContainer.new()
+	column.add_child(_bottom)
+	modifier_label = _add_label(_bottom, "", "small", true)
 	modifier_label.add_theme_color_override("font_color", get_theme_color("text_dim", "Hardwire"))
-	badge_new = _add_label(bottom, "NEW", "small", false)
-	_make_badge(badge_new)
+	badge_new = _add_label(_bottom, "NEW", "small", false)
+	Ui.tag(badge_new, get_theme_color(slot.type, "Hardwire"))
+	tag_locked = _add_label(_bottom, "LOCKED", "small", false)
+	tag_locked.size_flags_horizontal = Control.SIZE_SHRINK_END
+	Ui.tag(tag_locked, get_theme_color("text_dim", "Hardwire"), false)
 
 
 func _add_label(parent: Control, text: String, font: String, expand: bool) -> Label:
@@ -137,17 +140,3 @@ func _add_label(parent: Control, text: String, font: String, expand: bool) -> La
 		l.clip_text = true
 	parent.add_child(l)
 	return l
-
-
-## Small filled pill behind a badge label (modifier glyph, NEW); _badge_color sets its color.
-func _make_badge(badge: Label) -> void:
-	var style := StyleBoxFlat.new()
-	style.set_corner_radius_all(BADGE_CORNER)
-	style.content_margin_left = BADGE_PAD
-	style.content_margin_right = BADGE_PAD
-	badge.add_theme_stylebox_override("normal", style)
-	badge.add_theme_color_override("font_color", get_theme_color("bg", "Hardwire"))
-
-
-static func _badge_color(badge: Label, color: Color) -> void:
-	(badge.get_theme_stylebox("normal") as StyleBoxFlat).bg_color = color

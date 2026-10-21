@@ -106,6 +106,31 @@ func test_theme_motion_constants_match_spec() -> void:
 	assert_eq(theme.get_constant("transition_ms", "Hardwire"), 150)
 
 
+## D-039: square geometry and the phosphor focus ring; the stat hues stay distinct.
+func test_theme_is_square_and_phosphor() -> void:
+	var theme: Theme = ThemeDB.get_project_theme()
+	for style: StyleBox in [
+		theme.get_stylebox("normal", "Button"),
+		theme.get_stylebox("pressed", "Button"),
+		theme.get_stylebox("focus", "Button"),
+		theme.get_stylebox("panel", "PanelContainer"),
+	]:
+		var flat := style as StyleBoxFlat
+		assert_eq(flat.corner_radius_top_left, 0, "no rounded corners")
+	var focus := theme.get_stylebox("focus", "Button") as StyleBoxFlat
+	assert_eq(focus.border_color, theme.get_color("accent", "Hardwire"), "phosphor focus ring")
+	assert_eq(theme.get_constant("boot_line_ms", "Hardwire"), 250)
+	var hues: Array[Color] = [
+		theme.get_color("ram", "Hardwire"),
+		theme.get_color("cpu", "Hardwire"),
+		theme.get_color("sto", "Hardwire"),
+		theme.get_color("warn", "Hardwire"),
+	]
+	for i: int in hues.size():
+		for j: int in range(i + 1, hues.size()):
+			assert_ne(hues[i], hues[j], "stat hues and the attention colour stay apart")
+
+
 func test_modifier_display_names() -> void:
 	assert_eq(SlotDef.modifier_name("audio_only"), "Audio only")
 	assert_eq(SlotDef.modifier_name("reverse"), "Reverse")
@@ -116,6 +141,23 @@ func test_modifier_display_names() -> void:
 	screen.setup(SlotDef.create(8, SlotDef.TYPE_CPU, "audio_only"))
 	assert_eq(screen.title_text(), "CPU  T8  [Audio only]")
 	screen.free()
+
+
+## D-039: countdown and Watch are dim, the input phase and success are the accent, failure red.
+func test_phase_label_colour_follows_the_phase() -> void:
+	var screen: Control = PuzzleScreen.new()
+	screen.setup(SlotGenerator.make(1, SlotDef.TYPE_STO))
+	add_child_autofree(screen)
+	await wait_process_frames(1)
+	var label: Label = screen._phase_label
+	var theme: Theme = ThemeDB.get_project_theme()
+	assert_eq(label.get_theme_color("font_color"), theme.get_color("text_dim", "Hardwire"))
+	run_until(screen.puzzle, PuzzleBase.Phase.INPUT)
+	assert_eq(label.text, "Your turn")
+	assert_eq(label.get_theme_color("font_color"), theme.get_color("accent", "Hardwire"))
+	screen.puzzle.tap_pad((screen.puzzle.expected()[0] + 1) % screen.puzzle.pads().size())
+	assert_eq(label.text, "Corrupted")
+	assert_eq(label.get_theme_color("font_color"), theme.get_color("fail", "Hardwire"))
 
 
 func test_modifier_hint_lines() -> void:
@@ -154,10 +196,7 @@ func test_result_overlay_counts_up_and_notes_new_tier() -> void:
 	var overlay := ResultOverlay.new()
 	add_child_autofree(overlay)
 	overlay.show_result(
-		"Write complete",
-		Color.WHITE,
-		"STO",
-		{"stat": 4, "cycles": 10, "first_solve": true, "new_tier": 2}
+		"Write complete", "STO", {"stat": 4, "cycles": 10, "first_solve": true, "new_tier": 2}
 	)
 	assert_eq(overlay.gain.text, "+0 STO    +0 Cycles", "count-up starts at 0")
 	await wait_seconds(0.7)
@@ -173,11 +212,14 @@ func test_slot_card_texts() -> void:
 	add_child_autofree(locked)
 	assert_eq(locked.lines.text, "CPU 4 more")
 	assert_false(locked.badge_new.visible)
+	assert_true(locked.tag_locked.visible)
+	assert_eq(locked.tag_locked.text, "LOCKED")
 	var open := SlotCard.new()
 	open.setup(SlotGenerator.make(1, SlotDef.TYPE_CPU))
 	add_child_autofree(open)
 	assert_eq(open.lines.text, "+4 CPU\n+10 Cyc", "first solve pays double")
 	assert_true(open.badge_new.visible)
+	assert_false(open.tag_locked.visible)
 	var modifier := SlotCard.new()
 	modifier.setup(SlotDef.create(8, SlotDef.TYPE_CPU, "audio_only"))
 	add_child_autofree(modifier)

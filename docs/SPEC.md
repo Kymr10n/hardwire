@@ -1,6 +1,6 @@
 # Hardwire: Boot Sequence — Game Design Spec
 
-As of 2026-10-19. **Source of truth for implementation.** Build it milestone by milestone (see "Milestones and acceptance criteria"); progress is tracked in `docs/PROGRESS.md`. Change it only through `/spec-change`, which also records the change in `docs/DECISIONS.md`.
+As of 2026-10-21. **Source of truth for implementation.** Build it milestone by milestone (see "Milestones and acceptance criteria"); progress is tracked in `docs/PROGRESS.md`. Change it only through `/spec-change`, which also records the change in `docs/DECISIONS.md`.
 
 ## Overview
 
@@ -12,7 +12,7 @@ As of 2026-10-19. **Source of truth for implementation.** Build it milestone by 
 | Platforms | Android, iOS, Windows, Linux, macOS, Steam Deck (native Linux build), plus Web — see Platforms and input |
 | Orientation | Phones portrait; PC and Steam Deck landscape. One layout code path per screen adapts to both |
 | Input | Touch, mouse, keyboard and gamepad, all through InputMap actions |
-| Art | Minimal flat circuit-board look, no drawn assets |
+| Art | Cold Boot: a flat industrial diagnostic terminal drawn with Godot shapes and one font, no drawn assets (D-039, `docs/DESIGN.md`) |
 | Audio | Synthesized tones generated in code, no audio files needed |
 | Save | Local JSON in `user://` |
 | Prototype scope | All three minigames, overview with tiers, upgrade shop, prestige, idle income |
@@ -159,7 +159,7 @@ A central tile plays a rhythm of on and off phases, and the player mimics it by 
 - Off-segments between them, each 1 to 2 steps long.
 - No off-segment before the first beat or after the last.
 
-**Watch phase.** The tile lights and plays a steady tone for each on-segment and goes dark for each off-segment. Under the tile, one marker per beat shows its length: a dot for a tap, a bar as long as its steps for a hold. Markers fill as beats play, and again as the player presses.
+**Watch phase.** The tile lights and plays a steady tone for each on-segment and goes dark for each off-segment. Under the tile, one marker per beat shows its length: a square tick for a tap, a bar as long as its steps for a hold. Markers fill as beats play, and again as the player presses.
 
 **Haptics.** During playback the controller rumbles for each on-segment, exactly as long as the tile is lit (phones: one vibration per beat), so a tap is a short buzz and a hold a long one. Under Audio only playback does not rumble: only the tone plays. During input the controller rumbles for as long as the tile is held.
 
@@ -188,7 +188,7 @@ The judge is a pure function with unit tests, because it decides whether the min
 
 **Modifiers** (from tier 8):
 
-- *Audio only:* the tile stays dark during playback; only the tone plays. The beat markers are plain dots that do not fill during playback, only for the player's presses.
+- *Audio only:* the tile stays dark during playback; only the tone plays. The beat markers are plain ticks that do not fill during playback, only for the player's presses.
 - *Syncopated:* on- and off-segments may also be 0.5 or 1.5 steps long, and every syncopated rhythm contains at least one such half-step segment.
 
 ## Difficulty curve and slot tiers
@@ -278,13 +278,13 @@ The prototype has five screens around one hub, the overview. Every screen works 
 
 | Screen | Contents | Leads to |
 | --- | --- | --- |
-| Boot | Title "HARDWIRE" with the subtitle "BOOT SEQUENCE", "Press any button" ("Tap to start" on touch), a small dim "FIRMWARE v<version>" line in the bottom-right corner (from `application/config/version`), loads the save | Overview |
-| Overview | Top bar with RAM, CPU, STO, Cycles and Cores (compact above 9999: 12.3K, 4.56M); vertical scroll list of tier rows (tier 1 at the top), newest unlocked tier in view on open; each row = tier number, requirement chips (accent-coloured while unmet) and 3 slot cards (RAM, CPU, STO); bottom bar with Shop, Rebuild, Settings and, on PC, Quit (saves and closes) | Puzzle, Shop, Rebuild dialog, Settings |
+| Boot | Title "HARDWIRE" with the subtitle "BOOT SEQUENCE"; under them a short check list from real state, one line per `boot_line_ms` (theme): "SAVE LOADED" (or "NEW SYSTEM" before the first solve), "CORES n", "BEST TIER n", then "SYSTEM READY" in the accent; then "Press any button" ("Tap to start" on touch). Any press starts at once, also mid-list. A small dim "FIRMWARE v<version>" line sits in the bottom-right corner (from `application/config/version`); the save is loaded before the screen opens | Overview |
+| Overview | System header line: "HARDWIRE" and the status "SYSTEM READY", or "REBUILD AVAILABLE" (attention colour) once a Rebuild is possible; top bar with RAM, CPU, STO, Cycles and Cores (compact above 9999: 12.3K, 4.56M); vertical scroll list of tier rows (tier 1 at the top), newest unlocked tier in view on open; each row = tier number, a rule, requirement chips (amber while unmet, dim when met) and 3 slot cards (RAM, CPU, STO); bottom bar with Shop, Rebuild, Settings and, on PC, Quit (saves and closes) | Puzzle, Shop, Rebuild dialog, Settings |
 | Puzzle | Header with minigame name, tier, modifier and a back button; phase label ("Watch" / "Your turn"); timer bar; the minigame area; result overlay | Overview |
 | Shop | List of upgrade cards, Cycles balance on top | Overview |
 | Settings | Sound on or off, haptics on or off, licenses (full texts of Hardwire, the font and Godot with its third-party components; the text scrolls with the D-pad or arrows; Back returns to Settings), reset save (with confirm) | Overview, Licenses |
 
-**Slot card states:** locked (greyed, shows missing stats), unlocked and never solved (accent border, "NEW" badge), solved (normal), modifier (icon in the corner). Unlocked cards show what the next solve pays (+stat, +Cycles).
+**Slot card states:** locked (greyed, "LOCKED" tag, shows missing stats), unlocked and never solved (stat-hue border, "NEW" tag), solved (normal), modifier (icon in the corner). Unlocked cards show what the next solve pays (+stat, +Cycles).
 
 **Result overlay:**
 
@@ -308,15 +308,17 @@ On PC, Settings adds "Fullscreen" and the overview adds "Quit"; B on the overvie
 
 ## Visual and audio style
 
-The look is a dark, flat circuit board drawn entirely with Godot shapes and one font, so the prototype needs no art assets. The sound is simple synthesized tones generated at runtime.
+The look is Cold Boot: a dark, flat diagnostic terminal drawn entirely with Godot shapes and one font, so the game needs no art assets. The sound is simple synthesized tones generated at runtime.
 
-**Visuals:**
+**Visuals** (D-039; the full design language with every token is `docs/DESIGN.md`):
 
-- Background near-black blue-grey; thin trace lines in a muted green-grey connect the tier rows on the overview.
-- One accent color per stat, used for its numbers, slot borders and minigame header: RAM cyan, CPU magenta, STO amber.
+- Cold Boot: a flat industrial diagnostic terminal. Background near-black green-grey; panels, cards and buttons are flat surfaces with thin 2 px outlines; thin trace lines connect the tier rows on the overview. No gradients, textures, shaders or image assets.
+- Square corners everywhere (cards, buttons, pads, cells, tile, tags, timer bar, focus ring). Markers and tags are small squares.
+- Phosphor green is the one UI accent: focus ring, pressed border, "Your turn", success, "SYSTEM READY". A NEW tag and border use the slot's stat hue. Amber marks attention only: unmet requirement chips, "REBUILD AVAILABLE", the enabled Rebuild button and its confirm button. Red marks failure only: "Corrupted", the missed beat marker, Reset save / Erase. Colour never carries a state alone; text, shape or position says it too.
+- One hue per stat marks module identity only (its stat value, card and header title, timer fill, lit RAM cells and the CPU tile): RAM cyan, CPU violet, STO orange.
 - Storage pads use an 8-color colorblind-safe palette, each paired with a symbol.
-- Shapes are rounded rectangles; lit states glow by brightening and scaling to 105% over 80 ms. No gradients or textures.
-- One monospace font under the SIL Open Font License (for example JetBrains Mono), bundled with the project.
+- Lit states glow by brightening and scaling to 105% over 80 ms; motion marks state changes only (no idle animation, no flashing).
+- One monospace font under the SIL Open Font License (JetBrains Mono), bundled with the project. Section, phase and status labels are drawn uppercase; body text stays normal case. Minimum font size per Platforms and input.
 - All colors, sizes and durations live in a theme resource so the style can be changed in one place.
 
 **Audio** (generated with `AudioStreamGenerator`, no files):
@@ -423,7 +425,7 @@ res://
 
 ## Milestones and acceptance criteria
 
-Build one milestone per session, in order. Each milestone ends with a playable build and passing tests, so the game can be play-tested at any point. Status lives in `docs/PROGRESS.md`. **M1–M9 are complete (prototype v0.1.0, 2026-10-19, D-026); the Android build is tracked in issue #5.** New work starts from the "After the prototype" sections.
+Build one milestone per session, in order. Each milestone ends with a playable build and passing tests, so the game can be play-tested at any point. Status lives in `docs/PROGRESS.md`. **M1–M9 are complete (prototype v0.1.0, 2026-10-19, D-026); the Android build is tracked in issue #5.** New work starts from the "After the prototype" sections; M11 is the Cold Boot visual redesign (D-039).
 
 | # | Milestone | Done when |
 | --- | --- | --- |
@@ -437,6 +439,7 @@ Build one milestone per session, in order. Each milestone ends with a playable b
 | M8 | Polish and export | Synth sounds, haptics, screen transitions, first-run hints; Android APK and web build run on a real phone |
 | M9 | Steam Deck and desktop: landscape layouts, gamepad and keyboard controls, Linux build | The Linux build runs fullscreen in Steam Deck game mode; every screen and minigame is playable with the controller alone and with touch alone; landscape layouts work at 16:10 and 16:9; prompts show glyphs of the last-used device; export presets exist for Windows and macOS; CI builds Linux and Windows |
 | M10 | Steam release preparation (see After the prototype: Steam release) | Saves live in a `Hardwire` folder on desktop; the Windows exe carries the Hardwire icon, name ("Hardwire: Boot Sequence"), version and company; `tools/steam_upload.sh` exports Linux and Windows and uploads both depots with SteamPipe; the first Steam build installs and plays from the Steam client on PC and Steam Deck (needs the App ID) |
+| M11 | Cold Boot visual redesign (D-039, `docs/DESIGN.md`) | The theme and every screen use the DESIGN.md tokens and no rounded corners; focus, pressed and disabled states are visible with keyboard and gamepad; the boot check list and the overview status line show real state; gameplay, balance and saves unchanged; `tools/check.sh` passes; `docs/screenshots` regenerated at phone size |
 
 ## After the prototype: Steam release
 

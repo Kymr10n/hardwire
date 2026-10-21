@@ -1,113 +1,114 @@
-[gd_resource type="Theme" load_steps=7 format=3]
+[gd_resource type="Theme" load_steps=9 format=3]
 
 [ext_resource type="FontFile" path="res://fonts/JetBrainsMono-Regular.ttf" id="1_font"]
 
 [sub_resource type="StyleBoxFlat" id="button_normal"]
-bg_color = Color(0.105, 0.137, 0.169, 1)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(0.25, 0.32, 0.29, 1)
-corner_radius_top_left = 18
-corner_radius_top_right = 18
-corner_radius_bottom_right = 18
-corner_radius_bottom_left = 18
+bg_color = Color(0.063, 0.086, 0.075, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.204, 0.259, 0.224, 1)
+content_margin_left = 24.0
+content_margin_top = 12.0
+content_margin_right = 24.0
+content_margin_bottom = 12.0
+
+[sub_resource type="StyleBoxFlat" id="button_hover"]
+bg_color = Color(0.063, 0.086, 0.075, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.529, 0.584, 0.541, 1)
 content_margin_left = 24.0
 content_margin_top = 12.0
 content_margin_right = 24.0
 content_margin_bottom = 12.0
 
 [sub_resource type="StyleBoxFlat" id="button_pressed"]
-bg_color = Color(0.17, 0.22, 0.2, 1)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(1, 0.722, 0.302, 1)
-corner_radius_top_left = 18
-corner_radius_top_right = 18
-corner_radius_bottom_right = 18
-corner_radius_bottom_left = 18
+bg_color = Color(0.09, 0.122, 0.102, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.549, 1.0, 0.608, 1)
 content_margin_left = 24.0
 content_margin_top = 12.0
 content_margin_right = 24.0
 content_margin_bottom = 12.0
 
 [sub_resource type="StyleBoxFlat" id="button_disabled"]
-bg_color = Color(0.08, 0.1, 0.12, 1)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(0.16, 0.2, 0.19, 1)
-corner_radius_top_left = 18
-corner_radius_top_right = 18
-corner_radius_bottom_right = 18
-corner_radius_bottom_left = 18
+bg_color = Color(0.047, 0.067, 0.055, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.325, 0.376, 0.341, 1)
 content_margin_left = 24.0
 content_margin_top = 12.0
 content_margin_right = 24.0
 content_margin_bottom = 12.0
 
 [sub_resource type="StyleBoxFlat" id="panel"]
-bg_color = Color(0.059, 0.078, 0.102, 0.94)
+bg_color = Color(0.063, 0.086, 0.075, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.204, 0.259, 0.224, 1)
+content_margin_left = 36.0
+content_margin_top = 36.0
+content_margin_right = 36.0
+content_margin_bottom = 36.0
+
+[sub_resource type="StyleBoxFlat" id="focus"]
+draw_center = false
 border_width_left = 3
 border_width_top = 3
 border_width_right = 3
 border_width_bottom = 3
-border_color = Color(0.25, 0.32, 0.29, 1)
-corner_radius_top_left = 24
-corner_radius_top_right = 24
-corner_radius_bottom_right = 24
-corner_radius_bottom_left = 24
-content_margin_left = 48.0
-content_margin_top = 48.0
-content_margin_right = 48.0
-content_margin_bottom = 48.0
+border_color = Color(0.549, 1.0, 0.608, 1)
+expand_margin_left = 4.0
+expand_margin_top = 4.0
+expand_margin_right = 4.0
+expand_margin_bottom = 4.0
 
-[sub_resource type="StyleBoxFlat" id="focus"]
-draw_center = false
-border_width_left = 5
-border_width_top = 5
-border_width_right = 5
-border_width_bottom = 5
-border_color = Color(0.95, 0.97, 0.96, 1)
-corner_radius_top_left = 22
-corner_radius_top_right = 22
-corner_radius_bottom_right = 22
-corner_radius_bottom_left = 22
-expand_margin_left = 6.0
-expand_margin_top = 6.0
-expand_margin_right = 6.0
-expand_margin_bottom = 6.0
+[sub_resource type="StyleBoxLine" id="rule"]
+color = Color(0.204, 0.259, 0.224, 1)
+thickness = 2
 
 [resource]
 default_font = ExtResource("1_font")
 default_font_size = 40
-Button/colors/font_color = Color(0.86, 0.9, 0.88, 1)
-Button/colors/font_pressed_color = Color(1, 1, 1, 1)
-Button/colors/font_hover_color = Color(0.86, 0.9, 0.88, 1)
-Button/colors/font_disabled_color = Color(0.4, 0.45, 0.43, 1)
+Button/colors/font_color = Color(0.847, 0.886, 0.851, 1)
+Button/colors/font_pressed_color = Color(0.549, 1.0, 0.608, 1)
+Button/colors/font_hover_color = Color(0.847, 0.886, 0.851, 1)
+Button/colors/font_disabled_color = Color(0.325, 0.376, 0.341, 1)
 Button/font_sizes/font_size = 40
 Button/styles/normal = SubResource("button_normal")
-Button/styles/hover = SubResource("button_normal")
+Button/styles/hover = SubResource("button_hover")
 Button/styles/pressed = SubResource("button_pressed")
 Button/styles/disabled = SubResource("button_disabled")
 Button/styles/focus = SubResource("focus")
-Label/colors/font_color = Color(0.86, 0.9, 0.88, 1)
+HSeparator/styles/separator = SubResource("rule")
+Label/colors/font_color = Color(0.847, 0.886, 0.851, 1)
 Label/font_sizes/font_size = 40
 PanelContainer/styles/panel = SubResource("panel")
-Hardwire/colors/bg = Color(0.059, 0.078, 0.102, 1)
-Hardwire/colors/trace = Color(0.25, 0.32, 0.29, 1)
-Hardwire/colors/text = Color(0.86, 0.9, 0.88, 1)
-Hardwire/colors/text_dim = Color(0.5, 0.56, 0.54, 1)
-Hardwire/colors/ram = Color(0.369, 0.902, 1, 1)
-Hardwire/colors/cpu = Color(1, 0.369, 0.784, 1)
-Hardwire/colors/sto = Color(1, 0.722, 0.302, 1)
-Hardwire/colors/fail = Color(1, 0.35, 0.3, 1)
-Hardwire/colors/card = Color(0.105, 0.137, 0.169, 1)
-Hardwire/colors/card_locked = Color(0.07, 0.09, 0.114, 1)
+Hardwire/colors/bg = Color(0.035, 0.047, 0.043, 1)
+Hardwire/colors/trace = Color(0.204, 0.259, 0.224, 1)
+Hardwire/colors/text = Color(0.847, 0.886, 0.851, 1)
+Hardwire/colors/text_dim = Color(0.529, 0.584, 0.541, 1)
+Hardwire/colors/accent = Color(0.549, 1.0, 0.608, 1)
+Hardwire/colors/warn = Color(0.902, 0.714, 0.361, 1)
+Hardwire/colors/fail = Color(1.0, 0.42, 0.38, 1)
+Hardwire/colors/disabled = Color(0.325, 0.376, 0.341, 1)
+Hardwire/colors/ram = Color(0.373, 0.827, 0.902, 1)
+Hardwire/colors/cpu = Color(0.706, 0.549, 1.0, 1)
+Hardwire/colors/sto = Color(1.0, 0.62, 0.341, 1)
+Hardwire/colors/card = Color(0.063, 0.086, 0.075, 1)
+Hardwire/colors/card_locked = Color(0.047, 0.067, 0.055, 1)
+Hardwire/colors/raised = Color(0.09, 0.122, 0.102, 1)
 Hardwire/colors/pad_0 = Color(0.902, 0.624, 0, 1)
 Hardwire/colors/pad_1 = Color(0.337, 0.706, 0.914, 1)
 Hardwire/colors/pad_2 = Color(0, 0.62, 0.451, 1)
@@ -117,6 +118,8 @@ Hardwire/colors/pad_5 = Color(0.835, 0.369, 0, 1)
 Hardwire/colors/pad_6 = Color(0.8, 0.475, 0.655, 1)
 Hardwire/colors/pad_7 = Color(0.86, 0.86, 0.86, 1)
 Hardwire/constants/glow_ms = 80
+Hardwire/constants/boot_line_ms = 250
+Hardwire/constants/tag_pad = 8
 Hardwire/constants/transition_ms = 150
 Hardwire/constants/hint_dim_pct = 85
 Hardwire/constants/dialog_dim_pct = 80
@@ -125,6 +128,8 @@ Hardwire/constants/dialog_width = 860
 Hardwire/constants/button_width = 300
 Hardwire/constants/tier_label_width = 130
 Hardwire/constants/trace_width = 3
+Hardwire/constants/outline_width = 2
+Hardwire/constants/outline_new_width = 3
 Hardwire/constants/row_gap = 16
 Hardwire/constants/glow_scale_pct = 105
 Hardwire/constants/pad_size = 220

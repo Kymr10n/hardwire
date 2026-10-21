@@ -1,9 +1,7 @@
 class_name CpuTile
 extends Control
-## The central CPU tile: a large rounded square that lights in the CPU accent color.
+## The central CPU tile: a large square that lights in the CPU accent color.
 ## Lit state brightens and scales to glow_scale_pct over glow_ms. Input is handled by CpuPuzzle.
-
-const CORNER := 0.12
 
 var lit: bool = false:
 	set(value):
@@ -40,6 +38,5 @@ func _animate() -> void:
 func _draw() -> void:
 	var accent: Color = get_theme_color("cpu", "Hardwire")
 	_style.bg_color = (accent if lit else accent.darkened(1.0 - Ui.pct(self, "pad_idle_pct")))
-	_style.set_corner_radius_all(int(size.x * CORNER))
 	draw_style_box(_style, Rect2(Vector2.ZERO, size))
 	Ui.draw_focus(self, Rect2(Vector2.ZERO, size))

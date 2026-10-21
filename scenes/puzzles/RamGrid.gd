@@ -16,8 +16,6 @@ const DIRECTIONS := {
 
 ## Cell look, as fractions of the grid / cell size.
 const GAP := 0.03
-const CORNER := 0.14
-const IDLE_DARKEN := 0.4
 const MIN_GLOW_S := 0.001
 
 var n: int = 0
@@ -129,14 +127,17 @@ func cell_rect(i: int) -> Rect2:
 	return Rect2(Vector2(col, row) * (cell + gap), Vector2(cell, cell))
 
 
+## Dark cells are outlined surfaces (a memory map); lit cells are solid in the RAM hue.
 func _draw() -> void:
 	var lit: Color = get_theme_color("ram", "Hardwire")
-	var idle: Color = get_theme_color("trace", "Hardwire").darkened(IDLE_DARKEN)
+	var idle: Color = get_theme_color("card", "Hardwire")
+	var outline: int = get_theme_constant("outline_width", "Hardwire")
+	_style.border_color = get_theme_color("trace", "Hardwire")
 	for i: int in n * n:
 		var rect: Rect2 = cell_rect(i)
 		rect = rect.grow((rect.size.x * _scale[i] - rect.size.x) / 2.0)
 		_style.bg_color = lit if _on[i] else idle
-		_style.set_corner_radius_all(int(rect.size.x * CORNER))
+		_style.set_border_width_all(0 if _on[i] else outline)
 		draw_style_box(_style, rect)
 	if n > 0:
 		Ui.draw_focus(self, cell_rect(cursor))

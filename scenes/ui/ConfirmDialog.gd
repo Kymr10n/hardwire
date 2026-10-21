@@ -6,6 +6,9 @@ extends Control
 signal confirmed
 signal cancelled
 
+## The confirm button; callers colour it for a consequential action (warn, fail).
+var confirm_button: Button
+
 var _title: String
 var _message: String
 var _confirm_text: String
@@ -34,7 +37,9 @@ func _ready() -> void:
 	var box: VBoxContainer = Ui.modal(
 		self, Ui.pct(self, "dialog_dim_pct"), get_theme_constant("dialog_width", "Hardwire")
 	)
-	box.add_child(Ui.label(_title, get_theme_font_size("header", "Hardwire")))
+	var title: Label = Ui.label(_title, get_theme_font_size("header", "Hardwire"))
+	title.uppercase = true
+	box.add_child(title)
 	var message: Label = Ui.label(_message)
 	message.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	box.add_child(message)
@@ -44,9 +49,9 @@ func _ready() -> void:
 	box.add_child(buttons)
 	if not _cancel_text.is_empty():
 		buttons.add_child(Ui.button(_cancel_text, cancel, true))
-	var ok: Button = Ui.button(_confirm_text, confirm, true)
-	buttons.add_child(ok)
-	ok.grab_focus.call_deferred(true)
+	confirm_button = Ui.button(_confirm_text, confirm, true)
+	buttons.add_child(confirm_button)
+	confirm_button.grab_focus.call_deferred(true)
 
 
 ## B / Esc cancels when the dialog has a cancel button.

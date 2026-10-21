@@ -15,8 +15,9 @@ Status values: `todo`, `in progress`, `done`. Milestone scope and "Done when" cr
 | M8 | done | Polish, web and Linux builds; the Android APK and phone test are tracked in [issue #5](https://github.com/Kymr10n/hardwire/issues/5) (D-026) |
 | M9 | done | Steam Deck and desktop: landscape, controller, glyphs, Linux/Windows/macOS presets, `tools/deck.sh`, rumble; Deck play-test passed 2026-10-19 (issue #6) |
 | M10 | in progress | Steam release preparation (D-032): save folder, Windows exe metadata and `tools/steam_upload.sh` done; the first Steam install waits for the App ID |
+| M11 | done | Cold Boot visual redesign (D-039, `docs/DESIGN.md`): square terminal theme, phosphor accent, retuned stat hues, boot check list, overview status line; checked in screenshots at 540 × 960 and 1280 × 800 (2026-10-21) |
 
-**Prototype v0.1.0 released 2026-10-19 (D-026); v0.2.0 released 2026-10-19 (name, ambient score, Storage hold feedback, Steam preparation).** Next scope: the "After the prototype" sections of the spec (Steam release, Benchmark slot).
+**Prototype v0.1.0 released 2026-10-19 (D-026); v0.2.0 released 2026-10-19 (name, ambient score, Storage hold feedback, Steam preparation); M11 Cold Boot look 2026-10-21 (D-039).** Next scope: the "After the prototype" sections of the spec (Steam release, Benchmark slot).
 
 ## Reviews
 
@@ -43,6 +44,8 @@ Deferred work, each with what it needs:
 ## Play-test notes
 
 Add dated notes here after play-testing (what felt wrong, which numbers to tune). Turn agreed changes into `/spec-change`.
+
+- 2026-10-21, Cold Boot (M11, D-039): play-test checklist. Phone portrait 540 × 960 and Deck 1280 × 800: is `text_dim` on `card` readable at Deck size (locked card text, effect lines)? Keyboard and gamepad: the phosphor focus ring on cards, pads, cells, tile, buttons and dialogs; A on the boot list mid-way starts at once. Overview: the status line flips to REBUILD AVAILABLE after a tier 10 solve; unmet chips amber, met chips dim. Shop: a purchase flashes the card frame. Does the retuned CPU violet read as "CPU" after the magenta, and STO orange apart from the amber chips? Tests: 250 in 25 scripts.
 
 - 2026-10-19, Storage (D-037): pads now stay lit, sound and rumble while held. Re-test: hold and quick-tap with mouse, touch, keyboard and gamepad (desktop and Deck); a wrong press fails without lighting the pad; rumble lasts while held on the Deck. Known gap: if the window loses focus mid-hold, the hold lasts until the next press or the timer. Tests: 245 in 25 scripts.
 - 2026-10-19, Steam Deck: the owner wants full immersion: rumble on every button and while a puzzle plays back. D-034: the Haptics autoload hooks every button; Storage pads and the RAM pattern rumble while lit (decoys weaker), like the CPU tile. Re-test: a buy must buzz once; is the RAM rumble (up to 2.5 s) too much? Tests: 228 in 24 scripts.

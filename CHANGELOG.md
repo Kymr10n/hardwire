@@ -4,6 +4,10 @@ All notable changes to Hardwire are documented here. The format follows [Keep a 
 
 ## [Unreleased]
 
+### Changed
+
+- Cold Boot look (D-039): square industrial terminal styling, phosphor green accent, amber for attention and red for failure only, retuned stat hues (RAM cyan, CPU violet, STO orange), a short boot check list and a status line on the overview. The design language is in `docs/DESIGN.md`.
+
 ### Added
 
 - One-click Steam Deck install: download `Hardwire-SteamDeck.desktop` from the latest release, double-click it in Desktop Mode; it installs or updates the game and adds it to Steam. Releases are published by pushing a `v<version>` tag.

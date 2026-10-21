@@ -1,7 +1,7 @@
 class_name UpgradeCard
 extends PanelContainer
-## One upgrade in the shop (SPEC: Upgrade shop): name, level, current and next effect, and a buy
-## button with the cost, greyed out when unaffordable or maxed.
+## One upgrade in the shop (SPEC: Upgrade shop): name, a level tag, current and next effect, and a
+## buy button with the cost, greyed out when unaffordable or maxed. A purchase flashes the frame.
 
 signal buy_pressed(id: String)
 
@@ -18,7 +18,9 @@ var id: String = ""
 
 var buy_button: Button
 var _title: Label
+var _level: Label
 var _effect: Label
+var _frame: StyleBoxFlat
 
 
 func _init(p_id: String = "") -> void:
@@ -27,15 +29,25 @@ func _init(p_id: String = "") -> void:
 
 func _ready() -> void:
 	var margin: int = get_theme_constant("margin", "Hardwire")
+	_frame = get_theme_stylebox("panel").duplicate()
+	add_theme_stylebox_override("panel", _frame)
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", margin / 2)
 	add_child(row)
 	var text := VBoxContainer.new()
 	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(text)
+	var top := HBoxContainer.new()
+	top.add_theme_constant_override("separation", margin / 2)
+	text.add_child(top)
 	_title = Label.new()
+	_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_title.add_theme_font_size_override("font_size", get_theme_font_size("card_title", "Hardwire"))
-	text.add_child(_title)
+	top.add_child(_title)
+	_level = Label.new()
+	_level.add_theme_font_size_override("font_size", get_theme_font_size("small", "Hardwire"))
+	Ui.tag(_level, get_theme_color("text_dim", "Hardwire"), false)
+	top.add_child(_level)
 	_effect = Label.new()
 	_effect.add_theme_font_size_override("font_size", get_theme_font_size("small", "Hardwire"))
 	_effect.add_theme_color_override("font_color", get_theme_color("text_dim", "Hardwire"))
@@ -51,9 +63,8 @@ func refresh() -> void:
 	var level: int = GameState.upgrade_level(id)
 	var max_level: int = int(Balance.upgrade(id).max_level)
 	var maxed: bool = Economy.is_maxed(id, level)
-	_title.text = (
-		"%s  Lv %d%s" % [NAMES.get(id, id), level, ("/%d" % max_level) if max_level >= 0 else ""]
-	)
+	_title.text = NAMES.get(id, id)
+	_level.text = "Lv %d%s" % [level, ("/%d" % max_level) if max_level >= 0 else ""]
 	if maxed:
 		_effect.text = effect_text(id, level) + "  (max)"
 		buy_button.text = "Max"
@@ -61,6 +72,14 @@ func refresh() -> void:
 		_effect.text = "%s  ->  %s" % [effect_text(id, level), effect_text(id, level + 1)]
 		buy_button.text = "%d Cyc" % Economy.upgrade_cost(id, level)
 	buy_button.disabled = not Economy.can_buy(id, GameState.upgrade_level(id), GameState.cycles)
+
+
+## The frame turns accent for glow_ms after a purchase (feedback without a layout change).
+func flash() -> void:
+	_frame.border_color = get_theme_color("accent", "Hardwire")
+	var tween: Tween = create_tween()
+	tween.tween_interval(get_theme_constant("glow_ms", "Hardwire") / 1000.0)
+	tween.tween_callback(_frame.set.bind("border_color", get_theme_color("trace", "Hardwire")))
 
 
 ## Human-readable total effect at a level.

@@ -1,7 +1,8 @@
 class_name OverviewScreen
 extends Control
-## Overview hub (SPEC: Screens and UX flow): stat bar, scrolling list of tier rows (every unlocked
-## tier plus flow.locked_tiers_visible locked ones), bottom bar with Shop, Rebuild and Settings.
+## Overview hub (SPEC: Screens and UX flow): system header with the status line, stat bar,
+## scrolling list of tier rows (every unlocked tier plus flow.locked_tiers_visible locked ones),
+## bottom bar with Shop, Rebuild and Settings.
 
 signal play_requested(slot: SlotDef)
 signal shop_requested
@@ -10,6 +11,8 @@ signal debug_requested
 
 var rebuild_button: Button
 var shop_button: Button
+## "System ready", or "Rebuild available" in the attention colour once a Rebuild is possible.
+var status: Label
 
 var _scroll: ScrollContainer
 var _list: VBoxContainer
@@ -28,6 +31,7 @@ func _ready() -> void:
 		side = Ui.box(true)
 		side.custom_minimum_size.x = get_theme_constant("side_panel", "Hardwire")
 		body.add_child(side)
+	side.add_child(_build_header(landscape))
 	var stat_bar := StatBar.new()
 	stat_bar.vertical = landscape
 	stat_bar.debug_requested.connect(debug_requested.emit)
@@ -44,6 +48,28 @@ func _ready() -> void:
 	_sync_rows()
 
 
+## Game name and status over a rule: side by side in portrait, stacked in the landscape sidebar.
+func _build_header(stacked: bool) -> VBoxContainer:
+	var box := VBoxContainer.new()
+	var row := BoxContainer.new()
+	row.vertical = stacked
+	box.add_child(row)
+	var font: int = get_theme_font_size("small", "Hardwire")
+	var title: Label = Ui.dim_label(Ui.title_parts()[0])
+	title.add_theme_font_size_override("font_size", font)
+	status = Ui.label("", font)
+	for label: Label in [title, status]:
+		label.uppercase = true
+		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(label)
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	status.horizontal_alignment = (
+		HORIZONTAL_ALIGNMENT_LEFT if stacked else HORIZONTAL_ALIGNMENT_RIGHT
+	)
+	box.add_child(HSeparator.new())
+	return box
+
+
 func _build_list() -> ScrollContainer:
 	_scroll = Ui.scroll()
 	_list = VBoxContainer.new()
@@ -58,6 +84,8 @@ func _build_buttons(vertical: bool) -> BoxContainer:
 	var bar: BoxContainer = Ui.box(vertical)
 	shop_button = Ui.button("Shop", shop_requested.emit)
 	rebuild_button = Ui.button("Rebuild", _confirm_rebuild)
+	# A consequential action: attention colour while enabled (the disabled colour is the theme's).
+	Ui.tint(rebuild_button, get_theme_color("warn", "Hardwire"))
 	var buttons: Array[Button] = [
 		shop_button, rebuild_button, Ui.button("Settings", settings_requested.emit)
 	]
@@ -125,6 +153,7 @@ func _confirm_rebuild() -> void:
 		]
 	)
 	var dialog := ConfirmDialog.open(self, "Rebuild?", message, "Rebuild")
+	Ui.tint(dialog.confirm_button, get_theme_color("warn", "Hardwire"))
 	dialog.confirmed.connect(
 		func() -> void:
 			GameState.rebuild()
@@ -135,7 +164,12 @@ func _confirm_rebuild() -> void:
 func _refresh_rows() -> void:
 	for row: TierRow in _rows:
 		row.refresh()
-	rebuild_button.disabled = not Progress.can_rebuild(GameState.solved_slots)
+	var can_rebuild: bool = Progress.can_rebuild(GameState.solved_slots)
+	rebuild_button.disabled = not can_rebuild
+	status.text = "Rebuild available" if can_rebuild else "System ready"
+	status.add_theme_color_override(
+		"font_color", get_theme_color("warn" if can_rebuild else "accent", "Hardwire")
+	)
 
 
 ## Brings the newest unlocked tier into view once the list has laid out its rows.

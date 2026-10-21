@@ -63,16 +63,17 @@ func _ready() -> void:
 
 ## Header (back + title), phase label and timer bar.
 func _build_panel(landscape: bool) -> BoxContainer:
-	var accent: Color = get_theme_color(slot.type, "Hardwire")
+	var hue: Color = get_theme_color(slot.type, "Hardwire")
 	var panel: BoxContainer = Ui.box(true)
 	if landscape:
 		panel.custom_minimum_size.x = get_theme_constant("side_panel", "Hardwire")
 	var title: Label = Ui.header(panel, title_text(), go_back, landscape)
-	title.add_theme_color_override("font_color", accent)
+	title.add_theme_color_override("font_color", hue)
 	_phase_label = Ui.label("", get_theme_font_size("phase", "Hardwire"))
+	_phase_label.uppercase = true
 	panel.add_child(_phase_label)
 	_timer_bar = TimerBar.new()
-	_timer_bar.color = accent
+	_timer_bar.color = hue
 	_timer_bar.custom_minimum_size.y = get_theme_constant("timer_bar_height", "Hardwire")
 	panel.add_child(_timer_bar)
 	return panel
@@ -110,23 +111,21 @@ func title_text() -> String:
 	return text
 
 
+## Countdown and Watch are dim; the active input phase and success are the accent; failure is red.
 func _on_phase_changed(phase: PuzzleBase.Phase, text: String) -> void:
 	_phase_label.text = text
-	var color: Color = get_theme_color("text", "Hardwire")
-	if phase == PuzzleBase.Phase.RESULT and text == "Corrupted":
-		color = get_theme_color("fail", "Hardwire")
-	_phase_label.add_theme_color_override("font_color", color)
+	var color_name: String = "text_dim"
+	if phase == PuzzleBase.Phase.INPUT:
+		color_name = "accent"
+	elif phase == PuzzleBase.Phase.RESULT:
+		color_name = "fail" if text == "Corrupted" else "accent"
+	_phase_label.add_theme_color_override("font_color", get_theme_color(color_name, "Hardwire"))
 
 
 func _on_solved(_result: Dictionary) -> void:
 	var gain: Dictionary = GameState.apply_solve(slot)
 	SaveManager.save_game()
-	overlay.show_result(
-		"Write complete",
-		get_theme_color(slot.type, "Hardwire"),
-		SlotDef.STAT_NAMES[slot.type],
-		gain
-	)
+	overlay.show_result("Write complete", SlotDef.STAT_NAMES[slot.type], gain)
 
 
 func _on_failed() -> void:

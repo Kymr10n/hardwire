@@ -1,7 +1,7 @@
 class_name TierRow
 extends VBoxContainer
-## One tier on the overview: tier number, requirement chips (accent while unmet) and 3 slot cards.
-## A thin trace line on the left connects the rows (SPEC: Visual style).
+## One tier on the overview: tier number, a rule, requirement chips (attention colour while unmet)
+## and 3 slot cards. A thin trace line on the left connects the rows (SPEC: Visual style).
 
 signal slot_pressed(slot: SlotDef)
 
@@ -29,6 +29,9 @@ func _ready() -> void:
 	title.custom_minimum_size.x = get_theme_constant("tier_label_width", "Hardwire")
 	title.add_theme_font_size_override("font_size", get_theme_font_size("header", "Hardwire"))
 	_header.add_child(title)
+	var rule := HSeparator.new()
+	rule.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_header.add_child(rule)
 	for type: String in SlotGenerator.TYPES:
 		var chip := Label.new()
 		chip.text = "%s %d" % [SlotDef.STAT_NAMES[type], Balance.req(tier)]
@@ -57,22 +60,21 @@ func refresh() -> void:
 		var type: String = SlotGenerator.TYPES[i]
 		var met: bool = GameState.stats()[type] >= Balance.req(tier)
 		_chips[i].add_theme_color_override(
-			"font_color",
-			get_theme_color("text_dim", "Hardwire") if met else get_theme_color(type, "Hardwire")
+			"font_color", get_theme_color("text_dim" if met else "warn", "Hardwire")
 		)
 	for card: SlotCard in cards:
 		card.refresh()
 	queue_redraw()
 
 
-## Trace line down the left edge with a node at the tier label (SPEC: Visual style).
+## Trace line down the left edge with a square node at the tier label (SPEC: Visual style).
 func _draw() -> void:
 	var trace: Color = get_theme_color("trace", "Hardwire")
 	var margin: float = get_theme_constant("margin", "Hardwire")
 	var x: float = _spacer_width() / 2
 	var width: float = get_theme_constant("trace_width", "Hardwire")
 	draw_line(Vector2(x, 0), Vector2(x, size.y + margin), trace, width)
-	draw_circle(Vector2(x, _header.size.y / 2), x, trace)
+	draw_rect(Rect2(Vector2(x / 2, _header.size.y / 2 - x / 2), Vector2(x, x)), trace)
 
 
 ## Empty strip left of the cards that the trace line runs through.

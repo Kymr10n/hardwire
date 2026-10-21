@@ -214,7 +214,7 @@ func test_markers_show_tap_and_hold_lengths() -> void:
 	assert_eq(_widths(puzzle), [6.0, 4.0, 2.0] as Array[float])
 
 
-func test_markers_under_audio_only_are_plain_dots() -> void:
+func test_markers_under_audio_only_are_plain_ticks() -> void:
 	var puzzle := make_puzzle(CpuPuzzle, 1, RhythmGen.MOD_AUDIO_ONLY)
 	assert_eq(_widths(puzzle), [2.0, 2.0, 2.0] as Array[float])
 	run_until(puzzle, PuzzleBase.Phase.WATCH)

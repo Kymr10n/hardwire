@@ -173,6 +173,35 @@ static func modal(overlay: Control, dim_alpha: float, min_width: float = 0.0) ->
 	return column
 
 
+## A small square tag behind a label (NEW, LOCKED, Lv 2/5): filled in `color` with text in bg,
+## or outlined in `color` when not `filled`.
+static func tag(badge: Label, color: Color, filled: bool = true) -> void:
+	var theme: Theme = ThemeDB.get_project_theme()
+	var style := StyleBoxFlat.new()
+	var pad: int = theme.get_constant("tag_pad", "Hardwire")
+	style.content_margin_left = pad
+	style.content_margin_right = pad
+	style.draw_center = filled
+	style.bg_color = color
+	style.border_color = color
+	style.set_border_width_all(0 if filled else theme.get_constant("outline_width", "Hardwire"))
+	badge.add_theme_stylebox_override("normal", style)
+	badge.add_theme_color_override(
+		"font_color", theme.get_color("bg", "Hardwire") if filled else color
+	)
+
+
+## Colours a button's text in every state but disabled (consequential actions: warn, fail).
+static func tint(button: Button, color: Color) -> void:
+	button.add_theme_color_override("font_color", color)
+	button.add_theme_color_override("font_hover_color", color)
+
+
+## ["Title", "Subtitle"] from the one home of the name, project.godot ("Title: Subtitle").
+static func title_parts() -> PackedStringArray:
+	return str(ProjectSettings.get_setting("application/config/name")).split(": ")
+
+
 ## A centered label in the dim text color (prompts and notes).
 static func dim_label(text: String) -> Label:
 	var l: Label = label(text)

@@ -1,9 +1,9 @@
 class_name CpuMarkers
 extends Control
-## Beat markers under the CPU tile (SPEC: Watch phase, D-022): a dot per tap and a bar as long as
-## its steps per hold; the first `filled` of them are lit and the `missed` one (the beat that broke
-## the attempt, D-030) is red. Under Audio only (`plain`) every marker is a dot, so lengths must
-## be heard.
+## Beat markers under the CPU tile (SPEC: Watch phase, D-022): a square tick per tap and a bar as
+## long as its steps per hold; the first `filled` of them are lit and the `missed` one (the beat
+## that broke the attempt, D-030) is red. Under Audio only (`plain`) every marker is a tick, so
+## lengths must be heard.
 
 ## Radius as a fraction of tap_min; gap and outline as fractions of the radius.
 const RADIUS := 0.2
@@ -70,8 +70,6 @@ func _draw() -> void:
 	_miss.bg_color = get_theme_color("fail", "Hardwire")
 	_off.border_color = get_theme_color("text_dim", "Hardwire")
 	_off.set_border_width_all(int(r * RING))
-	for style: StyleBoxFlat in [_on, _off, _miss]:
-		style.set_corner_radius_all(int(r))
 	for i: int in all.size():
 		var style: StyleBoxFlat = _on if i < filled else _off
 		draw_style_box(_miss if i == missed else style, all[i])

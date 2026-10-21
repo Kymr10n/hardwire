@@ -1,3 +1,4 @@
+# gdlint: disable=max-public-methods
 extends "res://tests/hardwire_test.gd"
 ## Overview screen: visible tiers, card states, gating in the UI, reward flow from the puzzle
 ## screen.
@@ -87,6 +88,36 @@ func test_card_states() -> void:
 func test_rebuild_disabled_before_tier_10() -> void:
 	var overview := _overview()
 	assert_true(overview.rebuild_button.disabled)
+
+
+## D-039: unmet requirement chips are amber, met ones dim.
+func test_requirement_chips_colour() -> void:
+	var overview := _overview()
+	var theme: Theme = ThemeDB.get_project_theme()
+	var chips: Array[Label] = overview.rows()[1]._chips
+	assert_eq(chips[0].get_theme_color("font_color"), theme.get_color("warn", "Hardwire"))
+	set_stats(2)
+	overview._refresh_rows()
+	assert_eq(chips[0].get_theme_color("font_color"), theme.get_color("text_dim", "Hardwire"))
+
+
+## D-039: the header's status names the real state.
+func test_hub_status_line() -> void:
+	var overview := _overview()
+	assert_eq(overview.status.text, "System ready")
+	set_stats(162)
+	GameState.apply_solve(SlotGenerator.make(10, SlotDef.TYPE_RAM))
+	overview._refresh_rows()
+	assert_eq(overview.status.text, "Rebuild available")
+	assert_false(overview.rebuild_button.disabled)
+	var landscape: Control = in_viewport(OverviewScreen.new(), Vector2i(1920, 1080))
+	await wait_process_frames(2)
+	var header: Control = landscape.status.get_parent()
+	assert_lte(
+		header.size.x,
+		float(landscape.get_theme_constant("side_panel", "Hardwire")),
+		"the status fits the sidebar (stacked under the name)"
+	)
 
 
 func test_card_press_requests_play() -> void:
