@@ -26,7 +26,7 @@ Hardwire is a Godot 4.7 (GDScript) puzzle game for phones (Android, iOS), PC (Wi
   - colors, fonts, sizes, durations → the theme; drawing proportions → named `const`s in their file
   - Extract shared code when it appears the second time; don't build abstractions for one caller.
 - **Use Godot, don't rebuild it:** Containers for layout, `Tween` for animation, `Timer`, signals, `InputMap`, focus navigation, `Theme`, `RandomNumberGenerator` with a seed.
-- **Small units** (enforced): files ≤ 300 lines, functions ≤ 40 lines, ≤ 5 parameters, lines ≤ 100 characters, ≤ 12 public methods per class. Static types everywhere.
+- **Small units** (enforced): files ≤ 300 lines, functions ≤ 40 lines, ≤ 5 parameters, lines ≤ 100 characters, ≤ 12 public methods per class with state (a pure static helper file like `scenes/ui/Ui.gd` is exempt, as in gdlint; D-040). Static types everywhere.
 - Comments explain *why*, not *what*. No dead or commented-out code.
 
 ## Architecture rules (enforced by `tools/drift_check.py`)
