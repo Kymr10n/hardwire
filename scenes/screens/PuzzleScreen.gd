@@ -99,7 +99,6 @@ func _on_hint_dismissed() -> void:
 	GameState.seen_tutorials.append(slot.type)
 	SaveManager.save_game()
 	start_attempt()
-	Ui.focus_first(self)
 
 
 ## The hint while it is up (A begins), else the puzzle's control.
@@ -107,11 +106,13 @@ func default_focus() -> Control:
 	return hint if hint != null else puzzle.default_focus()
 
 
-## Fresh sequence (new seed), same slot and difficulty.
+## Fresh sequence (new seed), same slot and difficulty. Hiding the overlay (or the hint going
+## away) drops gamepad focus with it, so the puzzle's control takes it back.
 func start_attempt() -> void:
 	overlay.hide()
 	puzzle.setup(slot, _rng.randi())
 	puzzle.start()
+	Ui.focus_first(self)
 
 
 func _process(_delta: float) -> void:

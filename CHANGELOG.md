@@ -4,6 +4,10 @@ All notable changes to Hardwire are documented here. The format follows [Keep a 
 
 ## [Unreleased]
 
+### Fixed
+
+- Gamepad and keyboard focus returns to the screen when a dialog closes and to the puzzle when a new attempt starts. Before, collecting the "While you were away" Cycles (or cancelling Rebuild or Erase) left the overview deaf to the controller, and "Again" after a result did the same to the puzzle.
+
 ## [0.3.0] - 2026-10-22
 
 The Cold Boot look: a powered-on diagnostic terminal with phosphor green, CRT glass, a typed boot and a machine sound bed; rendered through Vulkan; one-click Steam Deck install.

@@ -106,6 +106,26 @@ func test_dialog_focus_and_cancel() -> void:
 	tap_action(main.get_viewport(), "ui_cancel")
 	assert_signal_emitted(dialog, "cancelled")
 	assert_false(main.screen is OverviewScreen, "B closed the dialog, not the screen")
+	await wait_process_frames(2)
+	var owner: Control = _focus_owner(main)
+	assert_true(
+		owner != null and main.screen.is_ancestor_of(owner), "the screen under it has focus again"
+	)
+
+
+## The "While you were away" dialog on start: A collects, then the overview must answer the
+## gamepad again (a freed button leaves nothing focused unless the dialog hands focus back).
+func test_collect_dialog_returns_focus_to_the_overview() -> void:
+	GameState.apply_solve(SlotGenerator.make(5, SlotDef.TYPE_RAM))
+	GameState.last_seen = int(Time.get_unix_time_from_system()) - 2 * 3600
+	var main := make_main(true)
+	main.show_boot()
+	tap_action(main.get_viewport(), "ui_accept")
+	await wait_process_frames(2)
+	assert_eq((_focus_owner(main) as Button).text, "Collect", "the idle dialog has focus")
+	tap_action(main.get_viewport(), "ui_accept")
+	await wait_process_frames(2)
+	assert_true(_focus_owner(main) is SlotCard, "the overview has focus again after Collect")
 
 
 func test_boot_and_hint_start_with_a() -> void:
@@ -119,6 +139,20 @@ func test_boot_and_hint_start_with_a() -> void:
 	await wait_process_frames(2)  # the hint takes focus once the old screen is gone
 	tap_action(main.get_viewport(), "ui_accept")
 	assert_eq(main.screen.puzzle.phase, PuzzleBase.Phase.COUNTDOWN, "hint dismissed with A")
+
+
+## "Again" on the result overlay hides the button that had focus; the new attempt must be
+## playable with the gamepad, so its control gets the focus back.
+func test_again_hands_focus_to_the_next_attempt() -> void:
+	var screen: Control = await _puzzle_screen(1, SlotDef.TYPE_STO)
+	var viewport: Viewport = screen.get_viewport()
+	screen.puzzle.abort()
+	screen.overlay.show_result("Write complete", "RAM", {})
+	await wait_process_frames(2)
+	assert_eq((_focus_owner(screen) as Button).text, "Again", "the overlay has focus")
+	tap_action(viewport, "ui_accept")
+	await wait_process_frames(2)
+	assert_eq(_focus_owner(screen), screen.puzzle.default_focus(), "the puzzle has focus again")
 
 
 func test_ram_cursor_becomes_visible_on_use() -> void:

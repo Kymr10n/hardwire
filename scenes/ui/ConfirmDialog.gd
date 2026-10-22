@@ -67,9 +67,19 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func confirm() -> void:
 	confirmed.emit()
-	queue_free()
+	_close()
 
 
 func cancel() -> void:
 	cancelled.emit()
+	_close()
+
+
+## Hands gamepad/keyboard focus back to the screen under the dialog: its button had it, and a
+## freed button leaves nothing focused. Hidden first so focus_first skips the dialog's buttons.
+func _close() -> void:
+	hide()
 	queue_free()
+	var screen := get_parent() as Control
+	if screen != null and screen.is_inside_tree():
+		Ui.focus_first(screen)
