@@ -12,7 +12,7 @@ An endless incremental puzzle game for phones and the Steam Deck. Upgrade a comp
 
 ## Status
 
-Playable prototype (version 0.2.0). All three minigames, the tier overview, the upgrade shop, prestige ("Rebuild") and idle income are in; it runs on Linux / Steam Deck, Windows and the web with touch, mouse, keyboard or gamepad. The Android build, iOS and play-tests on real devices are still to come. Status and open follow-ups are in [`docs/PROGRESS.md`](docs/PROGRESS.md); the milestones are in the [spec](docs/SPEC.md#milestones-and-acceptance-criteria).
+Playable prototype (version 0.3.0). All three minigames, the tier overview, the upgrade shop, prestige ("Rebuild") and idle income are in; it runs on Linux / Steam Deck, Windows and the web with touch, mouse, keyboard or gamepad. The Android build, iOS and play-tests on real devices are still to come. Status and open follow-ups are in [`docs/PROGRESS.md`](docs/PROGRESS.md); the milestones are in the [spec](docs/SPEC.md#milestones-and-acceptance-criteria).
 
 ## How it plays
 

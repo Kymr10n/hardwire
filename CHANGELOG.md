@@ -4,6 +4,10 @@ All notable changes to Hardwire are documented here. The format follows [Keep a 
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-22
+
+The Cold Boot look: a powered-on diagnostic terminal with phosphor green, CRT glass, a typed boot and a machine sound bed; rendered through Vulkan; one-click Steam Deck install.
+
 ### Changed
 
 - Renders with Godot's Mobile renderer, Vulkan on PC, Steam Deck and Android and Metal on Apple devices (D-042). The web build stays on OpenGL via the Compatibility renderer.
