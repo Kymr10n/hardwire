@@ -1,3 +1,4 @@
+# gdlint: disable=max-public-methods
 extends "res://tests/hardwire_test.gd"
 ## Gamepad / keyboard controls (SPEC: Controls): every minigame and the menus work without touch.
 
@@ -19,6 +20,25 @@ func _puzzle_screen(tier: int, type: String, modifier: String = "") -> Control:
 
 func _focus_owner(node: Node) -> Control:
 	return node.get_viewport().gui_get_focus_owner()
+
+
+## The focus rule (SPEC: Platforms and input): after a step, a visible control on the current
+## screen owns focus, so the gamepad can act. Waits for the deferred grabs first.
+func _assert_focused(main: Node, step: String) -> Control:
+	await wait_process_frames(2)
+	var owner: Control = _focus_owner(main)
+	assert_true(
+		owner != null and main.screen.is_ancestor_of(owner) and owner.is_visible_in_tree(), step
+	)
+	return owner
+
+
+## The button with `text` on the current screen (dialogs included).
+func _button(main: Node, text: String) -> Button:
+	for node: Node in main.screen.find_children("*", "Button", true, false):
+		if (node as Button).text == text:
+			return node
+	return null
 
 
 func test_storage_with_controller() -> void:
@@ -183,3 +203,67 @@ func test_ram_cursor_becomes_visible_on_use() -> void:
 	assert_false(grid.has_focus(true), "hidden until a gamepad/keyboard press")
 	tap_action(screen.get_viewport(), "ui_right")
 	assert_true(grid.has_focus(true), "cursor outline shows")
+
+
+## The focus rule after every screen transition and back path; the boot screen is left out
+## because it has no button and starts on any press.
+func test_every_screen_opens_focused() -> void:
+	var main := make_main()
+	var viewport: Viewport = main.get_viewport()
+	main.show_boot()
+	tap_action(viewport, "ui_accept")
+	await _assert_focused(main, "overview after boot")
+	main.show_shop()
+	await _assert_focused(main, "shop")
+	tap_action(viewport, "ui_cancel")
+	await _assert_focused(main, "overview after shop")
+	main.show_settings()
+	await _assert_focused(main, "settings")
+	main.show_licenses()
+	await _assert_focused(main, "licenses")
+	tap_action(viewport, "ui_cancel")
+	await _assert_focused(main, "settings after licenses")
+	tap_action(viewport, "ui_cancel")
+	await _assert_focused(main, "overview after settings")
+	main.show_debug()
+	await _assert_focused(main, "debug menu")
+	tap_action(viewport, "ui_cancel")
+	await _assert_focused(main, "overview after debug")
+	GameState.seen_tutorials = [SlotDef.TYPE_RAM, SlotDef.TYPE_CPU] as Array[String]
+	for type: String in SlotGenerator.TYPES:
+		main.show_puzzle(SlotGenerator.make(1, type))
+		await _assert_focused(main, "%s puzzle" % type)
+		tap_action(viewport, "ui_cancel")
+		await _assert_focused(main, "overview after %s" % type)
+
+
+## The focus rule when a dialog closes either way and when a buy refreshes the shop cards.
+func test_dialogs_hand_focus_back() -> void:
+	set_stats(722)
+	GameState.apply_solve(SlotGenerator.make(10, SlotDef.TYPE_CPU))
+	GameState.cycles = 10_000
+	var main := make_main()
+	var viewport: Viewport = main.get_viewport()
+	main.show_overview()
+	await _assert_focused(main, "overview")
+	for action: String in ["ui_cancel", "ui_accept"]:
+		main.screen.rebuild_button.grab_focus()
+		tap_action(viewport, "ui_accept")
+		var confirm: Control = await _assert_focused(main, "Rebuild dialog")
+		assert_eq((confirm as Button).text, "Rebuild", "the dialog's confirm button has focus")
+		tap_action(viewport, action)
+		await _assert_focused(main, "overview after Rebuild %s" % action)
+	main.show_settings()
+	await _assert_focused(main, "settings")
+	for action: String in ["ui_cancel", "ui_accept"]:
+		_button(main, "Reset save").grab_focus()
+		tap_action(viewport, "ui_accept")
+		var confirm: Control = await _assert_focused(main, "Erase dialog")
+		assert_eq((confirm as Button).text, "Erase", "the dialog's confirm button has focus")
+		tap_action(viewport, action)
+		await _assert_focused(main, "settings after Erase %s" % action)
+	main.show_shop()
+	await _assert_focused(main, "shop")
+	main.screen.cards[0].buy_button.grab_focus()
+	tap_action(viewport, "ui_accept")
+	await _assert_focused(main, "shop after a buy")
