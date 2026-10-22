@@ -6,6 +6,7 @@ All notable changes to Hardwire are documented here. The format follows [Keep a 
 
 ### Changed
 
+- Renders with Godot's Mobile renderer, Vulkan on PC, Steam Deck and Android and Metal on Apple devices (D-042). The web build stays on OpenGL via the Compatibility renderer.
 - Powered-on Cold Boot (D-041): phosphor-tinted palette, a CRT glass overlay (vignette, scanlines, bloom, slow flicker; Settings toggle "CRT glass"), a typed POST boot with a power-on sweep, a machine hum with key and relay clicks, a readout with lamps and count-ups, tier nodes that light with progress, a bezel and segmented timer on puzzles, inverted dialog titles.
 - Cold Boot look (D-039): square industrial terminal styling, phosphor green accent, amber for attention and red for failure only, retuned stat hues (RAM cyan, CPU violet, STO orange), a short boot check list and a status line on the overview. The design language is in `docs/DESIGN.md`.
 

@@ -8,7 +8,7 @@ As of 2026-10-21. **Source of truth for implementation.** Build it milestone by 
 
 | Decision | Choice |
 | --- | --- |
-| Engine | Godot 4.7.2 (pinned in `tools/versions.env`), GDScript, Compatibility renderer |
+| Engine | Godot 4.7.2 (pinned in `tools/versions.env`), GDScript, Mobile renderer (Vulkan); Compatibility (OpenGL) on the web only |
 | Platforms | Android, iOS, Windows, Linux, macOS, Steam Deck (native Linux build), plus Web — see Platforms and input |
 | Orientation | Phones portrait; PC and Steam Deck landscape. One layout code path per screen adapts to both |
 | Input | Touch, mouse, keyboard and gamepad, all through InputMap actions |
@@ -373,7 +373,7 @@ The code splits pure logic (generators, judges, economy) from presentation (scen
 
 **Project settings:**
 
-- Renderer: Compatibility (`gl_compatibility`).
+- Renderer: Mobile (`mobile`, Vulkan on every native platform, Metal on Apple). The web export overrides it to Compatibility (`gl_compatibility`) because browsers run nothing else (D-042).
 - Window: 1080 × 1920 reference viewport (1920 × 1080 in landscape), stretch mode `canvas_items`, aspect `expand`; phones locked to portrait; desktop window 1280 × 800 by default. Test phone layout with `--resolution 540x960`.
 - Input: pointer input is touch, with the mouse emulated (`emulate_touch_from_mouse`); keyboard and gamepad use InputMap actions (see Platforms and input). Only the InputMode autoload looks at raw device events, for glyphs.
 
