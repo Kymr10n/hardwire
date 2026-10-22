@@ -4,6 +4,10 @@ All notable changes to Hardwire are documented here. The format follows [Keep a 
 
 ## [Unreleased]
 
+### Fixed
+
+- Storage: after a failed attempt the gamepad cursor stays on the pad the player had it on. 0.3.1 moved it silently to the first pad, so the next A press picked the wrong pad.
+
 ## [0.3.1] - 2026-10-22
 
 Controllers work again after collecting idle Cycles and after "Again".

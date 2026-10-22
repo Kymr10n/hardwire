@@ -107,12 +107,15 @@ func default_focus() -> Control:
 
 
 ## Fresh sequence (new seed), same slot and difficulty. Hiding the overlay (or the hint going
-## away) drops gamepad focus with it, so the puzzle's control takes it back.
+## away) drops gamepad focus with it, so the puzzle's control takes it back; a restart after a
+## failure leaves the cursor where the player had it.
 func start_attempt() -> void:
 	overlay.hide()
 	puzzle.setup(slot, _rng.randi())
 	puzzle.start()
-	Ui.focus_first(self)
+	var owner: Control = get_viewport().gui_get_focus_owner()
+	if owner == null or not puzzle.is_ancestor_of(owner):
+		Ui.focus_first(self)
 
 
 func _process(_delta: float) -> void:

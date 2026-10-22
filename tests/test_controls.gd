@@ -155,6 +155,28 @@ func test_again_hands_focus_to_the_next_attempt() -> void:
 	assert_eq(_focus_owner(screen), screen.puzzle.default_focus(), "the puzzle has focus again")
 
 
+## A failed attempt restarts by itself. The cursor must stay where the player left it: a silent
+## jump to pad 0 makes the next A press pick the wrong pad.
+func test_restart_keeps_the_storage_cursor() -> void:
+	var screen: Control = await _puzzle_screen(1, SlotDef.TYPE_STO)
+	var viewport: Viewport = screen.get_viewport()
+	var puzzle: PuzzleBase = screen.puzzle
+	# Put the cursor on a pad that is not the first expected one, then fail with it.
+	tap_action(viewport, "ui_right")  # a gamepad press makes the cursor visible
+	var wrong: StoragePad = puzzle.pads()[(puzzle.expected()[0] + 1) % puzzle.pads().size()]
+	wrong.grab_focus()
+	assert_true(wrong.has_focus(true), "cursor visible on the pad")
+	tap_action(viewport, "ui_accept")
+	assert_eq(puzzle.phase, PuzzleBase.Phase.RESULT, "wrong pad fails")
+	for i: int in 3000:
+		if puzzle.phase == PuzzleBase.Phase.COUNTDOWN:
+			break
+		puzzle._process(FRAME)
+	await wait_process_frames(2)
+	assert_eq(_focus_owner(screen), wrong, "the next attempt keeps the cursor")
+	assert_true(wrong.has_focus(true), "and keeps it visible")
+
+
 func test_ram_cursor_becomes_visible_on_use() -> void:
 	var screen: Control = await _puzzle_screen(1, SlotDef.TYPE_RAM)
 	var grid: RamGrid = screen.puzzle.grid()
