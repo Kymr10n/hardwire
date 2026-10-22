@@ -18,7 +18,7 @@ Status values: `todo`, `in progress`, `done`. Milestone scope and "Done when" cr
 | M11 | done | Cold Boot visual redesign (D-039, `docs/DESIGN.md`): square terminal theme, phosphor accent, retuned stat hues, boot check list, overview status line; checked in screenshots at 540 × 960 and 1280 × 800 (2026-10-21) |
 | M12 | done | Cold Boot, powered on (D-041): phosphor palette, glass overlay with the CRT glass setting, typed boot with power-on sweep, hum and key/relay clicks, readout lamps and count-ups, lit tier nodes, bezel and segmented timer, dialog strips; checked in screenshots at 540 × 960 and 1280 × 800 (2026-10-21) |
 
-**Prototype v0.1.0 released 2026-10-19 (D-026); v0.2.0 released 2026-10-19 (name, ambient score, Storage hold feedback, Steam preparation); v0.3.0 released 2026-10-22 (Cold Boot look M11 and M12, Vulkan renderer, one-click Deck install); v0.3.1 released 2026-10-22 (gamepad focus fix).** Next scope: the "After the prototype" sections of the spec (Steam release, Benchmark slot).
+**Prototype v0.1.0 released 2026-10-19 (D-026); v0.2.0 released 2026-10-19 (name, ambient score, Storage hold feedback, Steam preparation); v0.3.0 released 2026-10-22 (Cold Boot look M11 and M12, Vulkan renderer, one-click Deck install); v0.3.1 and v0.3.2 released 2026-10-22 (gamepad focus fixes).** Next scope: the "After the prototype" sections of the spec (Steam release, Benchmark slot).
 
 ## Reviews
 

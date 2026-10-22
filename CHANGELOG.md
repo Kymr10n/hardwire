@@ -4,6 +4,10 @@ All notable changes to Hardwire are documented here. The format follows [Keep a 
 
 ## [Unreleased]
 
+## [0.3.2] - 2026-10-22
+
+The Storage cursor stays put after a failed attempt.
+
 ### Fixed
 
 - Storage: after a failed attempt the gamepad cursor stays on the pad the player had it on. 0.3.1 moved it silently to the first pad, so the next A press picked the wrong pad.
